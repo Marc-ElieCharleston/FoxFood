@@ -251,8 +251,8 @@ export default function Home() {
         </p>
       </div>
 
-      {/* Onglets de catégories */}
-      <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
+      {/* Onglets de catégories - responsive */}
+      <div className="flex gap-2 mb-4 justify-center">
         {Object.entries(categoryLabels).map(([category, { name, emoji, color }]) => {
           const count = dishes.filter(d => d.category === category).length
           return (
@@ -262,13 +262,17 @@ export default function Home() {
                 setActiveCategory(category)
                 setSearchQuery('')
               }}
-              className={`flex-shrink-0 px-4 py-2 rounded-lg font-semibold transition whitespace-nowrap ${
+              className={`flex-shrink-0 px-3 py-2 rounded-lg font-semibold transition flex items-center gap-1.5 ${
                 activeCategory === category
                   ? `${color} text-white`
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
             >
-              {emoji} {name} ({count})
+              <span className="text-lg">{emoji}</span>
+              {/* Mobile: juste le nombre */}
+              <span className="sm:hidden text-sm font-bold">{count}</span>
+              {/* Tablette/Desktop: nom + nombre */}
+              <span className="hidden sm:inline text-sm font-semibold">{name} ({count})</span>
             </button>
           )
         })}

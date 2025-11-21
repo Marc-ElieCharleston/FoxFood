@@ -15,29 +15,34 @@ export default function Header() {
 
   return (
     <header className="bg-orange-600 text-white shadow-md">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex justify-between items-center">
-          <Link href="/" className="flex flex-col">
-            <h1 className="text-2xl font-bold">🦊 FoxFood</h1>
-            <p className="text-sm text-orange-100">Gestion de plats et liste de courses</p>
+      <div className="container mx-auto px-3 py-3">
+        <div className="flex justify-between items-center gap-2">
+          {/* Logo - compact sur mobile */}
+          <Link href="/" className="flex items-center gap-2">
+            <span className="text-2xl">🦊</span>
+            <div className="flex flex-col">
+              <h1 className="text-lg md:text-xl font-bold leading-tight">FoxFood</h1>
+              <p className="text-xs text-orange-100 hidden sm:block">Gestion de plats</p>
+            </div>
           </Link>
 
-          <div className="flex items-center gap-4">
+          {/* Actions */}
+          <div className="flex items-center gap-2">
             {status === 'loading' && (
-              <div className="text-sm">Chargement...</div>
+              <div className="text-xs md:text-sm">...</div>
             )}
 
             {status === 'unauthenticated' && (
               <div className="flex gap-2">
                 <Link
                   href="/login"
-                  className="px-4 py-2 bg-white text-orange-600 rounded-lg font-semibold hover:bg-orange-50 transition"
+                  className="px-3 py-1.5 md:px-4 md:py-2 bg-white text-orange-600 rounded-lg text-sm font-semibold hover:bg-orange-50 transition"
                 >
                   Connexion
                 </Link>
                 <Link
                   href="/register"
-                  className="px-4 py-2 bg-orange-700 text-white rounded-lg font-semibold hover:bg-orange-800 transition"
+                  className="px-3 py-1.5 md:px-4 md:py-2 bg-orange-700 text-white rounded-lg text-sm font-semibold hover:bg-orange-800 transition hidden sm:block"
                 >
                   Inscription
                 </Link>
@@ -45,26 +50,31 @@ export default function Header() {
             )}
 
             {status === 'authenticated' && session?.user && (
-              <div className="flex items-center gap-4">
-                <div className="text-right">
-                  <p className="font-semibold">{session.user.name}</p>
+              <div className="flex items-center gap-2">
+                {/* Nom utilisateur - caché sur mobile */}
+                <div className="text-right hidden lg:block">
+                  <p className="font-semibold text-sm">{session.user.name}</p>
                   <p className="text-xs text-orange-100">{session.user.email}</p>
                 </div>
 
+                {/* Bouton Admin */}
                 {session.user.role === 'admin' && (
                   <Link
                     href="/admin"
-                    className="px-4 py-2 bg-orange-700 text-white rounded-lg font-semibold hover:bg-orange-800 transition"
+                    className="px-3 py-1.5 md:px-4 md:py-2 bg-orange-700 text-white rounded-lg text-sm font-semibold hover:bg-orange-800 transition"
                   >
-                    Admin
+                    <span className="hidden sm:inline">Admin</span>
+                    <span className="sm:hidden">👤</span>
                   </Link>
                 )}
 
+                {/* Bouton Déconnexion */}
                 <button
                   onClick={() => signOut({ callbackUrl: '/login' })}
-                  className="px-4 py-2 bg-white text-orange-600 rounded-lg font-semibold hover:bg-orange-50 transition"
+                  className="px-3 py-1.5 md:px-4 md:py-2 bg-white text-orange-600 rounded-lg text-sm font-semibold hover:bg-orange-50 transition"
                 >
-                  Déconnexion
+                  <span className="hidden sm:inline">Déconnexion</span>
+                  <span className="sm:hidden">↗</span>
                 </button>
               </div>
             )}

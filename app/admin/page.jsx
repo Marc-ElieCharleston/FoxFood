@@ -163,42 +163,51 @@ export default function AdminPage() {
       </div>
 
       {/* Actions */}
-      <div className="mb-6 flex gap-4 flex-wrap">
-        <button
-          onClick={() => {
-            setEditingDish(null)
-            setFormData({ name: '', category: 'viandes', description: '', active: true })
-            setShowForm(true)
-          }}
-          className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-semibold"
-        >
-          ➕ Nouveau plat
-        </button>
-
-        {dishes.length === 0 && (
+      <div className="mb-6 space-y-3">
+        {/* Boutons d'action principaux */}
+        <div className="flex gap-2 flex-wrap">
           <button
-            onClick={handleImport}
-            disabled={importing}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold disabled:opacity-50"
+            onClick={() => {
+              setEditingDish(null)
+              setFormData({ name: '', category: 'viandes', description: '', active: true })
+              setShowForm(true)
+            }}
+            className="px-3 py-2 md:px-4 md:py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-semibold text-sm"
           >
-            {importing ? 'Import en cours...' : '📥 Importer le catalogue (80 plats)'}
+            <span className="hidden sm:inline">➕ Nouveau plat</span>
+            <span className="sm:hidden">➕ Nouveau</span>
           </button>
-        )}
 
-        <div className="flex gap-2">
+          {dishes.length === 0 && (
+            <button
+              onClick={handleImport}
+              disabled={importing}
+              className="px-3 py-2 md:px-4 md:py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold text-sm disabled:opacity-50"
+            >
+              {importing ? 'Import...' : '📥 Importer (74 plats)'}
+            </button>
+          )}
+        </div>
+
+        {/* Filtres de catégorie */}
+        <div className="flex gap-2 flex-wrap">
           <button
             onClick={() => setFilter('all')}
-            className={`px-4 py-2 rounded-lg font-semibold ${filter === 'all' ? 'bg-orange-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+            className={`px-3 py-1.5 rounded-lg font-semibold text-sm ${filter === 'all' ? 'bg-orange-600 text-white' : 'bg-gray-200 text-gray-700'}`}
           >
-            Tous ({dishes.length})
+            <span className="hidden sm:inline">Tous ({dishes.length})</span>
+            <span className="sm:hidden">Tous {dishes.length}</span>
           </button>
           {['viandes', 'poissons', 'vegetation'].map(cat => (
             <button
               key={cat}
               onClick={() => setFilter(cat)}
-              className={`px-4 py-2 rounded-lg font-semibold ${filter === cat ? 'bg-orange-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+              className={`px-3 py-1.5 rounded-lg font-semibold text-sm ${filter === cat ? 'bg-orange-600 text-white' : 'bg-gray-200 text-gray-700'}`}
             >
-              {categoryLabels[cat]} ({dishes.filter(d => d.category === cat).length})
+              {/* Tablette/Desktop: texte complet */}
+              <span className="hidden sm:inline">{categoryLabels[cat]} ({dishes.filter(d => d.category === cat).length})</span>
+              {/* Mobile: première lettre + nombre */}
+              <span className="sm:hidden">{categoryLabels[cat][0]} {dishes.filter(d => d.category === cat).length}</span>
             </button>
           ))}
         </div>
@@ -298,67 +307,115 @@ export default function AdminPage() {
           Aucun plat trouvé. {dishes.length === 0 && "Cliquez sur 'Importer le catalogue' pour commencer."}
         </div>
       ) : (
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <table className="min-w-full divide-y divide-gray-200">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Nom
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Catégorie
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Description
-                </th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Statut
-                </th>
-                <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="bg-white divide-y divide-gray-200">
-              {filteredDishes.map(dish => (
-                <tr key={dish.id} className={!dish.active ? 'opacity-50' : ''}>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    {dish.name}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${
-                      dish.category === 'viandes' ? 'bg-red-100 text-red-800' :
-                      dish.category === 'poissons' ? 'bg-blue-100 text-blue-800' :
-                      'bg-green-100 text-green-800'
-                    }`}>
-                      {categoryLabels[dish.category]}
-                    </span>
-                  </td>
-                  <td className="px-6 py-4 text-sm text-gray-500 max-w-md truncate">
-                    {dish.description || '-'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {dish.active ? '✅ Actif' : '❌ Inactif'}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <button
-                      onClick={() => handleEdit(dish)}
-                      className="text-blue-600 hover:text-blue-900 mr-3"
-                    >
-                      Modifier
-                    </button>
-                    <button
-                      onClick={() => handleDelete(dish.id)}
-                      className="text-red-600 hover:text-red-900"
-                    >
-                      Supprimer
-                    </button>
-                  </td>
+        <>
+          {/* Vue mobile/tablette - Cards */}
+          <div className="lg:hidden space-y-3">
+            {filteredDishes.map(dish => (
+              <div
+                key={dish.id}
+                className={`bg-white rounded-lg shadow-md p-4 ${!dish.active ? 'opacity-50' : ''}`}
+              >
+                <div className="flex justify-between items-start mb-2">
+                  <div className="flex-1">
+                    <h3 className="font-semibold text-sm mb-1">{dish.name}</h3>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${
+                        dish.category === 'viandes' ? 'bg-red-100 text-red-800' :
+                        dish.category === 'poissons' ? 'bg-blue-100 text-blue-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {categoryLabels[dish.category]}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {dish.active ? '✅' : '❌'}
+                      </span>
+                    </div>
+                    {dish.description && (
+                      <p className="text-xs text-gray-600 line-clamp-2">{dish.description}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="flex gap-2 mt-3">
+                  <button
+                    onClick={() => handleEdit(dish)}
+                    className="flex-1 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 font-semibold"
+                  >
+                    ✏️ Modifier
+                  </button>
+                  <button
+                    onClick={() => handleDelete(dish.id)}
+                    className="flex-1 px-3 py-1.5 text-xs bg-red-600 text-white rounded hover:bg-red-700 font-semibold"
+                  >
+                    🗑️ Supprimer
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Vue desktop - Table */}
+          <div className="hidden lg:block bg-white rounded-lg shadow-md overflow-hidden">
+            <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Nom
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Catégorie
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Description
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Statut
+                  </th>
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {filteredDishes.map(dish => (
+                  <tr key={dish.id} className={!dish.active ? 'opacity-50' : ''}>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                      {dish.name}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${
+                        dish.category === 'viandes' ? 'bg-red-100 text-red-800' :
+                        dish.category === 'poissons' ? 'bg-blue-100 text-blue-800' :
+                        'bg-green-100 text-green-800'
+                      }`}>
+                        {categoryLabels[dish.category]}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-500 max-w-md truncate">
+                      {dish.description || '-'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                      {dish.active ? '✅ Actif' : '❌ Inactif'}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                      <button
+                        onClick={() => handleEdit(dish)}
+                        className="text-blue-600 hover:text-blue-900 mr-3"
+                      >
+                        Modifier
+                      </button>
+                      <button
+                        onClick={() => handleDelete(dish.id)}
+                        className="text-red-600 hover:text-red-900"
+                      >
+                        Supprimer
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </>
       )}
     </div>
   )
