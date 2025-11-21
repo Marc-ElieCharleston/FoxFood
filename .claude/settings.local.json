@@ -12,7 +12,12 @@
       "Bash(git branch:*)",
       "Bash(git push:*)",
       "Bash(git rm:*)",
-      "Bash(node -e:*)"
+      "Bash(node -e:*)",
+      "Bash(netstat:*)",
+      "Bash(findstr:*)",
+      "Bash(node test-db.js:*)",
+      "Bash(node test-api.js:*)",
+      "Bash(del:*)"
     ],
     "deny": [],
     "ask": []

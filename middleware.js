@@ -19,6 +19,7 @@ export default withAuth(
 export const config = {
   matcher: [
     '/admin/:path*',
-    '/((?!login|register|api/auth|_next/static|_next/image|favicon.ico).*)',
+    // Protéger toutes les pages sauf login, register, api, _next, et fichiers statiques
+    '/((?!api|login|register|_next/static|_next/image|favicon.ico).*)',
   ]
 }

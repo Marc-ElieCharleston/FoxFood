@@ -6,22 +6,41 @@ import { sql } from '@/lib/db'
 // GET - Récupérer tous les plats ou par catégorie
 export async function GET(request) {
   try {
+    // Vérifier l'authentification
+    const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Non authentifié' },
+        { status: 401 }
+      )
+    }
+
     const { searchParams } = new URL(request.url)
     const category = searchParams.get('category')
     const activeOnly = searchParams.get('active') === 'true'
 
     let result
-    if (category) {
+    if (category && activeOnly) {
+      result = await sql`
+        SELECT * FROM dishes
+        WHERE category = ${category} AND active = true
+        ORDER BY name
+      `
+    } else if (category) {
       result = await sql`
         SELECT * FROM dishes
         WHERE category = ${category}
-        ${activeOnly ? sql`AND active = true` : sql``}
         ORDER BY name
+      `
+    } else if (activeOnly) {
+      result = await sql`
+        SELECT * FROM dishes
+        WHERE active = true
+        ORDER BY category, name
       `
     } else {
       result = await sql`
         SELECT * FROM dishes
-        ${activeOnly ? sql`WHERE active = true` : sql``}
         ORDER BY category, name
       `
     }

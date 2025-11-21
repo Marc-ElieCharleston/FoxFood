@@ -23,7 +23,7 @@ export async function GET(request) {
 
     const result = await sql`
       SELECT * FROM weekly_selections
-      WHERE user_id = ${session.user.id}
+      WHERE user_id = ${parseInt(session.user.id)}
       AND week_start_date = ${monday.toISOString().split('T')[0]}
       LIMIT 1
     `
@@ -82,7 +82,7 @@ export async function POST(request) {
     // Upsert (INSERT ou UPDATE)
     const result = await sql`
       INSERT INTO weekly_selections (user_id, week_start_date, delivery_day, delivery_time_slot, selected_dishes, status)
-      VALUES (${session.user.id}, ${monday.toISOString().split('T')[0]}, ${deliveryDay}, ${deliveryTimeSlot}, ${JSON.stringify(selectedDishes)}, 'pending')
+      VALUES (${parseInt(session.user.id)}, ${monday.toISOString().split('T')[0]}, ${deliveryDay}, ${deliveryTimeSlot}, ${JSON.stringify(selectedDishes)}, 'pending')
       ON CONFLICT (user_id, week_start_date)
       DO UPDATE SET
         delivery_day = ${deliveryDay},
