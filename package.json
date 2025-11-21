@@ -16,6 +16,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@tailwindcss/postcss": "^4.1.17",
     "autoprefixer": "^10.4.22",
     "next": "^16.0.3",
     "postcss": "^8.5.6",
