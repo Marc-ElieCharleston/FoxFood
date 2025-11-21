@@ -1,6 +1,7 @@
 import './globals.css'
 import SessionProvider from '@/components/SessionProvider'
 import Header from '@/components/Header'
+import { Toaster } from 'sonner'
 
 export const metadata = {
   title: 'FoxFood - Gestion de plats et liste de courses',
@@ -16,6 +17,7 @@ export default function RootLayout({ children }) {
           <main className="container mx-auto px-4 py-8">
             {children}
           </main>
+          <Toaster position="top-center" richColors />
         </SessionProvider>
       </body>
     </html>

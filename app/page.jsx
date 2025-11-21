@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
+import { toast } from 'sonner'
 
 export default function Home() {
   const { data: session, status } = useSession()
@@ -65,7 +66,7 @@ export default function Home() {
       } else if (prev.length < MAX_DISHES) {
         return [...prev, dishId]
       } else {
-        alert(`Maximum ${MAX_DISHES} plats autorisés`)
+        toast.error(`Maximum ${MAX_DISHES} plats autorisés`)
         return prev
       }
     })
@@ -73,12 +74,12 @@ export default function Home() {
 
   const handleSaveSelection = async () => {
     if (selectedDishes.length === 0) {
-      alert('Veuillez sélectionner au moins un plat')
+      toast.error('Veuillez sélectionner au moins un plat')
       return
     }
 
     if (!deliveryDay || !deliveryTimeSlot) {
-      alert('Veuillez indiquer le jour et créneau de passage')
+      toast.error('Veuillez indiquer le jour et créneau de passage')
       return
     }
 
@@ -95,16 +96,16 @@ export default function Home() {
       })
 
       if (response.ok) {
-        alert('Sélection enregistrée avec succès!')
+        toast.success('Sélection enregistrée avec succès!')
         fetchCurrentSelection()
         setShowSummary(false)
       } else {
         const data = await response.json()
-        alert(data.error || 'Erreur lors de la sauvegarde')
+        toast.error(data.error || 'Erreur lors de la sauvegarde')
       }
     } catch (error) {
       console.error('Erreur:', error)
-      alert('Erreur lors de la sauvegarde')
+      toast.error('Erreur lors de la sauvegarde')
     } finally {
       setSaving(false)
     }
@@ -292,31 +293,31 @@ export default function Home() {
           {searchQuery ? 'Aucun plat trouvé' : 'Aucun plat dans cette catégorie'}
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="space-y-1.5">
           {filteredDishes.map(dish => {
             const isSelected = selectedDishes.includes(dish.id)
             return (
               <div
                 key={dish.id}
                 onClick={() => toggleDishSelection(dish.id)}
-                className={`p-4 rounded-lg border-2 cursor-pointer transition ${
+                className={`p-2.5 rounded-lg border-2 cursor-pointer transition ${
                   isSelected
                     ? 'border-orange-500 bg-orange-50'
                     : 'border-gray-200 bg-white hover:border-orange-300'
                 }`}
               >
-                <div className="flex items-start gap-3">
-                  <div className={`mt-1 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
+                <div className="flex items-center gap-2.5">
+                  <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs ${
                     isSelected ? 'bg-orange-600 text-white' : 'bg-gray-200'
                   }`}>
                     {isSelected && '✓'}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-sm leading-tight mb-1">
+                    <h3 className="font-medium text-sm leading-tight">
                       {dish.name}
                     </h3>
                     {dish.description && (
-                      <p className="text-xs text-gray-600 line-clamp-2">
+                      <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">
                         {dish.description}
                       </p>
                     )}

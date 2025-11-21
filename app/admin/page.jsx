@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 
 export default function AdminPage() {
   const { data: session, status } = useSession()
@@ -62,14 +63,14 @@ export default function AdminPage() {
       const data = await response.json()
 
       if (response.ok) {
-        alert(data.message)
+        toast.success(data.message)
         fetchDishes()
       } else {
-        alert(data.error || 'Erreur lors de l\'importation')
+        toast.error(data.error || 'Erreur lors de l\'importation')
       }
     } catch (error) {
       console.error('Erreur:', error)
-      alert('Erreur lors de l\'importation')
+      toast.error('Erreur lors de l\'importation')
     } finally {
       setImporting(false)
     }
@@ -92,18 +93,18 @@ export default function AdminPage() {
       })
 
       if (response.ok) {
-        alert(editingDish ? 'Plat modifié!' : 'Plat créé!')
+        toast.success(editingDish ? 'Plat modifié!' : 'Plat créé!')
         setShowForm(false)
         setEditingDish(null)
         setFormData({ name: '', category: 'viandes', description: '', active: true })
         fetchDishes()
       } else {
         const data = await response.json()
-        alert(data.error || 'Erreur')
+        toast.error(data.error || 'Erreur')
       }
     } catch (error) {
       console.error('Erreur:', error)
-      alert('Erreur lors de la sauvegarde')
+      toast.error('Erreur lors de la sauvegarde')
     }
   }
 
@@ -127,15 +128,15 @@ export default function AdminPage() {
       })
 
       if (response.ok) {
-        alert('Plat supprimé!')
+        toast.success('Plat supprimé!')
         fetchDishes()
       } else {
         const data = await response.json()
-        alert(data.error || 'Erreur lors de la suppression')
+        toast.error(data.error || 'Erreur lors de la suppression')
       }
     } catch (error) {
       console.error('Erreur:', error)
-      alert('Erreur lors de la suppression')
+      toast.error('Erreur lors de la suppression')
     }
   }
 
