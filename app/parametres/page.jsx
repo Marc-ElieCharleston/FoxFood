@@ -14,11 +14,16 @@ export default function SettingsPage() {
   const [settings, setSettings] = useState({
     delivery_day: '',
     delivery_time_slot: '',
-    reminder_days_before: 3,
-    reminder_method: 'email',
     notification_phone: '',
     notification_email: '',
     receive_notifications: true
+  })
+
+  // Rappels multiples: 5, 3, et 1 jours avant
+  const [reminders, setReminders] = useState({
+    day5: { enabled: false, email: false, sms: false },
+    day3: { enabled: true, email: true, sms: false }, // Par défaut 3 jours
+    day1: { enabled: false, email: false, sms: false }
   })
 
   const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
@@ -43,14 +48,31 @@ export default function SettingsPage() {
           setSettings({
             delivery_day: data.delivery_day || '',
             delivery_time_slot: data.delivery_time_slot || '',
-            reminder_days_before: data.reminder_days_before || 3,
-            reminder_method: data.reminder_method || 'email',
             notification_phone: data.notification_phone || '',
             notification_email: data.notification_email || session?.user?.email || '',
             receive_notifications: data.receive_notifications !== false
           })
+
+          // Charger les rappels configurés
+          if (data.reminders && Array.isArray(data.reminders)) {
+            const remindersState = {
+              day5: { enabled: false, email: false, sms: false },
+              day3: { enabled: false, email: false, sms: false },
+              day1: { enabled: false, email: false, sms: false }
+            }
+            data.reminders.forEach(reminder => {
+              const key = `day${reminder.days_before}`
+              if (remindersState[key]) {
+                remindersState[key] = {
+                  enabled: reminder.enabled,
+                  email: reminder.send_email,
+                  sms: reminder.send_sms
+                }
+              }
+            })
+            setReminders(remindersState)
+          }
         } else {
-          // Pré-remplir avec l'email de session
           setSettings(prev => ({
             ...prev,
             notification_email: session?.user?.email || ''
@@ -65,6 +87,28 @@ export default function SettingsPage() {
     }
   }
 
+  const handleReminderToggle = (day) => {
+    setReminders(prev => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        enabled: !prev[day].enabled,
+        // Si on active, activer email par défaut
+        email: !prev[day].enabled ? true : prev[day].email,
+      }
+    }))
+  }
+
+  const handleReminderMethodChange = (day, method, value) => {
+    setReminders(prev => ({
+      ...prev,
+      [day]: {
+        ...prev[day],
+        [method]: value
+      }
+    }))
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
 
@@ -74,17 +118,31 @@ export default function SettingsPage() {
       return
     }
 
-    if (!settings.reminder_days_before || settings.reminder_days_before < 1 || settings.reminder_days_before > 5) {
-      toast.error('Le délai de rappel doit être entre 1 et 5 jours')
+    // Vérifier qu'au moins un rappel est activé
+    const hasReminder = reminders.day5.enabled || reminders.day3.enabled || reminders.day1.enabled
+    if (!hasReminder) {
+      toast.error('Veuillez activer au moins un rappel')
       return
     }
 
-    if (settings.reminder_method === 'sms' && !settings.notification_phone) {
+    // Vérifier que pour chaque rappel activé, au moins une méthode est choisie
+    for (const [key, reminder] of Object.entries(reminders)) {
+      if (reminder.enabled && !reminder.email && !reminder.sms) {
+        toast.error('Chaque rappel activé doit avoir au moins une méthode (Email ou SMS)')
+        return
+      }
+    }
+
+    // Vérifier les coordonnées si SMS activé
+    const hasSMS = Object.values(reminders).some(r => r.enabled && r.sms)
+    if (hasSMS && !settings.notification_phone) {
       toast.error('Veuillez indiquer votre numéro de mobile pour les rappels SMS')
       return
     }
 
-    if (settings.reminder_method === 'email' && !settings.notification_email) {
+    // Vérifier email si Email activé
+    const hasEmail = Object.values(reminders).some(r => r.enabled && r.email)
+    if (hasEmail && !settings.notification_email) {
       toast.error('Veuillez indiquer votre email pour les rappels')
       return
     }
@@ -94,12 +152,18 @@ export default function SettingsPage() {
       const response = await fetch('/api/settings', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(settings)
+        body: JSON.stringify({
+          ...settings,
+          reminders: [
+            { days_before: 5, ...reminders.day5 },
+            { days_before: 3, ...reminders.day3 },
+            { days_before: 1, ...reminders.day1 }
+          ]
+        })
       })
 
       if (response.ok) {
         toast.success('Paramètres enregistrés avec succès!')
-        // Rediriger vers la page d'accueil après sauvegarde
         setTimeout(() => {
           router.push('/')
         }, 1000)
@@ -179,93 +243,153 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Section 2: Rappels */}
+        {/* Section 2: Rappels multiples */}
         <div className="border-b pb-6">
           <h2 className="text-lg font-bold mb-4">🔔 Rappels avant le passage</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Configurez vos rappels personnalisés. Vous pouvez recevoir plusieurs rappels par email et/ou SMS.
+          </p>
 
           <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Nombre de jours avant (1 à 5) *
+            {/* Rappel 5 jours */}
+            <div className="border rounded-lg p-4 bg-gray-50">
+              <label className="flex items-center gap-3 mb-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={reminders.day5.enabled}
+                  onChange={() => handleReminderToggle('day5')}
+                  className="w-5 h-5 text-orange-600"
+                />
+                <span className="text-sm font-semibold">📅 5 jours avant le passage</span>
               </label>
-              <input
-                type="number"
-                min="1"
-                max="5"
-                value={settings.reminder_days_before}
-                onChange={(e) => setSettings({ ...settings, reminder_days_before: parseInt(e.target.value) })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
-                required
-              />
-              <p className="text-xs text-gray-500 mt-1">
-                Vous recevrez un rappel {settings.reminder_days_before} jour(s) avant le passage d'Emeric
-              </p>
+              {reminders.day5.enabled && (
+                <div className="ml-8 space-y-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={reminders.day5.email}
+                      onChange={(e) => handleReminderMethodChange('day5', 'email', e.target.checked)}
+                      className="w-4 h-4 text-orange-600"
+                    />
+                    <span className="text-xs">📧 Par email</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={reminders.day5.sms}
+                      onChange={(e) => handleReminderMethodChange('day5', 'sms', e.target.checked)}
+                      className="w-4 h-4 text-orange-600"
+                    />
+                    <span className="text-xs">📱 Par SMS</span>
+                  </label>
+                </div>
+              )}
             </div>
 
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Méthode de rappel *
+            {/* Rappel 3 jours */}
+            <div className="border rounded-lg p-4 bg-gray-50">
+              <label className="flex items-center gap-3 mb-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={reminders.day3.enabled}
+                  onChange={() => handleReminderToggle('day3')}
+                  className="w-5 h-5 text-orange-600"
+                />
+                <span className="text-sm font-semibold">📅 3 jours avant le passage</span>
               </label>
-              <div className="space-y-2">
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="reminder_method"
-                    value="email"
-                    checked={settings.reminder_method === 'email'}
-                    onChange={(e) => setSettings({ ...settings, reminder_method: e.target.value })}
-                    className="w-4 h-4 text-orange-600"
-                  />
-                  <span className="text-sm">📧 Par email</span>
-                </label>
-                <label className="flex items-center gap-2 cursor-pointer">
-                  <input
-                    type="radio"
-                    name="reminder_method"
-                    value="sms"
-                    checked={settings.reminder_method === 'sms'}
-                    onChange={(e) => setSettings({ ...settings, reminder_method: e.target.value })}
-                    className="w-4 h-4 text-orange-600"
-                  />
-                  <span className="text-sm">📱 Par SMS</span>
-                </label>
-              </div>
+              {reminders.day3.enabled && (
+                <div className="ml-8 space-y-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={reminders.day3.email}
+                      onChange={(e) => handleReminderMethodChange('day3', 'email', e.target.checked)}
+                      className="w-4 h-4 text-orange-600"
+                    />
+                    <span className="text-xs">📧 Par email</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={reminders.day3.sms}
+                      onChange={(e) => handleReminderMethodChange('day3', 'sms', e.target.checked)}
+                      className="w-4 h-4 text-orange-600"
+                    />
+                    <span className="text-xs">📱 Par SMS</span>
+                  </label>
+                </div>
+              )}
             </div>
 
-            {settings.reminder_method === 'email' && (
+            {/* Rappel 1 jour */}
+            <div className="border rounded-lg p-4 bg-gray-50">
+              <label className="flex items-center gap-3 mb-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={reminders.day1.enabled}
+                  onChange={() => handleReminderToggle('day1')}
+                  className="w-5 h-5 text-orange-600"
+                />
+                <span className="text-sm font-semibold">📅 1 jour avant le passage (rappel urgent)</span>
+              </label>
+              {reminders.day1.enabled && (
+                <div className="ml-8 space-y-2">
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={reminders.day1.email}
+                      onChange={(e) => handleReminderMethodChange('day1', 'email', e.target.checked)}
+                      className="w-4 h-4 text-orange-600"
+                    />
+                    <span className="text-xs">📧 Par email</span>
+                  </label>
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={reminders.day1.sms}
+                      onChange={(e) => handleReminderMethodChange('day1', 'sms', e.target.checked)}
+                      className="w-4 h-4 text-orange-600"
+                    />
+                    <span className="text-xs">📱 Par SMS</span>
+                  </label>
+                </div>
+              )}
+            </div>
+
+            {/* Coordonnées */}
+            <div className="space-y-3 pt-2">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Email de notification *
+                  Email de notification {Object.values(reminders).some(r => r.enabled && r.email) && '*'}
                 </label>
                 <input
                   type="email"
                   value={settings.notification_email}
                   onChange={(e) => setSettings({ ...settings, notification_email: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-sm"
                   placeholder={session?.user?.email}
-                  required
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Laissez vide pour utiliser l'email de votre compte
+                  Utilisé pour les rappels par email
                 </p>
               </div>
-            )}
 
-            {settings.reminder_method === 'sms' && (
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Numéro de mobile *
+                  Numéro de mobile {Object.values(reminders).some(r => r.enabled && r.sms) && '*'}
                 </label>
                 <input
                   type="tel"
                   value={settings.notification_phone}
                   onChange={(e) => setSettings({ ...settings, notification_phone: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-sm"
                   placeholder="06 12 34 56 78"
-                  required
                 />
+                <p className="text-xs text-gray-500 mt-1">
+                  Utilisé pour les rappels par SMS
+                </p>
               </div>
-            )}
+            </div>
           </div>
         </div>
 

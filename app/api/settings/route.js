@@ -14,22 +14,34 @@ export async function GET(request) {
       )
     }
 
-    const result = await sql`
+    const userId = parseInt(session.user.id)
+
+    // Récupérer les paramètres de base
+    const userSettings = await sql`
       SELECT
         delivery_day,
         delivery_time_slot,
-        reminder_days_before,
-        reminder_method,
         notification_phone,
         notification_email,
         receive_notifications,
         settings_completed
       FROM users
-      WHERE id = ${parseInt(session.user.id)}
+      WHERE id = ${userId}
       LIMIT 1
     `
 
-    return NextResponse.json(result.rows[0] || null)
+    // Récupérer les rappels configurés
+    const reminders = await sql`
+      SELECT days_before, enabled, send_email, send_sms
+      FROM user_reminders
+      WHERE user_id = ${userId}
+      ORDER BY days_before DESC
+    `
+
+    const result = userSettings.rows[0] || {}
+    result.reminders = reminders.rows || []
+
+    return NextResponse.json(result)
   } catch (error) {
     console.error('Erreur lors de la récupération des paramètres:', error)
     return NextResponse.json(
@@ -53,12 +65,13 @@ export async function POST(request) {
     const {
       delivery_day,
       delivery_time_slot,
-      reminder_days_before,
-      reminder_method,
       notification_phone,
       notification_email,
-      receive_notifications
+      receive_notifications,
+      reminders
     } = await request.json()
+
+    const userId = parseInt(session.user.id)
 
     // Validation
     if (!delivery_day || !delivery_time_slot) {
@@ -68,61 +81,69 @@ export async function POST(request) {
       )
     }
 
-    if (!reminder_days_before || reminder_days_before < 1 || reminder_days_before > 5) {
+    if (!reminders || !Array.isArray(reminders)) {
       return NextResponse.json(
-        { error: 'Le délai de rappel doit être entre 1 et 5 jours' },
+        { error: 'Configuration de rappels invalide' },
         { status: 400 }
       )
     }
 
-    if (!reminder_method || !['email', 'sms'].includes(reminder_method)) {
+    // Vérifier qu'au moins un rappel est activé
+    const hasEnabledReminder = reminders.some(r => r.enabled)
+    if (!hasEnabledReminder) {
       return NextResponse.json(
-        { error: 'Méthode de rappel invalide' },
+        { error: 'Au moins un rappel doit être activé' },
         { status: 400 }
       )
     }
 
-    if (reminder_method === 'sms' && !notification_phone) {
-      return NextResponse.json(
-        { error: 'Numéro de mobile requis pour les rappels SMS' },
-        { status: 400 }
-      )
-    }
-
-    if (reminder_method === 'email' && !notification_email) {
-      return NextResponse.json(
-        { error: 'Email requis pour les rappels' },
-        { status: 400 }
-      )
-    }
-
-    // Mettre à jour les paramètres
-    const result = await sql`
+    // Mettre à jour les paramètres utilisateur
+    const userResult = await sql`
       UPDATE users
       SET
         delivery_day = ${delivery_day},
         delivery_time_slot = ${delivery_time_slot},
-        reminder_days_before = ${reminder_days_before},
-        reminder_method = ${reminder_method},
         notification_phone = ${notification_phone || null},
         notification_email = ${notification_email || null},
         receive_notifications = ${receive_notifications !== false},
         settings_completed = true,
         updated_at = CURRENT_TIMESTAMP
-      WHERE id = ${parseInt(session.user.id)}
+      WHERE id = ${userId}
       RETURNING *
     `
 
-    if (result.rows.length === 0) {
+    if (userResult.rows.length === 0) {
       return NextResponse.json(
         { error: 'Utilisateur non trouvé' },
         { status: 404 }
       )
     }
 
+    // Supprimer les anciens rappels
+    await sql`
+      DELETE FROM user_reminders
+      WHERE user_id = ${userId}
+    `
+
+    // Insérer les nouveaux rappels
+    for (const reminder of reminders) {
+      if (reminder.enabled) {
+        await sql`
+          INSERT INTO user_reminders (user_id, days_before, enabled, send_email, send_sms)
+          VALUES (
+            ${userId},
+            ${reminder.days_before},
+            ${reminder.enabled},
+            ${reminder.email || false},
+            ${reminder.sms || false}
+          )
+        `
+      }
+    }
+
     return NextResponse.json({
       message: 'Paramètres enregistrés avec succès',
-      settings: result.rows[0]
+      settings: userResult.rows[0]
     })
   } catch (error) {
     console.error('Erreur lors de la sauvegarde des paramètres:', error)
