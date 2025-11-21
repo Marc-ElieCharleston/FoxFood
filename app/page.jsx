@@ -18,6 +18,15 @@ export default function Home() {
   const [showSummary, setShowSummary] = useState(false)
   const [settingsCompleted, setSettingsCompleted] = useState(true)
   const [showSettingsBanner, setShowSettingsBanner] = useState(false)
+  const [showCustomDishModal, setShowCustomDishModal] = useState(false)
+  const [customDishFormType, setCustomDishFormType] = useState('simple') // 'simple' ou 'detailed'
+  const [customDishForm, setCustomDishForm] = useState({
+    dish_name: '',
+    description: '',
+    suggested_ingredients: []
+  })
+  const [newIngredient, setNewIngredient] = useState('')
+  const [submittingCustomDish, setSubmittingCustomDish] = useState(false)
 
   const MAX_DISHES = 5
 
@@ -126,6 +135,68 @@ export default function Home() {
       toast.error('Erreur lors de la sauvegarde')
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleAddIngredient = () => {
+    if (newIngredient.trim()) {
+      setCustomDishForm(prev => ({
+        ...prev,
+        suggested_ingredients: [...prev.suggested_ingredients, newIngredient.trim()]
+      }))
+      setNewIngredient('')
+    }
+  }
+
+  const handleRemoveIngredient = (index) => {
+    setCustomDishForm(prev => ({
+      ...prev,
+      suggested_ingredients: prev.suggested_ingredients.filter((_, i) => i !== index)
+    }))
+  }
+
+  const handleSubmitCustomDish = async () => {
+    if (!customDishForm.dish_name.trim()) {
+      toast.error('Veuillez indiquer le nom du plat')
+      return
+    }
+
+    if (!customDishForm.description.trim()) {
+      toast.error('Veuillez décrire le plat')
+      return
+    }
+
+    try {
+      setSubmittingCustomDish(true)
+      const response = await fetch('/api/custom-dishes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          dish_name: customDishForm.dish_name,
+          description: customDishForm.description,
+          suggested_ingredients: customDishFormType === 'detailed' ? customDishForm.suggested_ingredients : [],
+          is_detailed: customDishFormType === 'detailed'
+        })
+      })
+
+      if (response.ok) {
+        toast.success('Votre demande a été envoyée à Emeric!')
+        setShowCustomDishModal(false)
+        setCustomDishForm({
+          dish_name: '',
+          description: '',
+          suggested_ingredients: []
+        })
+        setCustomDishFormType('simple')
+      } else {
+        const data = await response.json()
+        toast.error(data.error || 'Erreur lors de l\'envoi')
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de l\'envoi')
+    } finally {
+      setSubmittingCustomDish(false)
     }
   }
 
@@ -336,6 +407,17 @@ export default function Home() {
         />
       </div>
 
+      {/* Bouton demander un plat personnalisé */}
+      <div className="mb-4">
+        <button
+          onClick={() => setShowCustomDishModal(true)}
+          className="w-full py-3 bg-gradient-to-r from-purple-500 to-purple-600 text-white rounded-lg font-semibold hover:from-purple-600 hover:to-purple-700 transition flex items-center justify-center gap-2"
+        >
+          <span className="text-xl">✨</span>
+          <span>Demander un plat personnalisé</span>
+        </button>
+      </div>
+
       {/* Liste des plats */}
       {loading ? (
         <div className="text-center py-8">Chargement...</div>
@@ -377,6 +459,168 @@ export default function Home() {
               </div>
             )
           })}
+        </div>
+      )}
+
+      {/* Modal de demande de plat personnalisé */}
+      {showCustomDishModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end md:items-center justify-center p-4">
+          <div className="bg-white rounded-t-2xl md:rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+            <div className="flex justify-between items-start mb-4">
+              <h3 className="text-xl font-bold">Demander un plat personnalisé</h3>
+              <button
+                onClick={() => {
+                  setShowCustomDishModal(false)
+                  setCustomDishForm({ dish_name: '', description: '', suggested_ingredients: [] })
+                  setCustomDishFormType('simple')
+                }}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ✕
+              </button>
+            </div>
+
+            {/* Onglets */}
+            <div className="flex gap-2 mb-6 border-b">
+              <button
+                onClick={() => setCustomDishFormType('simple')}
+                className={`px-4 py-2 font-semibold transition ${
+                  customDishFormType === 'simple'
+                    ? 'border-b-2 border-purple-600 text-purple-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Demande simple
+              </button>
+              <button
+                onClick={() => setCustomDishFormType('detailed')}
+                className={`px-4 py-2 font-semibold transition ${
+                  customDishFormType === 'detailed'
+                    ? 'border-b-2 border-purple-600 text-purple-600'
+                    : 'text-gray-500 hover:text-gray-700'
+                }`}
+              >
+                Demande détaillée
+              </button>
+            </div>
+
+            {/* Formulaire */}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Nom du plat *
+                </label>
+                <input
+                  type="text"
+                  value={customDishForm.dish_name}
+                  onChange={(e) => setCustomDishForm({ ...customDishForm, dish_name: e.target.value })}
+                  placeholder="Ex: Poulet au curry"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Description *
+                </label>
+                <textarea
+                  value={customDishForm.description}
+                  onChange={(e) => setCustomDishForm({ ...customDishForm, description: e.target.value })}
+                  placeholder="Décrivez le plat que vous souhaitez..."
+                  rows={4}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
+                />
+              </div>
+
+              {/* Section ingrédients suggérés (uniquement pour formulaire détaillé) */}
+              {customDishFormType === 'detailed' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Ingrédients suggérés (optionnel)
+                  </label>
+                  <div className="flex gap-2 mb-2">
+                    <input
+                      type="text"
+                      value={newIngredient}
+                      onChange={(e) => setNewIngredient(e.target.value)}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          e.preventDefault()
+                          handleAddIngredient()
+                        }
+                      }}
+                      placeholder="Ex: Poulet, curry, lait de coco..."
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 text-sm"
+                    />
+                    <button
+                      type="button"
+                      onClick={handleAddIngredient}
+                      className="px-4 py-2 bg-purple-100 text-purple-700 rounded-lg font-semibold hover:bg-purple-200 transition"
+                    >
+                      Ajouter
+                    </button>
+                  </div>
+
+                  {customDishForm.suggested_ingredients.length > 0 && (
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {customDishForm.suggested_ingredients.map((ingredient, index) => (
+                        <span
+                          key={index}
+                          className="inline-flex items-center gap-1 px-3 py-1 bg-purple-100 text-purple-800 rounded-full text-sm"
+                        >
+                          {ingredient}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveIngredient(index)}
+                            className="text-purple-600 hover:text-purple-800 ml-1"
+                          >
+                            ✕
+                          </button>
+                        </span>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                <p className="text-sm text-purple-900">
+                  {customDishFormType === 'simple' ? (
+                    <>
+                      <span className="font-semibold">Demande simple :</span> Emeric recevra votre demande
+                      et choisira les ingrédients lui-même selon ses inspirations et disponibilités.
+                    </>
+                  ) : (
+                    <>
+                      <span className="font-semibold">Demande détaillée :</span> Vous pouvez suggérer des
+                      ingrédients spécifiques. Emeric ajustera selon les disponibilités et vous contactera
+                      si nécessaire.
+                    </>
+                  )}
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-3 mt-6">
+              <button
+                onClick={handleSubmitCustomDish}
+                disabled={submittingCustomDish}
+                className="flex-1 py-3 bg-purple-600 text-white rounded-lg font-bold hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {submittingCustomDish ? 'Envoi...' : 'Envoyer la demande'}
+              </button>
+              <button
+                onClick={() => {
+                  setShowCustomDishModal(false)
+                  setCustomDishForm({ dish_name: '', description: '', suggested_ingredients: [] })
+                  setCustomDishFormType('simple')
+                }}
+                className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300"
+              >
+                Annuler
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

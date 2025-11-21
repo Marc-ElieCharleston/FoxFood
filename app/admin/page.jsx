@@ -170,6 +170,28 @@ export default function AdminPage() {
         <p className="text-gray-600">Gestion des plats du catalogue</p>
       </div>
 
+      {/* Navigation admin */}
+      <div className="mb-6 flex gap-2 flex-wrap">
+        <button
+          onClick={() => router.push('/admin')}
+          className="px-4 py-2 bg-orange-600 text-white rounded-lg font-semibold text-sm"
+        >
+          Plats du catalogue
+        </button>
+        <button
+          onClick={() => router.push('/admin/plats-personnalises')}
+          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm"
+        >
+          Plats personnalisés
+        </button>
+        <button
+          onClick={() => router.push('/admin/parametres')}
+          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm"
+        >
+          Paramètres
+        </button>
+      </div>
+
       {/* Actions */}
       <div className="mb-6 space-y-3">
         {/* Boutons d'action principaux */}

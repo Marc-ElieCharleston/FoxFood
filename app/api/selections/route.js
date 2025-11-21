@@ -92,6 +92,50 @@ export async function POST(request) {
       RETURNING *
     `
 
+    // Envoyer notification à l'admin
+    try {
+      const adminSettingsResult = await sql`
+        SELECT
+          a.notification_email,
+          a.notification_phone,
+          a.send_email,
+          a.send_sms,
+          a.notify_on_selection,
+          u.email as user_email
+        FROM admin_settings a
+        JOIN users u ON a.user_id = u.id
+        WHERE u.role = 'admin'
+        AND a.notify_on_selection = true
+        LIMIT 1
+      `
+
+      if (adminSettingsResult.rows.length > 0) {
+        const adminSettings = adminSettingsResult.rows[0]
+
+        // Récupérer les noms des plats sélectionnés
+        const dishesResult = await sql`
+          SELECT name FROM dishes
+          WHERE id = ANY(${selectedDishes})
+        `
+        const dishNames = dishesResult.rows.map(d => d.name)
+
+        const { notifyAdminOnSelection } = await import('@/lib/notifications')
+
+        await notifyAdminOnSelection({
+          adminEmail: adminSettings.notification_email || adminSettings.user_email,
+          adminPhone: adminSettings.notification_phone,
+          sendEmail: adminSettings.send_email,
+          sendSMS: adminSettings.send_sms,
+          userName: session.user.name,
+          userEmail: session.user.email,
+          selectedDishes: dishNames
+        })
+      }
+    } catch (notifError) {
+      console.error('Erreur notification admin:', notifError)
+      // Ne pas bloquer la sauvegarde si la notification échoue
+    }
+
     return NextResponse.json(result.rows[0])
   } catch (error) {
     console.error('Erreur lors de la sauvegarde de la sélection:', error)

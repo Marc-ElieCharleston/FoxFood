@@ -18,7 +18,8 @@
       "Bash(node test-db.js:*)",
       "Bash(node test-api.js:*)",
       "Bash(del:*)",
-      "Bash(npx shadcn@latest init:*)"
+      "Bash(npx shadcn@latest init:*)",
+      "Bash(\"C:\\Users\\Charl\\Documents\\Projets\\Emeric_cuisine\\app\\api\\cron\\send-reminders\\route.js\")"
     ],
     "deny": [],
     "ask": []
