@@ -1,0 +1,446 @@
+[
+  {
+    "name": "Parmentier de canard à la patate douce",
+    "category": "viandes",
+    "description": "Hachis de canard confit recouvert de purée de patate douce",
+    "ingredients": []
+  },
+  {
+    "name": "Parmentier de bœuf",
+    "category": "viandes",
+    "description": "Hachis parmentier traditionnel avec viande de bœuf",
+    "ingredients": []
+  },
+  {
+    "name": "Sauté de veau aux olives",
+    "category": "viandes",
+    "description": "Morceaux de veau mijotés avec olives vertes et noires",
+    "ingredients": []
+  },
+  {
+    "name": "Bœuf bourguignon",
+    "category": "viandes",
+    "description": "Bœuf mijoté au vin rouge avec carottes et champignons",
+    "ingredients": []
+  },
+  {
+    "name": "Couscous",
+    "category": "viandes",
+    "description": "Couscous traditionnel avec légumes et viande",
+    "ingredients": []
+  },
+  {
+    "name": "Filet mignon de porc sauce Boursin & écrasé de pomme de terre",
+    "category": "viandes",
+    "description": "Filet mignon avec sauce crémeuse au Boursin",
+    "ingredients": []
+  },
+  {
+    "name": "Cuisses de canard confites & gratin dauphinois",
+    "category": "viandes",
+    "description": "Cuisses de canard confites accompagnées de gratin dauphinois",
+    "ingredients": []
+  },
+  {
+    "name": "Magret de canard rôti, sauce balsamique, carottes & pousses de soja",
+    "category": "viandes",
+    "description": "Magret de canard avec sauce balsamique et légumes croquants",
+    "ingredients": []
+  },
+  {
+    "name": "Escalope de veau à la crème de champignons & butternut rôti au miel",
+    "category": "viandes",
+    "description": "Escalope de veau sauce crémeuse aux champignons",
+    "ingredients": []
+  },
+  {
+    "name": "Boulettes de porc caramélisées & lentilles mijotées",
+    "category": "viandes",
+    "description": "Boulettes de viande de porc caramélisées servies avec lentilles",
+    "ingredients": []
+  },
+  {
+    "name": "Sauté de porc à la tomate & champignons, haricots verts persillés",
+    "category": "viandes",
+    "description": "Sauté de porc à la sauce tomate et champignons",
+    "ingredients": []
+  },
+  {
+    "name": "Sauté de porc coco/curry & purée de patate douce",
+    "category": "viandes",
+    "description": "Sauté de porc au lait de coco et curry",
+    "ingredients": []
+  },
+  {
+    "name": "Poulet ricotta & épinards, linguine au beurre",
+    "category": "viandes",
+    "description": "Poulet farci à la ricotta et épinards",
+    "ingredients": []
+  },
+  {
+    "name": "Poulet mafé & riz blanc",
+    "category": "viandes",
+    "description": "Poulet sauce mafé à la cacahuète",
+    "ingredients": []
+  },
+  {
+    "name": "Aiguillette de poulet panée & pomme de terre vapeur, fromage blanc ciboulette",
+    "category": "viandes",
+    "description": "Poulet pané accompagné de pommes de terre",
+    "ingredients": []
+  },
+  {
+    "name": "Colombo de poulet",
+    "category": "viandes",
+    "description": "Poulet mijoté aux épices colombo",
+    "ingredients": []
+  },
+  {
+    "name": "Cuisses de poulet forestières, endives rôties & quinoa",
+    "category": "viandes",
+    "description": "Cuisses de poulet sauce forestière",
+    "ingredients": []
+  },
+  {
+    "name": "Pilons de poulet citron/olive & polenta crémeuse",
+    "category": "viandes",
+    "description": "Pilons de poulet au citron et olives",
+    "ingredients": []
+  },
+  {
+    "name": "Wok de poulet aux légumes de saison",
+    "category": "viandes",
+    "description": "Poulet sauté au wok avec légumes frais",
+    "ingredients": []
+  },
+  {
+    "name": "Enchiladas au poulet & épinards",
+    "category": "viandes",
+    "description": "Enchiladas mexicaines au poulet et épinards",
+    "ingredients": []
+  },
+  {
+    "name": "Boulettes de bœuf à l'italienne & tagliatelles fraîches",
+    "category": "viandes",
+    "description": "Boulettes de bœuf sauce tomate italienne",
+    "ingredients": []
+  },
+  {
+    "name": "Enchiladas au bœuf & poivrons",
+    "category": "viandes",
+    "description": "Enchiladas mexicaines au bœuf et poivrons",
+    "ingredients": []
+  },
+  {
+    "name": "Wok de bœuf aux légumes de saison",
+    "category": "viandes",
+    "description": "Bœuf sauté au wok avec légumes frais",
+    "ingredients": []
+  },
+  {
+    "name": "Chili con carne",
+    "category": "viandes",
+    "description": "Chili con carne épicé avec haricots rouges",
+    "ingredients": []
+  },
+  {
+    "name": "Endives au jambon gratinées",
+    "category": "viandes",
+    "description": "Endives roulées au jambon, sauce béchamel gratinée",
+    "ingredients": []
+  },
+  {
+    "name": "Poireaux au jambon gratinés",
+    "category": "viandes",
+    "description": "Poireaux roulés au jambon, sauce béchamel gratinée",
+    "ingredients": []
+  },
+  {
+    "name": "Gratin de brocolis & saucisses",
+    "category": "viandes",
+    "description": "Gratin de brocolis avec saucisses",
+    "ingredients": []
+  },
+  {
+    "name": "Risotto d'orzo façon carbonara",
+    "category": "viandes",
+    "description": "Orzo crémeux façon carbonara",
+    "ingredients": []
+  },
+  {
+    "name": "Bœuf Stroganov & tagliatelles fraîches",
+    "category": "viandes",
+    "description": "Bœuf Stroganov sauce crémeuse",
+    "ingredients": []
+  },
+  {
+    "name": "Mac and cheese crémeux & saucisses grillées",
+    "category": "viandes",
+    "description": "Macaroni au fromage crémeux avec saucisses",
+    "ingredients": []
+  },
+  {
+    "name": "Pomme de terre farcies & gratinées au gouda",
+    "category": "viandes",
+    "description": "Pommes de terre farcies et gratinées",
+    "ingredients": []
+  },
+  {
+    "name": "Filet de dinde, compotée de tomate, carottes Vichy & haricot blanc",
+    "category": "viandes",
+    "description": "Filet de dinde avec compotée de tomates",
+    "ingredients": []
+  },
+  {
+    "name": "Tourte de bœuf, comté & pomme de terre",
+    "category": "viandes",
+    "description": "Tourte au bœuf et comté",
+    "ingredients": []
+  },
+  {
+    "name": "Brandade de poisson à la butternut",
+    "category": "poissons",
+    "description": "Brandade de morue avec butternut",
+    "ingredients": []
+  },
+  {
+    "name": "Lasagne saumon & épinard",
+    "category": "poissons",
+    "description": "Lasagnes au saumon et épinards",
+    "ingredients": []
+  },
+  {
+    "name": "Filet de cabillaud au lard, purée de carottes & semoule",
+    "category": "poissons",
+    "description": "Cabillaud enrobé de lard fumé",
+    "ingredients": []
+  },
+  {
+    "name": "Saumon laqué miel/soja, quinoa & brocolis à l'ail",
+    "category": "poissons",
+    "description": "Saumon glacé miel et soja",
+    "ingredients": []
+  },
+  {
+    "name": "Tarte aux poireaux & truite fumée",
+    "category": "poissons",
+    "description": "Tarte salée aux poireaux et truite",
+    "ingredients": []
+  },
+  {
+    "name": "Tarte au brocolis & thon",
+    "category": "poissons",
+    "description": "Tarte salée au brocolis et thon",
+    "ingredients": []
+  },
+  {
+    "name": "Cabillaud et légumes au bouillon",
+    "category": "poissons",
+    "description": "Cabillaud poché avec légumes",
+    "ingredients": []
+  },
+  {
+    "name": "Calamar au pesto, blé aux saveurs de paella",
+    "category": "poissons",
+    "description": "Calamars au pesto avec blé",
+    "ingredients": []
+  },
+  {
+    "name": "Calamar en persillade, wedges de patate douce & fondue de poireaux",
+    "category": "poissons",
+    "description": "Calamars persillés avec patates douces",
+    "ingredients": []
+  },
+  {
+    "name": "Calamar sauce tomate/olives, curry de pois chiche & chou-fleur",
+    "category": "poissons",
+    "description": "Calamars sauce tomate avec pois chiches",
+    "ingredients": []
+  },
+  {
+    "name": "Wok de crevettes aux légumes de saison",
+    "category": "poissons",
+    "description": "Crevettes sautées au wok avec légumes",
+    "ingredients": []
+  },
+  {
+    "name": "Curry de crevettes au lait de coco & riz blanc",
+    "category": "poissons",
+    "description": "Crevettes au curry et lait de coco",
+    "ingredients": []
+  },
+  {
+    "name": "Crevettes à la Toscane & boulgour",
+    "category": "poissons",
+    "description": "Crevettes sauce toscane avec boulgour",
+    "ingredients": []
+  },
+  {
+    "name": "Crevettes persillées & sarrasin au coulis de butternut",
+    "category": "poissons",
+    "description": "Crevettes à l'ail et persil",
+    "ingredients": []
+  },
+  {
+    "name": "Blanquette de Saint-Jacques aux champignons & spaghetti",
+    "category": "poissons",
+    "description": "Saint-Jacques en blanquette crémeuse",
+    "ingredients": []
+  },
+  {
+    "name": "Bourride provençale",
+    "category": "poissons",
+    "description": "Soupe de poisson provençale à l'aïoli",
+    "ingredients": []
+  },
+  {
+    "name": "Marmite de la mer",
+    "category": "poissons",
+    "description": "Mélange de poissons et fruits de mer mijotés",
+    "ingredients": []
+  },
+  {
+    "name": "Galette de saumon, velouté de poireaux & sarrasin au curcuma",
+    "category": "poissons",
+    "description": "Galette de saumon avec velouté",
+    "ingredients": []
+  },
+  {
+    "name": "Poisson au four, coulis de brocolis au sésame & riz aux légumes",
+    "category": "poissons",
+    "description": "Poisson blanc cuit au four",
+    "ingredients": []
+  },
+  {
+    "name": "Duo de crevettes & Saint-Jacques, risotto crémeux & coulis de poivron",
+    "category": "poissons",
+    "description": "Fruits de mer avec risotto",
+    "ingredients": []
+  },
+  {
+    "name": "Flan de crabe & fromage blanc à l'aneth, haricot beurre",
+    "category": "poissons",
+    "description": "Flan de crabe léger à l'aneth",
+    "ingredients": []
+  },
+  {
+    "name": "Parmentier de saumon",
+    "category": "poissons",
+    "description": "Hachis parmentier au saumon",
+    "ingredients": []
+  },
+  {
+    "name": "Parmentier végan",
+    "category": "vegetation",
+    "description": "Hachis parmentier version végétale",
+    "ingredients": []
+  },
+  {
+    "name": "Lasagne aux légumes",
+    "category": "vegetation",
+    "description": "Lasagnes végétariennes aux légumes de saison",
+    "ingredients": []
+  },
+  {
+    "name": "Endives gratinées (sans jambon)",
+    "category": "vegetation",
+    "description": "Endives gratinées version végétarienne",
+    "ingredients": []
+  },
+  {
+    "name": "Poireaux gratinés (sans jambon)",
+    "category": "vegetation",
+    "description": "Poireaux gratinés version végétarienne",
+    "ingredients": []
+  },
+  {
+    "name": "Gratin de brocolis (sans saucisse)",
+    "category": "vegetation",
+    "description": "Gratin de brocolis végétarien",
+    "ingredients": []
+  },
+  {
+    "name": "Quiche chèvre & épinards",
+    "category": "vegetation",
+    "description": "Quiche végétarienne au chèvre et épinards",
+    "ingredients": []
+  },
+  {
+    "name": "Épinards à la florentine",
+    "category": "vegetation",
+    "description": "Épinards crémeux à la florentine",
+    "ingredients": []
+  },
+  {
+    "name": "Risotto butternut & burrata",
+    "category": "vegetation",
+    "description": "Risotto crémeux à la butternut avec burrata",
+    "ingredients": []
+  },
+  {
+    "name": "Risotto au parmesan, champignons & brunoise de butternut au miel",
+    "category": "vegetation",
+    "description": "Risotto crémeux aux champignons",
+    "ingredients": []
+  },
+  {
+    "name": "Linguine à la crème de courgette & parmesan",
+    "category": "vegetation",
+    "description": "Pâtes linguine crémeuses aux courgettes",
+    "ingredients": []
+  },
+  {
+    "name": "Frittata de pomme de terre, courge & féta",
+    "category": "vegetation",
+    "description": "Frittata végétarienne à la féta",
+    "ingredients": []
+  },
+  {
+    "name": "Chili sin carne",
+    "category": "vegetation",
+    "description": "Chili végétarien aux haricots",
+    "ingredients": []
+  },
+  {
+    "name": "Quiche aux poireaux & Boursin",
+    "category": "vegetation",
+    "description": "Quiche crémeuse aux poireaux",
+    "ingredients": []
+  },
+  {
+    "name": "Clafoutis à la courge & cheddar",
+    "category": "vegetation",
+    "description": "Clafoutis salé à la courge",
+    "ingredients": []
+  },
+  {
+    "name": "Wok de légumes",
+    "category": "vegetation",
+    "description": "Légumes de saison sautés au wok",
+    "ingredients": []
+  },
+  {
+    "name": "Tajine de légumes de saison",
+    "category": "vegetation",
+    "description": "Tajine végétarien aux légumes",
+    "ingredients": []
+  },
+  {
+    "name": "Curry de pois chiche, chou-fleur & épinard",
+    "category": "vegetation",
+    "description": "Curry végétarien aux pois chiches",
+    "ingredients": []
+  },
+  {
+    "name": "Gratin de patate douce & butternut",
+    "category": "vegetation",
+    "description": "Gratin végétarien aux cucurbitacées",
+    "ingredients": []
+  },
+  {
+    "name": "Pomme de terre farcies (version végé)",
+    "category": "vegetation",
+    "description": "Pommes de terre farcies végétariennes",
+    "ingredients": []
+  }
+]

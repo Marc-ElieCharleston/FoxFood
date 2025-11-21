@@ -1,329 +1,282 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+import { useSession } from 'next-auth/react'
 
 export default function Home() {
+  const { data: session, status } = useSession()
   const [dishes, setDishes] = useState([])
-  const [showForm, setShowForm] = useState(false)
+  const [loading, setLoading] = useState(true)
   const [selectedDishes, setSelectedDishes] = useState([])
+  const [deliveryDay, setDeliveryDay] = useState('')
+  const [deliveryTimeSlot, setDeliveryTimeSlot] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [currentSelection, setCurrentSelection] = useState(null)
 
-  // État du formulaire
-  const [formData, setFormData] = useState({
-    name: '',
-    category: 'viande',
-    ingredients: [{ name: '', quantity: '' }]
-  })
+  const MAX_DISHES = 5
 
-  // Charger les plats depuis le localStorage
+  // Charger les plats et la sélection existante
   useEffect(() => {
-    const savedDishes = localStorage.getItem('foxfood-dishes')
-    if (savedDishes) {
-      setDishes(JSON.parse(savedDishes))
+    if (status === 'authenticated') {
+      fetchDishes()
+      fetchCurrentSelection()
     }
-  }, [])
+  }, [status])
 
-  // Sauvegarder les plats dans le localStorage
-  const saveDishes = (newDishes) => {
-    localStorage.setItem('foxfood-dishes', JSON.stringify(newDishes))
-    setDishes(newDishes)
-  }
-
-  // Ajouter un ingrédient au formulaire
-  const addIngredientField = () => {
-    setFormData({
-      ...formData,
-      ingredients: [...formData.ingredients, { name: '', quantity: '' }]
-    })
-  }
-
-  // Mettre à jour un ingrédient
-  const updateIngredient = (index, field, value) => {
-    const newIngredients = [...formData.ingredients]
-    newIngredients[index][field] = value
-    setFormData({ ...formData, ingredients: newIngredients })
-  }
-
-  // Supprimer un ingrédient
-  const removeIngredient = (index) => {
-    const newIngredients = formData.ingredients.filter((_, i) => i !== index)
-    setFormData({ ...formData, ingredients: newIngredients })
-  }
-
-  // Soumettre le formulaire
-  const handleSubmit = (e) => {
-    e.preventDefault()
-    const newDish = {
-      id: Date.now(),
-      ...formData,
-      ingredients: formData.ingredients.filter(ing => ing.name && ing.quantity)
+  const fetchDishes = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch('/api/dishes?active=true')
+      const data = await response.json()
+      setDishes(data)
+    } catch (error) {
+      console.error('Erreur lors du chargement des plats:', error)
+    } finally {
+      setLoading(false)
     }
-    saveDishes([...dishes, newDish])
-    setFormData({
-      name: '',
-      category: 'viande',
-      ingredients: [{ name: '', quantity: '' }]
-    })
-    setShowForm(false)
   }
 
-  // Supprimer un plat
-  const deleteDish = (id) => {
-    saveDishes(dishes.filter(dish => dish.id !== id))
+  const fetchCurrentSelection = async () => {
+    try {
+      const response = await fetch('/api/selections')
+      if (response.ok) {
+        const data = await response.json()
+        if (data) {
+          setCurrentSelection(data)
+          setSelectedDishes(data.selected_dishes || [])
+          setDeliveryDay(data.delivery_day || '')
+          setDeliveryTimeSlot(data.delivery_time_slot || '')
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement de la sélection:', error)
+    }
   }
 
-  // Gérer la sélection des plats pour la liste de courses
   const toggleDishSelection = (dishId) => {
-    setSelectedDishes(prev =>
-      prev.includes(dishId)
-        ? prev.filter(id => id !== dishId)
-        : [...prev, dishId]
+    setSelectedDishes(prev => {
+      if (prev.includes(dishId)) {
+        return prev.filter(id => id !== dishId)
+      } else if (prev.length < MAX_DISHES) {
+        return [...prev, dishId]
+      } else {
+        alert(`Maximum ${MAX_DISHES} plats autorisés`)
+        return prev
+      }
+    })
+  }
+
+  const handleSaveSelection = async () => {
+    if (selectedDishes.length === 0) {
+      alert('Veuillez sélectionner au moins un plat')
+      return
+    }
+
+    if (!deliveryDay || !deliveryTimeSlot) {
+      alert('Veuillez indiquer le jour et créneau de passage')
+      return
+    }
+
+    try {
+      setSaving(true)
+      const response = await fetch('/api/selections', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          selectedDishes,
+          deliveryDay,
+          deliveryTimeSlot
+        })
+      })
+
+      if (response.ok) {
+        alert('Sélection enregistrée avec succès! Vous recevrez des rappels par email.')
+        fetchCurrentSelection()
+      } else {
+        const data = await response.json()
+        alert(data.error || 'Erreur lors de la sauvegarde')
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      alert('Erreur lors de la sauvegarde')
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const getDishesByCategory = (category) => {
+    return dishes.filter(dish => dish.category === category)
+  }
+
+  const categoryLabels = {
+    viandes: { name: 'Viandes', emoji: '🥩', color: 'red' },
+    poissons: { name: 'Poissons & Fruits de mer', emoji: '🐟', color: 'blue' },
+    vegetation: { name: 'Végétarien', emoji: '🥗', color: 'green' }
+  }
+
+  const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
+  const timeSlots = ['Matin (8h-12h)', 'Midi (12h-14h)', 'Après-midi (14h-18h)', 'Soir (18h-20h)']
+
+  if (status === 'loading') {
+    return <div className="text-center py-12">Chargement...</div>
+  }
+
+  if (!session) {
+    return (
+      <div className="text-center py-12">
+        <h2 className="text-2xl font-bold mb-4">Bienvenue sur FoxFood</h2>
+        <p className="text-gray-600 mb-4">
+          Connectez-vous pour sélectionner vos plats de la semaine
+        </p>
+      </div>
     )
   }
 
-  // Générer la liste de courses
-  const generateShoppingList = () => {
-    const selectedDishesData = dishes.filter(dish => selectedDishes.includes(dish.id))
-
-    // Regrouper les ingrédients
-    const ingredientsMap = {}
-    selectedDishesData.forEach(dish => {
-      dish.ingredients.forEach(ing => {
-        if (ingredientsMap[ing.name]) {
-          ingredientsMap[ing.name] += `, ${ing.quantity}`
-        } else {
-          ingredientsMap[ing.name] = ing.quantity
-        }
-      })
-    })
-
-    // Créer le texte de la liste
-    let listText = '🛒 LISTE DE COURSES - FoxFood\n\n'
-    listText += `Plats sélectionnés:\n${selectedDishesData.map(d => `- ${d.name}`).join('\n')}\n\n`
-    listText += 'Ingrédients:\n'
-    Object.entries(ingredientsMap).forEach(([name, quantity]) => {
-      listText += `- ${name}: ${quantity}\n`
-    })
-
-    return listText
-  }
-
-  // Copier la liste dans le presse-papier
-  const copyToClipboard = () => {
-    const list = generateShoppingList()
-    navigator.clipboard.writeText(list)
-    alert('Liste copiée dans le presse-papier!')
-  }
-
-  // Partager par SMS/email
-  const shareList = () => {
-    const list = generateShoppingList()
-    const encodedList = encodeURIComponent(list)
-
-    // Créer un lien mailto
-    window.location.href = `mailto:?subject=Liste de courses FoxFood&body=${encodedList}`
-  }
-
-  const categoryColors = {
-    viande: 'bg-red-100 text-red-800',
-    poisson: 'bg-blue-100 text-blue-800',
-    vegetation: 'bg-green-100 text-green-800'
-  }
-
-  const categoryEmojis = {
-    viande: '🥩',
-    poisson: '🐟',
-    vegetation: '🥗'
-  }
-
   return (
-    <div className="max-w-6xl mx-auto">
-      {/* Section d'ajout de plat */}
+    <div className="max-w-7xl mx-auto">
+      {/* En-tête */}
       <div className="mb-8">
-        {!showForm ? (
-          <button
-            onClick={() => setShowForm(true)}
-            className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-3 px-6 rounded-lg shadow-md transition"
-          >
-            ➕ Ajouter un plat
-          </button>
-        ) : (
-          <div className="bg-white p-6 rounded-lg shadow-md">
-            <h2 className="text-xl font-bold mb-4">Nouveau plat</h2>
-            <form onSubmit={handleSubmit}>
-              <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">
-                  Nom du plat
-                </label>
-                <input
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                  required
-                />
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">
-                  Catégorie
-                </label>
-                <select
-                  value={formData.category}
-                  onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                >
-                  <option value="viande">🥩 Viande</option>
-                  <option value="poisson">🐟 Poisson</option>
-                  <option value="vegetation">🥗 Végétarien</option>
-                </select>
-              </div>
-
-              <div className="mb-4">
-                <label className="block text-gray-700 font-bold mb-2">
-                  Ingrédients
-                </label>
-                {formData.ingredients.map((ing, index) => (
-                  <div key={index} className="flex gap-2 mb-2">
-                    <input
-                      type="text"
-                      placeholder="Ingrédient"
-                      value={ing.name}
-                      onChange={(e) => updateIngredient(index, 'name', e.target.value)}
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    />
-                    <input
-                      type="text"
-                      placeholder="Quantité"
-                      value={ing.quantity}
-                      onChange={(e) => updateIngredient(index, 'quantity', e.target.value)}
-                      className="w-32 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500"
-                    />
-                    {formData.ingredients.length > 1 && (
-                      <button
-                        type="button"
-                        onClick={() => removeIngredient(index)}
-                        className="px-3 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600"
-                      >
-                        🗑️
-                      </button>
-                    )}
-                  </div>
-                ))}
-                <button
-                  type="button"
-                  onClick={addIngredientField}
-                  className="mt-2 text-orange-600 hover:text-orange-700 font-semibold"
-                >
-                  + Ajouter un ingrédient
-                </button>
-              </div>
-
-              <div className="flex gap-2">
-                <button
-                  type="submit"
-                  className="bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg"
-                >
-                  Enregistrer
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setShowForm(false)}
-                  className="bg-gray-300 hover:bg-gray-400 text-gray-700 font-bold py-2 px-4 rounded-lg"
-                >
-                  Annuler
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
+        <h1 className="text-3xl font-bold mb-2">
+          Bienvenue {session.user.name}!
+        </h1>
+        <p className="text-gray-600">
+          Sélectionnez vos {MAX_DISHES} plats préférés pour cette semaine
+        </p>
       </div>
 
-      {/* Section de génération de liste de courses */}
-      {selectedDishes.length > 0 && (
-        <div className="mb-8 bg-orange-50 p-4 rounded-lg border-2 border-orange-200">
-          <h3 className="font-bold text-lg mb-3">
-            📋 {selectedDishes.length} plat(s) sélectionné(s)
-          </h3>
-          <div className="flex gap-2">
-            <button
-              onClick={copyToClipboard}
-              className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg"
-            >
-              📋 Copier la liste
-            </button>
-            <button
-              onClick={shareList}
-              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg"
-            >
-              📧 Envoyer par email
-            </button>
-            <button
-              onClick={() => setSelectedDishes([])}
-              className="bg-gray-400 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded-lg"
-            >
-              ✖️ Tout déselectionner
-            </button>
+      {/* Résumé sélection */}
+      <div className="mb-8 bg-gradient-to-r from-orange-50 to-orange-100 p-6 rounded-lg border-2 border-orange-200">
+        <div className="flex justify-between items-start mb-4">
+          <div>
+            <h3 className="font-bold text-lg mb-2">
+              📋 Votre sélection ({selectedDishes.length}/{MAX_DISHES})
+            </h3>
+            {selectedDishes.length > 0 && (
+              <ul className="text-sm space-y-1">
+                {selectedDishes.map(dishId => {
+                  const dish = dishes.find(d => d.id === dishId)
+                  return dish ? (
+                    <li key={dishId} className="flex items-center gap-2">
+                      <span>{categoryLabels[dish.category].emoji}</span>
+                      <span>{dish.name}</span>
+                    </li>
+                  ) : null
+                })}
+              </ul>
+            )}
           </div>
         </div>
-      )}
 
-      {/* Liste des plats */}
-      <div>
-        <h2 className="text-2xl font-bold mb-4">Mes plats ({dishes.length})</h2>
-        {dishes.length === 0 ? (
-          <p className="text-gray-500 text-center py-8">
-            Aucun plat enregistré. Commencez par ajouter votre premier plat!
-          </p>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {dishes.map(dish => (
-              <div
-                key={dish.id}
-                className={`bg-white p-4 rounded-lg shadow-md border-2 transition ${
-                  selectedDishes.includes(dish.id) ? 'border-orange-500' : 'border-transparent'
-                }`}
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <div className="flex-1">
-                    <h3 className="font-bold text-lg">{dish.name}</h3>
-                    <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${categoryColors[dish.category]}`}>
-                      {categoryEmojis[dish.category]} {dish.category}
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => deleteDish(dish.id)}
-                    className="text-red-500 hover:text-red-700 text-xl"
-                  >
-                    🗑️
-                  </button>
-                </div>
-
-                <div className="mt-3 mb-3">
-                  <h4 className="font-semibold text-sm text-gray-700 mb-1">Ingrédients:</h4>
-                  <ul className="text-sm space-y-1">
-                    {dish.ingredients.map((ing, idx) => (
-                      <li key={idx} className="text-gray-600">
-                        • {ing.name}: {ing.quantity}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <button
-                  onClick={() => toggleDishSelection(dish.id)}
-                  className={`w-full py-2 px-4 rounded-lg font-semibold transition ${
-                    selectedDishes.includes(dish.id)
-                      ? 'bg-orange-600 text-white hover:bg-orange-700'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-                >
-                  {selectedDishes.includes(dish.id) ? '✓ Sélectionné' : 'Sélectionner'}
-                </button>
-              </div>
-            ))}
+        {/* Jour et créneau */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Jour de passage d'Emeric
+            </label>
+            <select
+              value={deliveryDay}
+              onChange={(e) => setDeliveryDay(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+            >
+              <option value="">Choisir un jour...</option>
+              {daysOfWeek.map(day => (
+                <option key={day} value={day}>{day}</option>
+              ))}
+            </select>
           </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Créneau horaire
+            </label>
+            <select
+              value={deliveryTimeSlot}
+              onChange={(e) => setDeliveryTimeSlot(e.target.value)}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+            >
+              <option value="">Choisir un créneau...</option>
+              {timeSlots.map(slot => (
+                <option key={slot} value={slot}>{slot}</option>
+              ))}
+            </select>
+          </div>
+        </div>
+
+        <button
+          onClick={handleSaveSelection}
+          disabled={saving || selectedDishes.length === 0 || !deliveryDay || !deliveryTimeSlot}
+          className="w-full md:w-auto px-6 py-3 bg-orange-600 text-white rounded-lg font-bold hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+        >
+          {saving ? 'Enregistrement...' : '💾 Enregistrer ma sélection'}
+        </button>
+
+        {currentSelection && (
+          <p className="text-sm text-gray-600 mt-2">
+            Dernière modification: {new Date(currentSelection.updated_at).toLocaleString('fr-FR')}
+          </p>
         )}
       </div>
+
+      {/* Catalogue par catégorie */}
+      {loading ? (
+        <div className="text-center py-8">Chargement des plats...</div>
+      ) : dishes.length === 0 ? (
+        <div className="text-center py-8 text-gray-500">
+          Aucun plat disponible pour le moment
+        </div>
+      ) : (
+        <div className="space-y-8">
+          {Object.entries(categoryLabels).map(([category, { name, emoji, color }]) => {
+            const categoryDishes = getDishesByCategory(category)
+            if (categoryDishes.length === 0) return null
+
+            return (
+              <div key={category}>
+                <h2 className="text-2xl font-bold mb-4 flex items-center gap-2">
+                  <span>{emoji}</span>
+                  <span>{name}</span>
+                  <span className="text-sm font-normal text-gray-500">
+                    ({categoryDishes.length} plats)
+                  </span>
+                </h2>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {categoryDishes.map(dish => {
+                    const isSelected = selectedDishes.includes(dish.id)
+                    return (
+                      <div
+                        key={dish.id}
+                        onClick={() => toggleDishSelection(dish.id)}
+                        className={`p-4 rounded-lg border-2 cursor-pointer transition ${
+                          isSelected
+                            ? 'border-orange-500 bg-orange-50 shadow-md'
+                            : 'border-gray-200 bg-white hover:border-orange-300 hover:shadow-sm'
+                        }`}
+                      >
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-semibold text-sm leading-tight flex-1">
+                            {dish.name}
+                          </h3>
+                          <div className={`ml-2 w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 ${
+                            isSelected ? 'bg-orange-600 text-white' : 'bg-gray-200'
+                          }`}>
+                            {isSelected && '✓'}
+                          </div>
+                        </div>
+                        {dish.description && (
+                          <p className="text-xs text-gray-600 line-clamp-2">
+                            {dish.description}
+                          </p>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
     </div>
   )
 }
