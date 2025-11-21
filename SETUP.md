@@ -72,13 +72,43 @@ Comptes admin par défaut (à changer en production !) :
 3. Ajoutez `NEXTAUTH_URL` = `https://votre-domaine.vercel.app`
 4. Les variables Postgres sont automatiquement injectées par Vercel
 
-### 7. (Optionnel) Configurer Resend pour les emails
+### 7. Configurer Resend pour les emails de rappel
 
 1. Créez un compte sur https://resend.com (gratuit 3000 emails/mois)
-2. Créez une API key
-3. Ajoutez dans `.env.local` et dans Vercel :
+2. Allez dans **API Keys** et créez une nouvelle clé
+3. Ajoutez la clé dans `.env.local` :
 ```env
-RESEND_API_KEY=re_xxxxx
+RESEND_API_KEY=re_xxxxxxxxxxxxx
+```
+
+4. Dans Vercel, ajoutez la variable dans **Settings** > **Environment Variables**
+
+5. **Important**: Dans Resend, vous devez vérifier votre domaine pour envoyer des emails. Pour les tests, vous pouvez utiliser leur domaine de test.
+
+### 8. Configurer le Cron Job pour les rappels automatiques
+
+1. Générez un secret pour sécuriser l'endpoint du cron :
+```bash
+openssl rand -base64 32
+```
+
+2. Ajoutez-le dans `.env.local` et dans Vercel :
+```env
+CRON_SECRET=votre-secret-généré
+```
+
+3. Le fichier `vercel.json` est déjà configuré pour exécuter le cron quotidiennement à 9h du matin (UTC)
+
+4. Une fois déployé sur Vercel, le cron s'exécutera automatiquement et enverra:
+   - **5 jours avant**: Rappel de faire les courses
+   - **2 jours avant**: Rappel de sélectionner les plats (si pas fait)
+   - **Chaque lundi**: Rappel aux utilisateurs sans sélection
+
+### 9. Tester le cron job manuellement (optionnel)
+
+Vous pouvez tester l'endpoint du cron localement :
+```bash
+curl -H "Authorization: Bearer VOTRE_CRON_SECRET" http://localhost:3000/api/cron/send-reminders
 ```
 
 ## Prochaines étapes
@@ -86,6 +116,7 @@ RESEND_API_KEY=re_xxxxx
 Une fois la configuration terminée, vous pourrez :
 - Créer des comptes clients
 - Accéder à l'interface admin (`/admin`)
-- Gérer les plats
-- Faire des sélections hebdomadaires
-- Recevoir des rappels automatiques
+- Importer les 80+ plats du catalogue
+- Gérer les plats (CRUD complet)
+- Les clients peuvent faire leurs sélections hebdomadaires (5 plats max)
+- Recevoir des rappels automatiques par email
