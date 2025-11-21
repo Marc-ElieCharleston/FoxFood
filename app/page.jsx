@@ -16,6 +16,8 @@ export default function Home() {
   const [activeCategory, setActiveCategory] = useState('viandes')
   const [searchQuery, setSearchQuery] = useState('')
   const [showSummary, setShowSummary] = useState(false)
+  const [settingsCompleted, setSettingsCompleted] = useState(true)
+  const [showSettingsBanner, setShowSettingsBanner] = useState(false)
 
   const MAX_DISHES = 5
 
@@ -24,8 +26,24 @@ export default function Home() {
     if (status === 'authenticated') {
       fetchDishes()
       fetchCurrentSelection()
+      checkSettings()
     }
   }, [status])
+
+  const checkSettings = async () => {
+    try {
+      const response = await fetch('/api/settings')
+      if (response.ok) {
+        const data = await response.json()
+        if (!data || !data.settings_completed) {
+          setSettingsCompleted(false)
+          setShowSettingsBanner(true)
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors de la vérification des paramètres:', error)
+    }
+  }
 
   const fetchDishes = async () => {
     try {
@@ -151,6 +169,35 @@ export default function Home() {
 
   return (
     <div className="max-w-4xl mx-auto pb-24">
+      {/* Banner de configuration des paramètres */}
+      {showSettingsBanner && (
+        <div className="mb-6 bg-orange-100 border-l-4 border-orange-600 p-4 rounded-lg">
+          <div className="flex items-start gap-3">
+            <span className="text-2xl">⚙️</span>
+            <div className="flex-1">
+              <h3 className="font-bold text-orange-900 mb-1">Configurez vos paramètres</h3>
+              <p className="text-sm text-orange-800 mb-3">
+                Pour profiter pleinement du service, veuillez configurer vos créneaux de passage et vos préférences de rappel.
+              </p>
+              <div className="flex gap-2">
+                <a
+                  href="/parametres"
+                  className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-semibold hover:bg-orange-700 transition"
+                >
+                  Configurer maintenant
+                </a>
+                <button
+                  onClick={() => setShowSettingsBanner(false)}
+                  className="px-4 py-2 bg-white text-orange-800 rounded-lg text-sm font-semibold hover:bg-orange-50 transition"
+                >
+                  Plus tard
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Bouton flottant de sélection */}
       {selectedDishes.length > 0 && (
         <button

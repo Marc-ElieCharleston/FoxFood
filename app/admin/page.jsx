@@ -11,6 +11,7 @@ export default function AdminPage() {
   const [dishes, setDishes] = useState([])
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
+  const [searchQuery, setSearchQuery] = useState('')
   const [showForm, setShowForm] = useState(false)
   const [editingDish, setEditingDish] = useState(null)
   const [importing, setImporting] = useState(false)
@@ -141,8 +142,15 @@ export default function AdminPage() {
   }
 
   const filteredDishes = dishes.filter(dish => {
-    if (filter === 'all') return true
-    return dish.category === filter
+    // Filtre par catégorie
+    const matchesCategory = filter === 'all' || dish.category === filter
+
+    // Filtre par recherche
+    const matchesSearch = !searchQuery ||
+      dish.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (dish.description && dish.description.toLowerCase().includes(searchQuery.toLowerCase()))
+
+    return matchesCategory && matchesSearch
   })
 
   const categoryLabels = {
@@ -210,6 +218,17 @@ export default function AdminPage() {
               <span className="sm:hidden">{categoryLabels[cat][0]} {dishes.filter(d => d.category === cat).length}</span>
             </button>
           ))}
+        </div>
+
+        {/* Barre de recherche */}
+        <div className="w-full">
+          <input
+            type="text"
+            placeholder="🔍 Rechercher un plat..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+          />
         </div>
       </div>
 

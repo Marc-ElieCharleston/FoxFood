@@ -57,6 +57,16 @@ export default function Header() {
                   <p className="text-xs text-orange-100">{session.user.email}</p>
                 </div>
 
+                {/* Bouton Paramètres */}
+                <Link
+                  href="/parametres"
+                  className="px-3 py-1.5 md:px-4 md:py-2 bg-orange-500 text-white rounded-lg text-sm font-semibold hover:bg-orange-600 transition"
+                  title="Paramètres"
+                >
+                  <span className="hidden sm:inline">Paramètres</span>
+                  <span className="sm:hidden">⚙️</span>
+                </Link>
+
                 {/* Bouton Admin */}
                 {session.user.role === 'admin' && (
                   <Link
