@@ -63,7 +63,7 @@ export default function DiagnosticPage() {
       // Test 4: API par catégorie
       try {
         const response = await fetch('/api/dishes?category=viandes')
-        diagnostics.apiVi andes = {
+        diagnostics.apiViandes = {
           status: response.status,
           ok: response.ok
         }
