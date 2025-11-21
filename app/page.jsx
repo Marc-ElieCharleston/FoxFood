@@ -31,9 +31,11 @@ export default function Home() {
       setLoading(true)
       const response = await fetch('/api/dishes?active=true')
       const data = await response.json()
-      setDishes(data)
+      // S'assurer que data est bien un array
+      setDishes(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error('Erreur lors du chargement des plats:', error)
+      setDishes([])
     } finally {
       setLoading(false)
     }
