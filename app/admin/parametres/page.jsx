@@ -14,6 +14,7 @@ export default function AdminSettingsPage() {
   const [settings, setSettings] = useState({
     notification_email: '',
     notification_phone: '',
+    notification_phone_secondary: '',
     send_email: true,
     send_sms: false,
     notify_on_selection: true,
@@ -124,7 +125,7 @@ export default function AdminSettingsPage() {
         </button>
         <button
           onClick={() => router.push('/admin/parametres')}
-          className="px-4 py-2 bg-orange-600 text-white rounded-lg font-semibold text-sm"
+          className="px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold text-sm"
         >
           Paramètres
         </button>
@@ -144,22 +145,38 @@ export default function AdminSettingsPage() {
                 type="email"
                 value={settings.notification_email}
                 onChange={(e) => setSettings({ ...settings, notification_email: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 placeholder={session?.user?.email}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Numéro de téléphone {settings.send_sms && '*'}
+                Numéro de téléphone principal {settings.send_sms && '*'}
               </label>
               <input
                 type="tel"
                 value={settings.notification_phone}
                 onChange={(e) => setSettings({ ...settings, notification_phone: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 placeholder="06 12 34 56 78"
               />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Numéro de téléphone secondaire <span className="text-gray-400 font-normal">(optionnel)</span>
+              </label>
+              <input
+                type="tel"
+                value={settings.notification_phone_secondary}
+                onChange={(e) => setSettings({ ...settings, notification_phone_secondary: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                placeholder="06 98 76 54 32"
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Si renseigné, les deux numéros recevront les notifications SMS
+              </p>
             </div>
           </div>
         </div>
@@ -174,7 +191,7 @@ export default function AdminSettingsPage() {
                 type="checkbox"
                 checked={settings.send_email}
                 onChange={(e) => setSettings({ ...settings, send_email: e.target.checked })}
-                className="w-5 h-5 text-orange-600"
+                className="w-5 h-5 text-primary-600"
               />
               <span className="text-sm font-medium">Recevoir les notifications par email</span>
             </label>
@@ -184,7 +201,7 @@ export default function AdminSettingsPage() {
                 type="checkbox"
                 checked={settings.send_sms}
                 onChange={(e) => setSettings({ ...settings, send_sms: e.target.checked })}
-                className="w-5 h-5 text-orange-600"
+                className="w-5 h-5 text-primary-600"
               />
               <span className="text-sm font-medium">Recevoir les notifications par SMS</span>
             </label>
@@ -201,7 +218,7 @@ export default function AdminSettingsPage() {
                 type="checkbox"
                 checked={settings.notify_on_selection}
                 onChange={(e) => setSettings({ ...settings, notify_on_selection: e.target.checked })}
-                className="mt-1 w-4 h-4 text-orange-600"
+                className="mt-1 w-4 h-4 text-primary-600"
               />
               <div>
                 <span className="text-sm font-medium text-gray-700">
@@ -218,7 +235,7 @@ export default function AdminSettingsPage() {
                 type="checkbox"
                 checked={settings.notify_on_missing_selection}
                 onChange={(e) => setSettings({ ...settings, notify_on_missing_selection: e.target.checked })}
-                className="mt-1 w-4 h-4 text-orange-600"
+                className="mt-1 w-4 h-4 text-primary-600"
               />
               <div>
                 <span className="text-sm font-medium text-gray-700">
@@ -235,7 +252,7 @@ export default function AdminSettingsPage() {
                 type="checkbox"
                 checked={settings.notify_on_custom_dish}
                 onChange={(e) => setSettings({ ...settings, notify_on_custom_dish: e.target.checked })}
-                className="mt-1 w-4 h-4 text-orange-600"
+                className="mt-1 w-4 h-4 text-primary-600"
               />
               <div>
                 <span className="text-sm font-medium text-gray-700">
@@ -252,7 +269,7 @@ export default function AdminSettingsPage() {
                 type="checkbox"
                 checked={settings.daily_summary}
                 onChange={(e) => setSettings({ ...settings, daily_summary: e.target.checked })}
-                className="mt-1 w-4 h-4 text-orange-600"
+                className="mt-1 w-4 h-4 text-primary-600"
               />
               <div>
                 <span className="text-sm font-medium text-gray-700">
@@ -277,7 +294,7 @@ export default function AdminSettingsPage() {
             <select
               value={settings.auto_reminder_days_before}
               onChange={(e) => setSettings({ ...settings, auto_reminder_days_before: parseInt(e.target.value) })}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
             >
               <option value="1">1 jour avant le passage</option>
               <option value="2">2 jours avant le passage</option>
@@ -297,7 +314,7 @@ export default function AdminSettingsPage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex-1 py-3 bg-orange-600 text-white rounded-lg font-bold hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 py-3 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? 'Enregistrement...' : 'Enregistrer'}
           </button>

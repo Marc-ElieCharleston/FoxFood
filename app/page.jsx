@@ -242,24 +242,24 @@ export default function Home() {
     <div className="max-w-4xl mx-auto pb-24">
       {/* Banner de configuration des paramètres */}
       {showSettingsBanner && (
-        <div className="mb-6 bg-orange-100 border-l-4 border-orange-600 p-4 rounded-lg">
+        <div className="mb-6 bg-primary-100 border-l-4 border-primary-600 p-4 rounded-lg">
           <div className="flex items-start gap-3">
             <span className="text-2xl">⚙️</span>
             <div className="flex-1">
-              <h3 className="font-bold text-orange-900 mb-1">Configurez vos paramètres</h3>
-              <p className="text-sm text-orange-800 mb-3">
+              <h3 className="font-bold text-primary-900 mb-1">Configurez vos paramètres</h3>
+              <p className="text-sm text-primary-800 mb-3">
                 Pour profiter pleinement du service, veuillez configurer vos créneaux de passage et vos préférences de rappel.
               </p>
               <div className="flex gap-2">
                 <a
                   href="/parametres"
-                  className="px-4 py-2 bg-orange-600 text-white rounded-lg text-sm font-semibold hover:bg-orange-700 transition"
+                  className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-semibold hover:bg-primary-700 transition"
                 >
                   Configurer maintenant
                 </a>
                 <button
                   onClick={() => setShowSettingsBanner(false)}
-                  className="px-4 py-2 bg-white text-orange-800 rounded-lg text-sm font-semibold hover:bg-orange-50 transition"
+                  className="px-4 py-2 bg-white text-primary-800 rounded-lg text-sm font-semibold hover:bg-primary-50 transition"
                 >
                   Plus tard
                 </button>
@@ -273,7 +273,7 @@ export default function Home() {
       {selectedDishes.length > 0 && (
         <button
           onClick={() => setShowSummary(!showSummary)}
-          className="fixed bottom-4 right-4 z-50 bg-orange-600 text-white px-6 py-4 rounded-full shadow-lg font-bold flex items-center gap-2 hover:bg-orange-700 transition"
+          className="fixed bottom-4 right-4 z-50 bg-primary-600 text-white px-6 py-4 rounded-full shadow-lg font-bold flex items-center gap-2 hover:bg-primary-700 transition"
         >
           <span className="text-xl">🛒</span>
           <span>{selectedDishes.length}/{MAX_DISHES}</span>
@@ -322,7 +322,7 @@ export default function Home() {
                 <select
                   value={deliveryDay}
                   onChange={(e) => setDeliveryDay(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 >
                   <option value="">Choisir...</option>
                   {daysOfWeek.map(day => (
@@ -338,7 +338,7 @@ export default function Home() {
                 <select
                   value={deliveryTimeSlot}
                   onChange={(e) => setDeliveryTimeSlot(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 >
                   <option value="">Choisir...</option>
                   {timeSlots.map(slot => (
@@ -351,7 +351,7 @@ export default function Home() {
             <button
               onClick={handleSaveSelection}
               disabled={saving || selectedDishes.length === 0 || !deliveryDay || !deliveryTimeSlot}
-              className="w-full py-3 bg-orange-600 text-white rounded-lg font-bold hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full py-3 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {saving ? 'Enregistrement...' : '💾 Enregistrer'}
             </button>
@@ -403,7 +403,7 @@ export default function Home() {
           placeholder="Rechercher un plat..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
         />
       </div>
 
@@ -435,13 +435,13 @@ export default function Home() {
                 onClick={() => toggleDishSelection(dish.id)}
                 className={`p-2.5 rounded-lg border-2 cursor-pointer transition ${
                   isSelected
-                    ? 'border-orange-500 bg-orange-50'
-                    : 'border-gray-200 bg-white hover:border-orange-300'
+                    ? 'border-primary-500 bg-primary-50'
+                    : 'border-gray-200 bg-white hover:border-primary-300'
                 }`}
               >
                 <div className="flex items-center gap-2.5">
                   <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs ${
-                    isSelected ? 'bg-orange-600 text-white' : 'bg-gray-200'
+                    isSelected ? 'bg-primary-600 text-white' : 'bg-gray-200'
                   }`}>
                     {isSelected && '✓'}
                   </div>

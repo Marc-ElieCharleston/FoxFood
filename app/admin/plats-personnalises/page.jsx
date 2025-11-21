@@ -157,7 +157,7 @@ export default function AdminCustomDishesPage() {
           </p>
         </div>
         {pendingCount > 0 && (
-          <div className="bg-orange-500 text-white px-4 py-2 rounded-full font-bold">
+          <div className="bg-primary-500 text-white px-4 py-2 rounded-full font-bold">
             {pendingCount} en attente
           </div>
         )}
@@ -173,7 +173,7 @@ export default function AdminCustomDishesPage() {
         </button>
         <button
           onClick={() => router.push('/admin/plats-personnalises')}
-          className="px-4 py-2 bg-orange-600 text-white rounded-lg font-semibold text-sm"
+          className="px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold text-sm"
         >
           Plats personnalisés
         </button>
@@ -198,7 +198,7 @@ export default function AdminCustomDishesPage() {
             onClick={() => setFilter(value)}
             className={`px-4 py-2 rounded-lg font-semibold transition ${
               filter === value
-                ? 'bg-orange-600 text-white'
+                ? 'bg-primary-600 text-white'
                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
             }`}
           >
@@ -323,7 +323,7 @@ export default function AdminCustomDishesPage() {
                 onChange={(e) => setAdminNotes(e.target.value)}
                 placeholder="Ajoutez des notes pour le client..."
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
               />
             </div>
 

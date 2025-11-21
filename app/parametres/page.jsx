@@ -15,6 +15,7 @@ export default function SettingsPage() {
     delivery_day: '',
     delivery_time_slot: '',
     notification_phone: '',
+    notification_phone_secondary: '',
     notification_email: '',
     receive_notifications: true
   })
@@ -49,6 +50,7 @@ export default function SettingsPage() {
             delivery_day: data.delivery_day || '',
             delivery_time_slot: data.delivery_time_slot || '',
             notification_phone: data.notification_phone || '',
+            notification_phone_secondary: data.notification_phone_secondary || '',
             notification_email: data.notification_email || session?.user?.email || '',
             receive_notifications: data.receive_notifications !== false
           })
@@ -210,7 +212,7 @@ export default function SettingsPage() {
               <select
                 value={settings.delivery_day}
                 onChange={(e) => setSettings({ ...settings, delivery_day: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 required
               >
                 <option value="">Choisir un jour...</option>
@@ -233,7 +235,7 @@ export default function SettingsPage() {
                       value={slot.value}
                       checked={settings.delivery_time_slot === slot.value}
                       onChange={(e) => setSettings({ ...settings, delivery_time_slot: e.target.value })}
-                      className="w-4 h-4 text-orange-600"
+                      className="w-4 h-4 text-primary-600"
                     />
                     <span className="text-sm">{slot.label}</span>
                   </label>
@@ -258,7 +260,7 @@ export default function SettingsPage() {
                   type="checkbox"
                   checked={reminders.day5.enabled}
                   onChange={() => handleReminderToggle('day5')}
-                  className="w-5 h-5 text-orange-600"
+                  className="w-5 h-5 text-primary-600"
                 />
                 <span className="text-sm font-semibold">📅 5 jours avant le passage</span>
               </label>
@@ -269,7 +271,7 @@ export default function SettingsPage() {
                       type="checkbox"
                       checked={reminders.day5.email}
                       onChange={(e) => handleReminderMethodChange('day5', 'email', e.target.checked)}
-                      className="w-4 h-4 text-orange-600"
+                      className="w-4 h-4 text-primary-600"
                     />
                     <span className="text-xs">📧 Par email</span>
                   </label>
@@ -278,7 +280,7 @@ export default function SettingsPage() {
                       type="checkbox"
                       checked={reminders.day5.sms}
                       onChange={(e) => handleReminderMethodChange('day5', 'sms', e.target.checked)}
-                      className="w-4 h-4 text-orange-600"
+                      className="w-4 h-4 text-primary-600"
                     />
                     <span className="text-xs">📱 Par SMS</span>
                   </label>
@@ -293,7 +295,7 @@ export default function SettingsPage() {
                   type="checkbox"
                   checked={reminders.day3.enabled}
                   onChange={() => handleReminderToggle('day3')}
-                  className="w-5 h-5 text-orange-600"
+                  className="w-5 h-5 text-primary-600"
                 />
                 <span className="text-sm font-semibold">📅 3 jours avant le passage</span>
               </label>
@@ -304,7 +306,7 @@ export default function SettingsPage() {
                       type="checkbox"
                       checked={reminders.day3.email}
                       onChange={(e) => handleReminderMethodChange('day3', 'email', e.target.checked)}
-                      className="w-4 h-4 text-orange-600"
+                      className="w-4 h-4 text-primary-600"
                     />
                     <span className="text-xs">📧 Par email</span>
                   </label>
@@ -313,7 +315,7 @@ export default function SettingsPage() {
                       type="checkbox"
                       checked={reminders.day3.sms}
                       onChange={(e) => handleReminderMethodChange('day3', 'sms', e.target.checked)}
-                      className="w-4 h-4 text-orange-600"
+                      className="w-4 h-4 text-primary-600"
                     />
                     <span className="text-xs">📱 Par SMS</span>
                   </label>
@@ -328,7 +330,7 @@ export default function SettingsPage() {
                   type="checkbox"
                   checked={reminders.day1.enabled}
                   onChange={() => handleReminderToggle('day1')}
-                  className="w-5 h-5 text-orange-600"
+                  className="w-5 h-5 text-primary-600"
                 />
                 <span className="text-sm font-semibold">📅 1 jour avant le passage (rappel urgent)</span>
               </label>
@@ -339,7 +341,7 @@ export default function SettingsPage() {
                       type="checkbox"
                       checked={reminders.day1.email}
                       onChange={(e) => handleReminderMethodChange('day1', 'email', e.target.checked)}
-                      className="w-4 h-4 text-orange-600"
+                      className="w-4 h-4 text-primary-600"
                     />
                     <span className="text-xs">📧 Par email</span>
                   </label>
@@ -348,7 +350,7 @@ export default function SettingsPage() {
                       type="checkbox"
                       checked={reminders.day1.sms}
                       onChange={(e) => handleReminderMethodChange('day1', 'sms', e.target.checked)}
-                      className="w-4 h-4 text-orange-600"
+                      className="w-4 h-4 text-primary-600"
                     />
                     <span className="text-xs">📱 Par SMS</span>
                   </label>
@@ -366,7 +368,7 @@ export default function SettingsPage() {
                   type="email"
                   value={settings.notification_email}
                   onChange={(e) => setSettings({ ...settings, notification_email: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm"
                   placeholder={session?.user?.email}
                 />
                 <p className="text-xs text-gray-500 mt-1">
@@ -376,17 +378,33 @@ export default function SettingsPage() {
 
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Numéro de mobile {Object.values(reminders).some(r => r.enabled && r.sms) && '*'}
+                  Numéro de mobile principal {Object.values(reminders).some(r => r.enabled && r.sms) && '*'}
                 </label>
                 <input
                   type="tel"
                   value={settings.notification_phone}
                   onChange={(e) => setSettings({ ...settings, notification_phone: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 text-sm"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm"
                   placeholder="06 12 34 56 78"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  Utilisé pour les rappels par SMS
+                  Numéro principal pour les rappels par SMS
+                </p>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Numéro de mobile secondaire <span className="text-gray-400">(optionnel - pour couples)</span>
+                </label>
+                <input
+                  type="tel"
+                  value={settings.notification_phone_secondary}
+                  onChange={(e) => setSettings({ ...settings, notification_phone_secondary: e.target.value })}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm"
+                  placeholder="06 98 76 54 32"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  Si renseigné, les deux numéros recevront les SMS
                 </p>
               </div>
             </div>
@@ -402,7 +420,7 @@ export default function SettingsPage() {
               type="checkbox"
               checked={settings.receive_notifications}
               onChange={(e) => setSettings({ ...settings, receive_notifications: e.target.checked })}
-              className="mt-1 w-4 h-4 text-orange-600"
+              className="mt-1 w-4 h-4 text-primary-600"
             />
             <div>
               <span className="text-sm font-medium text-gray-700">
@@ -421,7 +439,7 @@ export default function SettingsPage() {
           <button
             type="submit"
             disabled={saving}
-            className="flex-1 py-3 bg-orange-600 text-white rounded-lg font-bold hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex-1 py-3 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {saving ? 'Enregistrement...' : '💾 Enregistrer'}
           </button>

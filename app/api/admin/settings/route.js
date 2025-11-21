@@ -28,6 +28,7 @@ export async function GET(request) {
       SELECT
         notification_email,
         notification_phone,
+        notification_phone_secondary,
         send_email,
         send_sms,
         notify_on_selection,
@@ -45,6 +46,7 @@ export async function GET(request) {
       return NextResponse.json({
         notification_email: session.user.email || '',
         notification_phone: '',
+        notification_phone_secondary: '',
         send_email: true,
         send_sms: false,
         notify_on_selection: true,
@@ -87,6 +89,7 @@ export async function POST(request) {
     const {
       notification_email,
       notification_phone,
+      notification_phone_secondary,
       send_email,
       send_sms,
       notify_on_selection,
@@ -133,6 +136,7 @@ export async function POST(request) {
         user_id,
         notification_email,
         notification_phone,
+        notification_phone_secondary,
         send_email,
         send_sms,
         notify_on_selection,
@@ -145,6 +149,7 @@ export async function POST(request) {
         ${userId},
         ${notification_email || null},
         ${notification_phone || null},
+        ${notification_phone_secondary || null},
         ${send_email !== false},
         ${send_sms === true},
         ${notify_on_selection !== false},
@@ -157,6 +162,7 @@ export async function POST(request) {
       DO UPDATE SET
         notification_email = EXCLUDED.notification_email,
         notification_phone = EXCLUDED.notification_phone,
+        notification_phone_secondary = EXCLUDED.notification_phone_secondary,
         send_email = EXCLUDED.send_email,
         send_sms = EXCLUDED.send_sms,
         notify_on_selection = EXCLUDED.notify_on_selection,

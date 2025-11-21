@@ -174,7 +174,7 @@ export default function AdminPage() {
       <div className="mb-6 flex gap-2 flex-wrap">
         <button
           onClick={() => router.push('/admin')}
-          className="px-4 py-2 bg-orange-600 text-white rounded-lg font-semibold text-sm"
+          className="px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold text-sm"
         >
           Plats du catalogue
         </button>
@@ -202,7 +202,7 @@ export default function AdminPage() {
               setFormData({ name: '', category: 'viandes', description: '', active: true })
               setShowForm(true)
             }}
-            className="px-3 py-2 md:px-4 md:py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-semibold text-sm"
+            className="px-3 py-2 md:px-4 md:py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-semibold text-sm"
           >
             <span className="hidden sm:inline">➕ Nouveau plat</span>
             <span className="sm:hidden">➕ Nouveau</span>
@@ -223,7 +223,7 @@ export default function AdminPage() {
         <div className="flex gap-2 flex-wrap">
           <button
             onClick={() => setFilter('all')}
-            className={`px-3 py-1.5 rounded-lg font-semibold text-sm ${filter === 'all' ? 'bg-orange-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+            className={`px-3 py-1.5 rounded-lg font-semibold text-sm ${filter === 'all' ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-700'}`}
           >
             <span className="hidden sm:inline">Tous ({dishes.length})</span>
             <span className="sm:hidden">Tous {dishes.length}</span>
@@ -232,7 +232,7 @@ export default function AdminPage() {
             <button
               key={cat}
               onClick={() => setFilter(cat)}
-              className={`px-3 py-1.5 rounded-lg font-semibold text-sm ${filter === cat ? 'bg-orange-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+              className={`px-3 py-1.5 rounded-lg font-semibold text-sm ${filter === cat ? 'bg-primary-600 text-white' : 'bg-gray-200 text-gray-700'}`}
             >
               {/* Tablette/Desktop: texte complet */}
               <span className="hidden sm:inline">{categoryLabels[cat]} ({dishes.filter(d => d.category === cat).length})</span>
@@ -249,7 +249,7 @@ export default function AdminPage() {
             placeholder="🔍 Rechercher un plat..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-sm"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent text-sm"
           />
         </div>
       </div>
@@ -270,7 +270,7 @@ export default function AdminPage() {
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                   required
                 />
               </div>
@@ -282,7 +282,7 @@ export default function AdminPage() {
                 <select
                   value={formData.category}
                   onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 >
                   <option value="viandes">Viandes</option>
                   <option value="poissons">Poissons</option>
@@ -298,7 +298,7 @@ export default function AdminPage() {
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 rows={3}
               />
             </div>
@@ -320,7 +320,7 @@ export default function AdminPage() {
             <div className="flex gap-2">
               <button
                 type="submit"
-                className="px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 font-semibold"
+                className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 font-semibold"
               >
                 {editingDish ? 'Modifier' : 'Créer'}
               </button>
@@ -394,62 +394,80 @@ export default function AdminPage() {
             ))}
           </div>
 
-          {/* Vue desktop - Table */}
-          <div className="hidden lg:block bg-white rounded-lg shadow-md overflow-hidden">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-                <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Nom
+          {/* Vue desktop - Table améliorée */}
+          <div className="hidden lg:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+            <table className="min-w-full">
+              <thead>
+                <tr className="bg-gradient-to-r from-primary-50 to-primary-100 border-b border-primary-200">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-primary-700 uppercase tracking-wider">
+                    Nom du plat
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-primary-700 uppercase tracking-wider">
                     Catégorie
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-xs font-semibold text-primary-700 uppercase tracking-wider">
                     Description
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-center text-xs font-semibold text-primary-700 uppercase tracking-wider">
                     Statut
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-right text-xs font-semibold text-primary-700 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-                {filteredDishes.map(dish => (
-                  <tr key={dish.id} className={!dish.active ? 'opacity-50' : ''}>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                      {dish.name}
+              <tbody className="divide-y divide-gray-100">
+                {filteredDishes.map((dish, index) => (
+                  <tr
+                    key={dish.id}
+                    className={`${!dish.active ? 'opacity-40' : ''} ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-primary-50 transition-colors`}
+                  >
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-2">
+                        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${dish.active ? 'bg-success-500' : 'bg-gray-300'}`}></div>
+                        <span className="text-sm font-medium text-gray-900">{dish.name}</span>
+                      </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      <span className={`inline-block px-2 py-1 rounded text-xs font-semibold ${
-                        dish.category === 'viandes' ? 'bg-red-100 text-red-800' :
-                        dish.category === 'poissons' ? 'bg-blue-100 text-blue-800' :
-                        'bg-green-100 text-green-800'
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                        dish.category === 'viandes' ? 'bg-red-100 text-red-700 border border-red-200' :
+                        dish.category === 'poissons' ? 'bg-blue-100 text-blue-700 border border-blue-200' :
+                        'bg-green-100 text-green-700 border border-green-200'
                       }`}>
                         {categoryLabels[dish.category]}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-500 max-w-md truncate">
-                      {dish.description || '-'}
+                    <td className="px-6 py-4">
+                      <p className="text-sm text-gray-600 max-w-md truncate">
+                        {dish.description || <span className="text-gray-400 italic">Aucune description</span>}
+                      </p>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {dish.active ? '✅ Actif' : '❌ Inactif'}
+                    <td className="px-6 py-4 text-center">
+                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                        dish.active
+                          ? 'bg-success-100 text-success-700 border border-success-200'
+                          : 'bg-gray-100 text-gray-600 border border-gray-200'
+                      }`}>
+                        {dish.active ? '✓ Actif' : '○ Inactif'}
+                      </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                      <button
-                        onClick={() => handleEdit(dish)}
-                        className="text-blue-600 hover:text-blue-900 mr-3"
-                      >
-                        Modifier
-                      </button>
-                      <button
-                        onClick={() => handleDelete(dish.id)}
-                        className="text-red-600 hover:text-red-900"
-                      >
-                        Supprimer
-                      </button>
+                    <td className="px-6 py-4 text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleEdit(dish)}
+                          className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-secondary-600 bg-secondary-50 rounded-md hover:bg-secondary-100 border border-secondary-200 transition-colors"
+                        >
+                          <span className="mr-1">✏️</span>
+                          Modifier
+                        </button>
+                        <button
+                          onClick={() => handleDelete(dish.id)}
+                          className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-danger-600 bg-danger-50 rounded-md hover:bg-danger-100 border border-danger-200 transition-colors"
+                        >
+                          <span className="mr-1">🗑️</span>
+                          Supprimer
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

@@ -22,6 +22,7 @@ export async function GET(request) {
         delivery_day,
         delivery_time_slot,
         notification_phone,
+        notification_phone_secondary,
         notification_email,
         receive_notifications,
         settings_completed
@@ -66,6 +67,7 @@ export async function POST(request) {
       delivery_day,
       delivery_time_slot,
       notification_phone,
+      notification_phone_secondary,
       notification_email,
       receive_notifications,
       reminders
@@ -104,6 +106,7 @@ export async function POST(request) {
         delivery_day = ${delivery_day},
         delivery_time_slot = ${delivery_time_slot},
         notification_phone = ${notification_phone || null},
+        notification_phone_secondary = ${notification_phone_secondary || null},
         notification_email = ${notification_email || null},
         receive_notifications = ${receive_notifications !== false},
         settings_completed = true,
