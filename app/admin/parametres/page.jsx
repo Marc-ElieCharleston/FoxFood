@@ -115,13 +115,19 @@ export default function AdminSettingsPage() {
           onClick={() => router.push('/admin')}
           className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm"
         >
-          Plats du catalogue
+          Catalogue
         </button>
         <button
           onClick={() => router.push('/admin/plats-personnalises')}
           className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm"
         >
-          Plats personnalisés
+          Plats perso
+        </button>
+        <button
+          onClick={() => router.push('/admin/utilisateurs')}
+          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm"
+        >
+          Utilisateurs
         </button>
         <button
           onClick={() => router.push('/admin/parametres')}

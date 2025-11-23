@@ -60,7 +60,7 @@ export default function Header() {
                 {/* Bouton Paramètres */}
                 <Link
                   href="/parametres"
-                  className="px-3 py-1.5 md:px-4 md:py-2 bg-primary-500 text-white rounded-lg text-sm font-semibold hover:bg-primary-600 transition"
+                  className="px-3 py-1.5 md:px-4 md:py-2 bg-white/20 text-white rounded-lg text-sm font-semibold hover:bg-white/30 transition backdrop-blur-sm border border-white/30"
                   title="Paramètres"
                 >
                   <span className="hidden sm:inline">Paramètres</span>
@@ -71,7 +71,7 @@ export default function Header() {
                 {session.user.role === 'admin' && (
                   <Link
                     href="/admin"
-                    className="px-3 py-1.5 md:px-4 md:py-2 bg-secondary-600 text-white rounded-lg text-sm font-semibold hover:bg-secondary-700 transition"
+                    className="px-3 py-1.5 md:px-4 md:py-2 bg-white text-primary-600 rounded-lg text-sm font-semibold hover:bg-primary-50 transition"
                   >
                     <span className="hidden sm:inline">Admin</span>
                     <span className="sm:hidden">👤</span>
