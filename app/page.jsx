@@ -2,22 +2,33 @@
 
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
+import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import OnboardingModal from '@/components/OnboardingModal'
 
 export default function Home() {
+  const router = useRouter()
   const { data: session, status } = useSession()
   const [dishes, setDishes] = useState([])
   const [loading, setLoading] = useState(true)
-  const [selectedDishes, setSelectedDishes] = useState([])
-  const [deliveryDay, setDeliveryDay] = useState('')
-  const [deliveryTimeSlot, setDeliveryTimeSlot] = useState('')
+  // Multi-semaines: état pour 4 semaines max
+  const [weeklySelections, setWeeklySelections] = useState({
+    week0: { dishes: [], variants: {} },
+    week1: { dishes: [], variants: {} },
+    week2: { dishes: [], variants: {} },
+    week3: { dishes: [], variants: {} }
+  })
+  const [weekDates, setWeekDates] = useState([])
+  const [activeWeek, setActiveWeek] = useState(0)
+  const [showNextWeekModal, setShowNextWeekModal] = useState(false)
+  const [pendingDishForNextWeek, setPendingDishForNextWeek] = useState(null)
   const [saving, setSaving] = useState(false)
-  const [currentSelection, setCurrentSelection] = useState(null)
   const [activeCategory, setActiveCategory] = useState('viandes')
   const [searchQuery, setSearchQuery] = useState('')
   const [showSummary, setShowSummary] = useState(false)
   const [settingsCompleted, setSettingsCompleted] = useState(true)
   const [showSettingsBanner, setShowSettingsBanner] = useState(false)
+  const [showOnboardingModal, setShowOnboardingModal] = useState(false)
   const [showCustomDishModal, setShowCustomDishModal] = useState(false)
   const [customDishFormType, setCustomDishFormType] = useState('simple') // 'simple' ou 'detailed'
   const [customDishForm, setCustomDishForm] = useState({
@@ -27,17 +38,189 @@ export default function Home() {
   })
   const [newIngredient, setNewIngredient] = useState('')
   const [submittingCustomDish, setSubmittingCustomDish] = useState(false)
+  const [selectedSeasons, setSelectedSeasons] = useState([]) // tableau des saisons sélectionnées (vide = saison actuelle)
+  const [dietaryTags, setDietaryTags] = useState([])
+  const [showVariantModal, setShowVariantModal] = useState(false)
+  const [selectedDishForVariant, setSelectedDishForVariant] = useState(null)
+  const [userDietaryPreferences, setUserDietaryPreferences] = useState([])
+  const [userAvoidedIngredients, setUserAvoidedIngredients] = useState([])
+  const [favorites, setFavorites] = useState([])
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
 
-  const MAX_DISHES = 5
+  const MAX_DISHES_PER_WEEK = 5
+  const MAX_WEEKS = 4
+
+  // Getters pour la semaine active
+  const selectedDishes = weeklySelections[`week${activeWeek}`]?.dishes || []
+  const selectedVariants = weeklySelections[`week${activeWeek}`]?.variants || {}
+
+  // Compter le total de plats sélectionnés sur toutes les semaines
+  const getTotalDishesCount = () => {
+    return Object.values(weeklySelections).reduce((total, week) => {
+      return total + (week.dishes?.length || 0)
+    }, 0)
+  }
+
+  // Compter le nombre de semaines avec des plats
+  const getActiveWeeksCount = () => {
+    return Object.values(weeklySelections).filter(week => week.dishes?.length > 0).length
+  }
+
+  // Trouver la première semaine non complète
+  const getFirstIncompleteWeek = () => {
+    for (let i = 0; i < MAX_WEEKS; i++) {
+      const weekDishes = weeklySelections[`week${i}`]?.dishes || []
+      if (weekDishes.length < MAX_DISHES_PER_WEEK) {
+        return i
+      }
+    }
+    return -1 // Toutes les semaines sont complètes
+  }
+
+  // Vérifier si on peut ajouter une nouvelle semaine
+  const canAddNextWeek = () => {
+    const currentWeekDishes = weeklySelections[`week${activeWeek}`]?.dishes || []
+    return currentWeekDishes.length >= MAX_DISHES_PER_WEEK && activeWeek < MAX_WEEKS - 1
+  }
+
+  // Vérifier si un plat est en favori
+  const isFavorite = (dishId) => favorites.includes(dishId)
+
+  // Toggle favori
+  const toggleFavorite = async (dishId, e) => {
+    e.stopPropagation() // Ne pas déclencher la sélection du plat
+
+    try {
+      if (isFavorite(dishId)) {
+        // Retirer des favoris
+        const response = await fetch(`/api/favorites?dishId=${dishId}`, {
+          method: 'DELETE'
+        })
+        if (response.ok) {
+          setFavorites(prev => prev.filter(id => id !== dishId))
+          toast.success('Retiré des favoris')
+        }
+      } else {
+        // Ajouter aux favoris
+        const response = await fetch('/api/favorites', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ dishId })
+        })
+        if (response.ok) {
+          setFavorites(prev => [...prev, dishId])
+          toast.success('Ajouté aux favoris')
+        }
+      }
+    } catch (error) {
+      console.error('Erreur favori:', error)
+      toast.error('Erreur lors de la mise à jour')
+    }
+  }
+
+  // Charger les favoris
+  const fetchFavorites = async () => {
+    try {
+      const response = await fetch('/api/favorites')
+      if (response.ok) {
+        const data = await response.json()
+        setFavorites(Array.isArray(data) ? data : [])
+      }
+    } catch (error) {
+      console.error('Erreur chargement favoris:', error)
+    }
+  }
+
+  // Fonction pour obtenir la saison actuelle
+  const getCurrentSeason = () => {
+    const month = new Date().getMonth() + 1 // 1-12
+    if (month >= 3 && month <= 5) return 'printemps'
+    if (month >= 6 && month <= 8) return 'ete'
+    if (month >= 9 && month <= 11) return 'automne'
+    return 'hiver'
+  }
+
+  const seasonEmojis = {
+    printemps: '🌸',
+    ete: '☀️',
+    automne: '🍂',
+    hiver: '❄️'
+  }
+
+  const seasonLabels = {
+    printemps: 'Printemps',
+    ete: 'Été',
+    automne: 'Automne',
+    hiver: 'Hiver'
+  }
+
+  // Pour la compatibilité avec getSeasonEmojis
+  const seasonOptions = [
+    { value: 'printemps', label: 'Printemps', emoji: '🌸' },
+    { value: 'ete', label: 'Été', emoji: '☀️' },
+    { value: 'automne', label: 'Automne', emoji: '🍂' },
+    { value: 'hiver', label: 'Hiver', emoji: '❄️' }
+  ]
+
+  // Fonction pour obtenir l'emoji de saison d'un plat
+  const getSeasonEmojis = (seasons) => {
+    if (!seasons) return ''
+    let seasonArray = seasons
+    if (typeof seasons === 'string') {
+      try {
+        seasonArray = JSON.parse(seasons)
+      } catch {
+        return ''
+      }
+    }
+    if (!Array.isArray(seasonArray) || seasonArray.length === 0) return ''
+    if (seasonArray.includes('toutes')) return ''
+    return seasonArray.map(s => {
+      const option = seasonOptions.find(o => o.value === s)
+      return option ? option.emoji : ''
+    }).join('')
+  }
+
+  // Fonction pour obtenir les ingrédients d'un plat
+  const getIngredients = (ingredients) => {
+    if (!ingredients) return []
+    let ingredientArray = ingredients
+    if (typeof ingredients === 'string') {
+      try {
+        ingredientArray = JSON.parse(ingredients)
+      } catch {
+        return []
+      }
+    }
+    if (!Array.isArray(ingredientArray)) return []
+    return ingredientArray
+  }
 
   // Charger les plats et la sélection existante
   useEffect(() => {
     if (status === 'authenticated') {
-      fetchDishes()
-      fetchCurrentSelection()
-      checkSettings()
+      // Vérifier si l'onboarding est nécessaire
+      if (session?.user?.onboarding_completed === false) {
+        setShowOnboardingModal(true)
+      } else {
+        fetchDishes()
+        fetchCurrentSelection()
+        checkSettings()
+        fetchDietaryTags()
+        fetchFavorites()
+      }
     }
-  }, [status])
+  }, [status, session?.user?.onboarding_completed])
+
+  const fetchDietaryTags = async () => {
+    try {
+      const response = await fetch('/api/tags')
+      const data = await response.json()
+      setDietaryTags(Array.isArray(data) ? data : [])
+    } catch (error) {
+      console.error('Erreur lors du chargement des tags:', error)
+    }
+  }
 
   const checkSettings = async () => {
     try {
@@ -48,6 +231,18 @@ export default function Home() {
           setSettingsCompleted(false)
           setShowSettingsBanner(true)
         }
+        // Charger les préférences alimentaires
+        if (data?.dietary_preferences) {
+          let prefs = data.dietary_preferences
+          if (typeof prefs === 'string') prefs = JSON.parse(prefs)
+          setUserDietaryPreferences(prefs || [])
+        }
+        // Charger les ingrédients évités
+        if (data?.avoided_ingredients) {
+          let avoided = data.avoided_ingredients
+          if (typeof avoided === 'string') avoided = JSON.parse(avoided)
+          setUserAvoidedIngredients(avoided || [])
+        }
       }
     } catch (error) {
       console.error('Erreur lors de la vérification des paramètres:', error)
@@ -57,7 +252,7 @@ export default function Home() {
   const fetchDishes = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/dishes?active=true')
+      const response = await fetch('/api/dishes?active=true&includeVariants=true')
       const data = await response.json()
       // S'assurer que data est bien un array
       setDishes(Array.isArray(data) ? data : [])
@@ -74,11 +269,30 @@ export default function Home() {
       const response = await fetch('/api/selections')
       if (response.ok) {
         const data = await response.json()
-        if (data) {
-          setCurrentSelection(data)
-          setSelectedDishes(data.selected_dishes || [])
-          setDeliveryDay(data.delivery_day || '')
-          setDeliveryTimeSlot(data.delivery_time_slot || '')
+        if (data && data.weeks) {
+          setWeekDates(data.weeks)
+
+          // Charger les sélections pour chaque semaine (4 semaines max)
+          const newSelections = {
+            week0: { dishes: [], variants: {} },
+            week1: { dishes: [], variants: {} },
+            week2: { dishes: [], variants: {} },
+            week3: { dishes: [], variants: {} }
+          }
+
+          for (let i = 0; i < MAX_WEEKS; i++) {
+            const weekKey = `week${i}`
+            const selection = data.selections[weekKey]
+            if (selection) {
+              newSelections[weekKey].dishes = selection.selected_dishes || []
+              const variants = typeof selection.selected_variants === 'string'
+                ? JSON.parse(selection.selected_variants)
+                : selection.selected_variants
+              newSelections[weekKey].variants = variants || {}
+            }
+          }
+
+          setWeeklySelections(newSelections)
         }
       }
     } catch (error) {
@@ -86,27 +300,134 @@ export default function Home() {
     }
   }
 
-  const toggleDishSelection = (dishId) => {
-    setSelectedDishes(prev => {
-      if (prev.includes(dishId)) {
-        return prev.filter(id => id !== dishId)
-      } else if (prev.length < MAX_DISHES) {
-        return [...prev, dishId]
+  const toggleDishSelection = (dish) => {
+    const dishId = dish.id
+    const weekKey = `week${activeWeek}`
+    const currentWeekDishes = weeklySelections[weekKey]?.dishes || []
+
+    // Si le plat est déjà sélectionné dans cette semaine, le retirer
+    if (currentWeekDishes.includes(dishId)) {
+      setWeeklySelections(prev => {
+        const weekData = prev[weekKey] || { dishes: [], variants: {} }
+        const variants = { ...weekData.variants }
+        delete variants[dishId]
+        return {
+          ...prev,
+          [weekKey]: {
+            dishes: weekData.dishes.filter(id => id !== dishId),
+            variants
+          }
+        }
+      })
+      return
+    }
+
+    // Si la semaine est pleine, proposer la semaine suivante
+    if (currentWeekDishes.length >= MAX_DISHES_PER_WEEK) {
+      if (activeWeek < MAX_WEEKS - 1) {
+        setPendingDishForNextWeek(dish)
+        setShowNextWeekModal(true)
       } else {
-        toast.error(`Maximum ${MAX_DISHES} plats autorisés`)
-        return prev
+        toast.error('Maximum 4 semaines atteint (20 plats)')
+      }
+      return
+    }
+
+    // Si le plat a plusieurs variantes, afficher le modal de selection
+    if (dish.variants && dish.variants.length > 1) {
+      setSelectedDishForVariant(dish)
+      setShowVariantModal(true)
+      return
+    }
+
+    // Ajouter le plat directement
+    addDishToWeek(dish, activeWeek)
+  }
+
+  // Fonction pour ajouter un plat à une semaine spécifique
+  const addDishToWeek = (dish, weekIndex, variantId = null) => {
+    const weekKey = `week${weekIndex}`
+
+    setWeeklySelections(prev => {
+      const weekData = prev[weekKey] || { dishes: [], variants: {} }
+      const variants = { ...weekData.variants }
+
+      // Définir la variante
+      if (variantId) {
+        variants[dish.id] = variantId
+      } else if (dish.variants && dish.variants.length > 0) {
+        const defaultVariant = dish.variants.find(v => v.is_default) || dish.variants[0]
+        variants[dish.id] = defaultVariant.id
+      }
+
+      return {
+        ...prev,
+        [weekKey]: {
+          dishes: [...weekData.dishes, dish.id],
+          variants
+        }
       }
     })
   }
 
-  const handleSaveSelection = async () => {
-    if (selectedDishes.length === 0) {
-      toast.error('Veuillez sélectionner au moins un plat')
-      return
-    }
+  // Confirmer l'ajout à la semaine suivante
+  const confirmAddToNextWeek = () => {
+    if (!pendingDishForNextWeek) return
 
-    if (!deliveryDay || !deliveryTimeSlot) {
-      toast.error('Veuillez indiquer le jour et créneau de passage')
+    const nextWeek = activeWeek + 1
+
+    // Si le plat a plusieurs variantes, afficher le modal de variantes
+    if (pendingDishForNextWeek.variants && pendingDishForNextWeek.variants.length > 1) {
+      setActiveWeek(nextWeek)
+      setSelectedDishForVariant(pendingDishForNextWeek)
+      setShowNextWeekModal(false)
+      setPendingDishForNextWeek(null)
+      setShowVariantModal(true)
+    } else {
+      addDishToWeek(pendingDishForNextWeek, nextWeek)
+      setActiveWeek(nextWeek)
+      setShowNextWeekModal(false)
+      setPendingDishForNextWeek(null)
+
+      const weekDate = weekDates[nextWeek]
+      const dateLabel = weekDate ? new Date(weekDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : `semaine ${nextWeek + 1}`
+      toast.success(`Plat ajouté pour la ${dateLabel}`)
+    }
+  }
+
+  // Selectionner une variante et ajouter le plat
+  const handleSelectVariant = (variantId) => {
+    const dish = selectedDishForVariant
+    if (!dish) return
+
+    addDishToWeek(dish, activeWeek, variantId)
+    setShowVariantModal(false)
+    setSelectedDishForVariant(null)
+  }
+
+  // Obtenir la variante selectionnee pour un plat
+  const getSelectedVariant = (dish) => {
+    if (!dish.variants || dish.variants.length === 0) return null
+    const variantId = selectedVariants[dish.id]
+    if (variantId) {
+      return dish.variants.find(v => v.id === variantId)
+    }
+    return dish.variants.find(v => v.is_default) || dish.variants[0]
+  }
+
+  // Obtenir l'info d'un tag
+  const getTagInfo = (tagName) => {
+    const tag = dietaryTags.find(t => t.name === tagName)
+    return tag ? { emoji: tag.emoji, name: tag.name } : { emoji: '', name: tagName }
+  }
+
+  const handleSaveSelection = async () => {
+    // Vérifier qu'au moins une semaine a des plats
+    const hasAnyDishes = Object.values(weeklySelections).some(
+      week => week && week.dishes && week.dishes.length > 0
+    )
+    if (!hasAnyDishes) {
+      toast.error('Veuillez sélectionner au moins un plat')
       return
     }
 
@@ -116,9 +437,7 @@ export default function Home() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          selectedDishes,
-          deliveryDay,
-          deliveryTimeSlot
+          weeklySelections
         })
       })
 
@@ -200,13 +519,113 @@ export default function Home() {
     }
   }
 
+  // Vérifier si une variante est compatible avec les préférences
+  const isVariantCompatible = (variant) => {
+    // Vérifier les ingrédients évités spécifiques
+    if (userAvoidedIngredients && userAvoidedIngredients.length > 0) {
+      const avoidedIds = userAvoidedIngredients.map(a => a.id)
+      // Vérifier les ingrédients liés à la variante
+      if (variant.linked_ingredients && variant.linked_ingredients.length > 0) {
+        const hasAvoidedIngredient = variant.linked_ingredients.some(
+          ing => avoidedIds.includes(ing.ingredient_id)
+        )
+        if (hasAvoidedIngredient) {
+          return false
+        }
+      }
+    }
+
+    // Si pas de préférences tags, la variante est compatible
+    if (!userDietaryPreferences || userDietaryPreferences.length === 0) return true
+
+    let variantTags = variant?.tags || []
+    if (typeof variantTags === 'string') {
+      try {
+        variantTags = JSON.parse(variantTags)
+      } catch {
+        variantTags = []
+      }
+    }
+
+    // Tags d'exclusion (l'utilisateur veut eviter ces ingredients)
+    const exclusionTags = ['porc', 'produit_laitier', 'gluten', 'poisson', 'fruits_de_mer', 'fruits_a_coque', 'oeuf']
+
+    // Vérifier les exclusions
+    for (const pref of userDietaryPreferences) {
+      if (exclusionTags.includes(pref)) {
+        // Si la variante contient cet ingrédient, elle n'est pas compatible
+        if (variantTags.includes(pref)) {
+          return false
+        }
+      }
+    }
+
+    // Tags de préférence positive (halal, vegetarien, vegan)
+    const positiveTags = ['halal', 'vegetarien', 'vegan']
+    const userPositivePrefs = userDietaryPreferences.filter(p => positiveTags.includes(p))
+
+    // Si l'utilisateur a des préférences positives, la variante doit avoir ces tags
+    if (userPositivePrefs.length > 0) {
+      // Pour halal: la variante doit avoir le tag halal
+      // Pour vegetarien/vegan: la variante doit avoir ce tag
+      const hasRequiredTag = userPositivePrefs.some(pref => variantTags.includes(pref))
+      if (!hasRequiredTag) {
+        return false
+      }
+    }
+
+    return true
+  }
+
+  // Obtenir les variantes compatibles d'un plat
+  const getCompatibleVariants = (dish) => {
+    if (!dish.variants || dish.variants.length === 0) return []
+    return dish.variants.filter(v => v.active !== false && isVariantCompatible(v))
+  }
+
   const getFilteredDishes = () => {
     let filtered = dishes.filter(dish => dish.category === activeCategory)
+
+    // Filtre par saison (multi-select)
+    // Si aucune saison sélectionnée → saison actuelle par défaut
+    const activeSeasons = selectedSeasons.length > 0 ? selectedSeasons : [getCurrentSeason()]
+
+    filtered = filtered.filter(dish => {
+      if (!dish.seasons) return true
+      let seasonArray = dish.seasons
+      if (typeof dish.seasons === 'string') {
+        try {
+          seasonArray = JSON.parse(dish.seasons)
+        } catch {
+          return true
+        }
+      }
+      if (!Array.isArray(seasonArray)) return true
+      // Plat visible si "toutes" ou si au moins une saison sélectionnée correspond
+      return seasonArray.includes('toutes') || activeSeasons.some(s => seasonArray.includes(s))
+    })
 
     if (searchQuery) {
       filtered = filtered.filter(dish =>
         dish.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
+    }
+
+    // Filtrer par préférences alimentaires et ingrédients évités
+    // Un plat est visible si au moins une de ses variantes est compatible
+    const hasFilters = (userDietaryPreferences && userDietaryPreferences.length > 0) ||
+                       (userAvoidedIngredients && userAvoidedIngredients.length > 0)
+
+    if (hasFilters) {
+      filtered = filtered.filter(dish => {
+        const compatibleVariants = getCompatibleVariants(dish)
+        return compatibleVariants.length > 0
+      })
+    }
+
+    // Filtrer par favoris si activé
+    if (showFavoritesOnly) {
+      filtered = filtered.filter(dish => favorites.includes(dish.id))
     }
 
     return filtered
@@ -238,8 +657,27 @@ export default function Home() {
 
   const filteredDishes = getFilteredDishes()
 
+  // Fonction appelée quand l'onboarding est terminé
+  const handleOnboardingComplete = () => {
+    setShowOnboardingModal(false)
+    // Rafraîchir la page pour mettre à jour la session
+    router.refresh()
+    // Charger les données
+    fetchDishes()
+    fetchCurrentSelection()
+  }
+
   return (
     <div className="max-w-4xl mx-auto pb-24">
+      {/* Modal d'onboarding pour les nouveaux utilisateurs */}
+      {showOnboardingModal && (
+        <OnboardingModal
+          userName={session?.user?.name}
+          userEmail={session?.user?.email}
+          onComplete={handleOnboardingComplete}
+        />
+      )}
+
       {/* Banner de configuration des paramètres */}
       {showSettingsBanner && (
         <div className="mb-6 bg-primary-100 border-l-4 border-primary-600 p-4 rounded-lg">
@@ -270,22 +708,22 @@ export default function Home() {
       )}
 
       {/* Bouton flottant de sélection */}
-      {selectedDishes.length > 0 && (
+      {getTotalDishesCount() > 0 && (
         <button
           onClick={() => setShowSummary(!showSummary)}
           className="fixed bottom-4 right-4 z-50 bg-primary-600 text-white px-6 py-4 rounded-full shadow-lg font-bold flex items-center gap-2 hover:bg-primary-700 transition"
         >
           <span className="text-xl">🛒</span>
-          <span>{selectedDishes.length}/{MAX_DISHES}</span>
+          <span>{getTotalDishesCount()} plat{getTotalDishesCount() > 1 ? 's' : ''}</span>
         </button>
       )}
 
-      {/* Modal de résumé */}
+      {/* Modal de résumé multi-semaines */}
       {showSummary && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-40 flex items-end md:items-center justify-center p-4">
-          <div className="bg-white rounded-t-2xl md:rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-white/30 backdrop-blur-sm z-40 flex items-end md:items-center justify-center p-4">
+          <div className="bg-white rounded-t-2xl md:rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl">
             <div className="flex justify-between items-start mb-4">
-              <h3 className="text-xl font-bold">Ma sélection</h3>
+              <h3 className="text-xl font-bold">Ma sélection ({getTotalDishesCount()} plats)</h3>
               <button
                 onClick={() => setShowSummary(false)}
                 className="text-gray-500 hover:text-gray-700 text-2xl"
@@ -294,66 +732,86 @@ export default function Home() {
               </button>
             </div>
 
-            {selectedDishes.length > 0 && (
-              <ul className="mb-6 space-y-2">
-                {selectedDishes.map(dishId => {
-                  const dish = dishes.find(d => d.id === dishId)
-                  return dish ? (
-                    <li key={dishId} className="flex items-start gap-2 text-sm">
-                      <span>{categoryLabels[dish.category].emoji}</span>
-                      <span className="flex-1">{dish.name}</span>
-                      <button
-                        onClick={() => toggleDishSelection(dishId)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        ✕
-                      </button>
-                    </li>
-                  ) : null
-                })}
-              </ul>
-            )}
-
+            {/* Affichage par semaine */}
             <div className="space-y-4 mb-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Jour de passage
-                </label>
-                <select
-                  value={deliveryDay}
-                  onChange={(e) => setDeliveryDay(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                >
-                  <option value="">Choisir...</option>
-                  {daysOfWeek.map(day => (
-                    <option key={day} value={day}>{day}</option>
-                  ))}
-                </select>
-              </div>
+              {Array.from({ length: MAX_WEEKS }).map((_, weekIndex) => {
+                const weekKey = `week${weekIndex}`
+                const weekData = weeklySelections[weekKey]
+                const weekDishes = weekData?.dishes || []
+                const weekVariants = weekData?.variants || {}
 
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Créneau
-                </label>
-                <select
-                  value={deliveryTimeSlot}
-                  onChange={(e) => setDeliveryTimeSlot(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                >
-                  <option value="">Choisir...</option>
-                  {timeSlots.map(slot => (
-                    <option key={slot} value={slot}>{slot}</option>
-                  ))}
-                </select>
-              </div>
+                // Formater la date de la semaine
+                const weekDate = weekDates[weekIndex]
+                let weekLabel = `Semaine ${weekIndex + 1}`
+                if (weekDate) {
+                  const date = new Date(weekDate)
+                  weekLabel = `Semaine du ${date.getDate()}/${date.getMonth() + 1}`
+                }
+
+                if (weekDishes.length === 0) return null
+
+                return (
+                  <div key={weekKey} className="border rounded-lg p-3">
+                    <h4 className="font-semibold text-sm mb-2 text-gray-700">
+                      {weekLabel} ({weekDishes.length}/{MAX_DISHES_PER_WEEK})
+                    </h4>
+                    <ul className="space-y-1.5">
+                      {weekDishes.map(dishId => {
+                        const dish = dishes.find(d => d.id === dishId)
+                        if (!dish) return null
+                        const variantId = weekVariants[dishId]
+                        const variant = dish.variants?.find(v => v.id === variantId)
+
+                        return (
+                          <li key={`${weekKey}-${dishId}`} className="flex items-center gap-2 text-sm">
+                            <span>{categoryLabels[dish.category]?.emoji}</span>
+                            <div className="flex-1">
+                              <span>{dish.name}</span>
+                              {variant && variant.name !== 'Classique' && (
+                                <span className="ml-1 text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded">
+                                  {variant.name}
+                                </span>
+                              )}
+                            </div>
+                            <button
+                              onClick={() => {
+                                // Supprimer ce plat de cette semaine spécifique
+                                setWeeklySelections(prev => {
+                                  const data = prev[weekKey]
+                                  const newVariants = { ...data.variants }
+                                  delete newVariants[dishId]
+                                  return {
+                                    ...prev,
+                                    [weekKey]: {
+                                      dishes: data.dishes.filter(id => id !== dishId),
+                                      variants: newVariants
+                                    }
+                                  }
+                                })
+                              }}
+                              className="text-red-500 hover:text-red-700 text-xs"
+                            >
+                              ✕
+                            </button>
+                          </li>
+                        )
+                      })}
+                    </ul>
+                  </div>
+                )
+              })}
             </div>
+
+            <p className="text-sm text-gray-500 mb-4">
+              Le jour et créneau de passage sont configurés dans vos paramètres.
+            </p>
 
             <button
               onClick={handleSaveSelection}
-              disabled={saving || selectedDishes.length === 0 || !deliveryDay || !deliveryTimeSlot}
+              disabled={saving || getTotalDishesCount() === 0}
               className="w-full py-3 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {saving ? 'Enregistrement...' : '💾 Enregistrer'}
+              {saving ? 'Enregistrement...' : '💾 Enregistrer toutes les semaines'}
             </button>
           </div>
         </div>
@@ -365,12 +823,77 @@ export default function Home() {
           Bonjour {session.user.name}!
         </h1>
         <p className="text-sm text-gray-600">
-          Choisissez vos {MAX_DISHES} plats pour cette semaine
+          Sélectionnez jusqu'à {MAX_DISHES_PER_WEEK} plats par semaine
         </p>
       </div>
 
+      {/* Indicateur de progression */}
+      <div className="mb-4 bg-white rounded-lg border border-gray-200 p-3">
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-2">
+            <span className="text-lg">📅</span>
+            <div>
+              <p className="font-semibold text-sm">
+                {weekDates[activeWeek]
+                  ? `Semaine du ${new Date(weekDates[activeWeek]).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}`
+                  : `Semaine ${activeWeek + 1}`
+                }
+              </p>
+              <p className="text-xs text-gray-500">
+                {selectedDishes.length}/{MAX_DISHES_PER_WEEK} plats sélectionnés
+              </p>
+            </div>
+          </div>
+          {getTotalDishesCount() > 0 && (
+            <div className="text-right">
+              <p className="text-lg font-bold text-primary-600">{getTotalDishesCount()}/{MAX_WEEKS * MAX_DISHES_PER_WEEK}</p>
+              <p className="text-xs text-gray-500">{getActiveWeeksCount()} semaine{getActiveWeeksCount() > 1 ? 's' : ''}</p>
+            </div>
+          )}
+        </div>
+
+        {/* Barre de progression pour la semaine en cours */}
+        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-primary-500 transition-all duration-300"
+            style={{ width: `${(selectedDishes.length / MAX_DISHES_PER_WEEK) * 100}%` }}
+          />
+        </div>
+
+        {/* Navigation entre semaines si plusieurs */}
+        {getActiveWeeksCount() > 1 && (
+          <div className="flex items-center justify-center gap-2 mt-3 pt-3 border-t border-gray-100">
+            {Array.from({ length: MAX_WEEKS }).map((_, weekIndex) => {
+              const weekDishes = weeklySelections[`week${weekIndex}`]?.dishes || []
+              if (weekDishes.length === 0 && weekIndex !== activeWeek) return null
+
+              const weekDate = weekDates[weekIndex]
+              let label = `S${weekIndex + 1}`
+              if (weekDate) {
+                const date = new Date(weekDate)
+                label = `${date.getDate()}/${date.getMonth() + 1}`
+              }
+
+              return (
+                <button
+                  key={weekIndex}
+                  onClick={() => setActiveWeek(weekIndex)}
+                  className={`px-3 py-1 rounded-full text-xs font-medium transition ${
+                    activeWeek === weekIndex
+                      ? 'bg-primary-600 text-white'
+                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                  }`}
+                >
+                  {label} ({weekDishes.length})
+                </button>
+              )
+            })}
+          </div>
+        )}
+      </div>
+
       {/* Onglets de catégories - responsive */}
-      <div className="flex gap-2 mb-4 justify-center">
+      <div className="flex gap-2 mb-3 justify-center flex-wrap">
         {Object.entries(categoryLabels).map(([category, { name, emoji, color }]) => {
           const count = dishes.filter(d => d.category === category).length
           return (
@@ -379,9 +902,10 @@ export default function Home() {
               onClick={() => {
                 setActiveCategory(category)
                 setSearchQuery('')
+                setShowFavoritesOnly(false)
               }}
               className={`flex-shrink-0 px-3 py-2 rounded-lg font-semibold transition flex items-center gap-1.5 ${
-                activeCategory === category
+                activeCategory === category && !showFavoritesOnly
                   ? `${color} text-white`
                   : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
@@ -394,6 +918,92 @@ export default function Home() {
             </button>
           )
         })}
+        {/* Bouton Favoris */}
+        <button
+          onClick={() => {
+            setShowFavoritesOnly(!showFavoritesOnly)
+            setSearchQuery('')
+          }}
+          className={`flex-shrink-0 px-3 py-2 rounded-lg font-semibold transition flex items-center gap-1.5 ${
+            showFavoritesOnly
+              ? 'bg-yellow-500 text-white'
+              : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+          }`}
+        >
+          <span className="text-lg">{showFavoritesOnly ? '⭐' : '☆'}</span>
+          <span className="sm:hidden text-sm font-bold">{favorites.length}</span>
+          <span className="hidden sm:inline text-sm font-semibold">Favoris ({favorites.length})</span>
+        </button>
+      </div>
+
+      {/* Filtre de saison - multi-select */}
+      <div className="mb-4">
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Bouton saison actuelle (toujours visible, sélectionné par défaut) */}
+          <button
+            onClick={() => {
+              const current = getCurrentSeason()
+              if (selectedSeasons.length === 0) {
+                // Déjà sur la saison actuelle, ne rien faire
+                return
+              }
+              if (selectedSeasons.includes(current)) {
+                // Retirer la saison actuelle
+                setSelectedSeasons(prev => prev.filter(s => s !== current))
+              } else {
+                // Ajouter la saison actuelle
+                setSelectedSeasons(prev => [...prev, current])
+              }
+            }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition ${
+              selectedSeasons.length === 0 || selectedSeasons.includes(getCurrentSeason())
+                ? 'bg-primary-600 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            <span>{seasonEmojis[getCurrentSeason()]}</span>
+            <span>{seasonLabels[getCurrentSeason()]}</span>
+          </button>
+
+          {/* Autres saisons */}
+          {Object.entries(seasonEmojis)
+            .filter(([season]) => season !== getCurrentSeason())
+            .map(([season, emoji]) => (
+              <button
+                key={season}
+                onClick={() => {
+                  if (selectedSeasons.includes(season)) {
+                    setSelectedSeasons(prev => prev.filter(s => s !== season))
+                  } else {
+                    // Si on était sur "saison actuelle par défaut", on ajoute la saison actuelle + la nouvelle
+                    if (selectedSeasons.length === 0) {
+                      setSelectedSeasons([getCurrentSeason(), season])
+                    } else {
+                      setSelectedSeasons(prev => [...prev, season])
+                    }
+                  }
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition ${
+                  selectedSeasons.includes(season)
+                    ? 'bg-primary-600 text-white'
+                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                }`}
+              >
+                <span>{emoji}</span>
+                <span className="hidden sm:inline">{seasonLabels[season]}</span>
+              </button>
+            ))}
+
+          {/* Bouton reset si plusieurs saisons */}
+          {selectedSeasons.length > 0 && (
+            <button
+              onClick={() => setSelectedSeasons([])}
+              className="text-xs text-gray-500 hover:text-gray-700 underline ml-1"
+            >
+              Réinitialiser
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Barre de recherche */}
@@ -429,29 +1039,91 @@ export default function Home() {
         <div className="space-y-1.5">
           {filteredDishes.map(dish => {
             const isSelected = selectedDishes.includes(dish.id)
+            const selectedVariant = getSelectedVariant(dish)
+            const hasMultipleVariants = dish.variants && dish.variants.length > 1
+
+            // Obtenir les tags de la variante selectionnee
+            let variantTags = []
+            if (selectedVariant && selectedVariant.tags) {
+              variantTags = typeof selectedVariant.tags === 'string'
+                ? JSON.parse(selectedVariant.tags)
+                : selectedVariant.tags
+            }
+
             return (
               <div
                 key={dish.id}
-                onClick={() => toggleDishSelection(dish.id)}
-                className={`p-2.5 rounded-lg border-2 cursor-pointer transition ${
+                onClick={() => toggleDishSelection(dish)}
+                className={`p-2.5 rounded-lg border-2 cursor-pointer transition relative ${
                   isSelected
                     ? 'border-primary-500 bg-primary-50'
                     : 'border-gray-200 bg-white hover:border-primary-300'
                 }`}
               >
-                <div className="flex items-center gap-2.5">
+                {/* Bouton favori */}
+                <button
+                  onClick={(e) => toggleFavorite(dish.id, e)}
+                  className={`absolute top-1/2 -translate-y-1/2 right-2 w-8 h-8 flex items-center justify-center text-xl transition-transform hover:scale-110 ${
+                    isFavorite(dish.id) ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-400'
+                  }`}
+                  title={isFavorite(dish.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                >
+                  {isFavorite(dish.id) ? '⭐' : '☆'}
+                </button>
+
+                <div className="flex items-center gap-2.5 pr-10">
                   <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs ${
                     isSelected ? 'bg-primary-600 text-white' : 'bg-gray-200'
                   }`}>
                     {isSelected && '✓'}
                   </div>
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-sm leading-tight">
-                      {dish.name}
-                    </h3>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      <h3 className="font-medium text-sm leading-tight">
+                        {dish.name}
+                      </h3>
+                      {isSelected && selectedVariant && selectedVariant.name !== 'Classique' && (
+                        <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded">
+                          {selectedVariant.name}
+                        </span>
+                      )}
+                      {hasMultipleVariants && !isSelected && (
+                        <span className="text-xs text-purple-500">
+                          🏷️ {dish.variants.length} options
+                        </span>
+                      )}
+                      {getSeasonEmojis(dish.seasons) && (
+                        <span className="text-xs flex-shrink-0" title="Saisons">
+                          {getSeasonEmojis(dish.seasons)}
+                        </span>
+                      )}
+                    </div>
+                    {/* Tags de la variante */}
+                    {isSelected && variantTags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-1">
+                        {variantTags.map(tagName => {
+                          const tagInfo = getTagInfo(tagName)
+                          return (
+                            <span
+                              key={tagName}
+                              className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs"
+                            >
+                              {tagInfo.emoji} {tagInfo.name}
+                            </span>
+                          )
+                        })}
+                      </div>
+                    )}
                     {dish.description && (
                       <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">
                         {dish.description}
+                      </p>
+                    )}
+                    {getIngredients(dish.ingredients).length > 0 && (
+                      <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">
+                        <span className="text-amber-600">🥕</span>{' '}
+                        {getIngredients(dish.ingredients).slice(0, 4).join(', ')}
+                        {getIngredients(dish.ingredients).length > 4 && '...'}
                       </p>
                     )}
                   </div>
@@ -462,10 +1134,120 @@ export default function Home() {
         </div>
       )}
 
+      {/* Modal de selection de variante */}
+      {showVariantModal && selectedDishForVariant && (
+        <div className="fixed inset-0 bg-white/30 backdrop-blur-sm z-50 flex items-end md:items-center justify-center p-4">
+          <div className="bg-white rounded-t-2xl md:rounded-2xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto shadow-xl">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className="text-lg font-bold">{selectedDishForVariant.name}</h3>
+                <p className="text-sm text-gray-500">Choisissez votre preference</p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowVariantModal(false)
+                  setSelectedDishForVariant(null)
+                }}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="space-y-2">
+              {selectedDishForVariant.variants?.map(variant => {
+                let tags = variant.tags || []
+                if (typeof tags === 'string') tags = JSON.parse(tags)
+
+                return (
+                  <button
+                    key={variant.id}
+                    onClick={() => handleSelectVariant(variant.id)}
+                    className={`w-full p-3 rounded-lg border-2 text-left transition ${
+                      variant.is_default
+                        ? 'border-purple-300 bg-purple-50 hover:bg-purple-100'
+                        : 'border-gray-200 hover:border-primary-300 hover:bg-gray-50'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium">{variant.name}</span>
+                      {variant.is_default && (
+                        <span className="text-xs bg-purple-200 text-purple-700 px-2 py-0.5 rounded-full">
+                          Recommande
+                        </span>
+                      )}
+                    </div>
+                    {tags.length > 0 && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {tags.map(tagName => {
+                          const tagInfo = getTagInfo(tagName)
+                          return (
+                            <span
+                              key={tagName}
+                              className="inline-flex items-center gap-0.5 px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs"
+                            >
+                              {tagInfo.emoji} {tagInfo.name}
+                            </span>
+                          )
+                        })}
+                      </div>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de proposition semaine suivante */}
+      {showNextWeekModal && pendingDishForNextWeek && (
+        <div className="fixed inset-0 bg-white/30 backdrop-blur-sm z-50 flex items-end md:items-center justify-center p-4">
+          <div className="bg-white rounded-t-2xl md:rounded-2xl p-6 w-full max-w-md shadow-xl">
+            <div className="text-center mb-4">
+              <span className="text-4xl mb-3 block">🎉</span>
+              <h3 className="text-xl font-bold mb-2">Semaine complète !</h3>
+              <p className="text-gray-600">
+                Vous avez sélectionné {MAX_DISHES_PER_WEEK} plats pour cette semaine.
+              </p>
+            </div>
+
+            <div className="bg-primary-50 rounded-lg p-4 mb-4">
+              <p className="text-sm text-primary-800">
+                <strong>Voulez-vous ajouter "{pendingDishForNextWeek.name}"</strong> pour la semaine suivante ?
+              </p>
+              {weekDates[activeWeek + 1] && (
+                <p className="text-xs text-primary-600 mt-1">
+                  Semaine du {new Date(weekDates[activeWeek + 1]).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })}
+                </p>
+              )}
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={confirmAddToNextWeek}
+                className="flex-1 py-3 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700"
+              >
+                Oui, ajouter
+              </button>
+              <button
+                onClick={() => {
+                  setShowNextWeekModal(false)
+                  setPendingDishForNextWeek(null)
+                }}
+                className="flex-1 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300"
+              >
+                Non merci
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Modal de demande de plat personnalisé */}
       {showCustomDishModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-end md:items-center justify-center p-4">
-          <div className="bg-white rounded-t-2xl md:rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-white/30 backdrop-blur-sm z-50 flex items-end md:items-center justify-center p-4">
+          <div className="bg-white rounded-t-2xl md:rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl">
             <div className="flex justify-between items-start mb-4">
               <h3 className="text-xl font-bold">Demander un plat personnalisé</h3>
               <button

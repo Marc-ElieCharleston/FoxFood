@@ -189,6 +189,12 @@ export default function AdminCustomDishesPage() {
         >
           Paramètres
         </button>
+        <button
+          onClick={() => router.push('/admin/test')}
+          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm"
+        >
+          Test
+        </button>
       </div>
 
       {/* Filtres */}
@@ -309,8 +315,8 @@ export default function AdminCustomDishesPage() {
 
       {/* Modal de confirmation */}
       {showModal && selectedRequest && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-lg p-6 w-full max-w-md">
+        <div className="fixed inset-0 bg-white/30 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
             <h3 className="text-xl font-bold mb-4">
               {actionType === 'approve' ? 'Approuver' : 'Rejeter'} la demande
             </h3>

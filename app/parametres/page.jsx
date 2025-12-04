@@ -11,14 +11,27 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
 
+  // États pour le foyer
+  const [household, setHousehold] = useState(null)
+  const [householdLoading, setHouseholdLoading] = useState(true)
+  const [regeneratingCode, setRegeneratingCode] = useState(false)
+  const [leavingHousehold, setLeavingHousehold] = useState(false)
+
   const [settings, setSettings] = useState({
     delivery_day: '',
     delivery_time_slot: '',
     notification_phone: '',
     notification_phone_secondary: '',
     notification_email: '',
-    receive_notifications: true
+    receive_notifications: true,
+    dietary_preferences: [],
+    avoided_ingredients: []
   })
+
+  const [dietaryTags, setDietaryTags] = useState([])
+  const [allIngredients, setAllIngredients] = useState([])
+  const [ingredientSearch, setIngredientSearch] = useState('')
+  const [showIngredientDropdown, setShowIngredientDropdown] = useState(false)
 
   // Rappels multiples: 5, 3, et 1 jours avant
   const [reminders, setReminders] = useState({
@@ -36,8 +49,153 @@ export default function SettingsPage() {
   useEffect(() => {
     if (status === 'authenticated') {
       fetchSettings()
+      fetchHousehold()
+      fetchDietaryTags()
+      fetchAllIngredients()
     }
   }, [status])
+
+  const fetchDietaryTags = async () => {
+    try {
+      const response = await fetch('/api/tags')
+      const data = await response.json()
+      setDietaryTags(Array.isArray(data) ? data : [])
+    } catch (error) {
+      console.error('Erreur chargement tags:', error)
+    }
+  }
+
+  const fetchAllIngredients = async () => {
+    try {
+      const response = await fetch('/api/ingredients?active=true')
+      const data = await response.json()
+      setAllIngredients(Array.isArray(data) ? data : [])
+    } catch (error) {
+      console.error('Erreur chargement ingredients:', error)
+    }
+  }
+
+  const toggleDietaryPreference = (tagName) => {
+    setSettings(prev => {
+      const prefs = prev.dietary_preferences || []
+      if (prefs.includes(tagName)) {
+        return { ...prev, dietary_preferences: prefs.filter(t => t !== tagName) }
+      } else {
+        return { ...prev, dietary_preferences: [...prefs, tagName] }
+      }
+    })
+  }
+
+  const addAvoidedIngredient = (ingredient) => {
+    setSettings(prev => {
+      const avoided = prev.avoided_ingredients || []
+      if (avoided.some(a => a.id === ingredient.id)) {
+        return prev // Deja ajoute
+      }
+      return {
+        ...prev,
+        avoided_ingredients: [...avoided, { id: ingredient.id, name: ingredient.name }]
+      }
+    })
+    setIngredientSearch('')
+    setShowIngredientDropdown(false)
+  }
+
+  const removeAvoidedIngredient = (ingredientId) => {
+    setSettings(prev => ({
+      ...prev,
+      avoided_ingredients: (prev.avoided_ingredients || []).filter(a => a.id !== ingredientId)
+    }))
+  }
+
+  // Filtrer les ingredients pour la recherche
+  const filteredIngredients = allIngredients.filter(ing =>
+    ing.name.toLowerCase().includes(ingredientSearch.toLowerCase()) &&
+    !(settings.avoided_ingredients || []).some(a => a.id === ing.id)
+  ).slice(0, 8)
+
+  const fetchHousehold = async () => {
+    try {
+      setHouseholdLoading(true)
+      const response = await fetch('/api/household')
+      if (response.ok) {
+        const data = await response.json()
+        setHousehold(data)
+      } else if (response.status === 404) {
+        setHousehold(null)
+      }
+    } catch (error) {
+      console.error('Erreur chargement foyer:', error)
+    } finally {
+      setHouseholdLoading(false)
+    }
+  }
+
+  const handleRegenerateCode = async () => {
+    if (!confirm('Voulez-vous vraiment regénérer le code d\'invitation ? L\'ancien code ne fonctionnera plus.')) {
+      return
+    }
+
+    try {
+      setRegeneratingCode(true)
+      const response = await fetch('/api/household/invite', { method: 'POST' })
+      const data = await response.json()
+
+      if (response.ok) {
+        setHousehold(prev => ({ ...prev, inviteCode: data.inviteCode }))
+        toast.success('Nouveau code généré !')
+      } else {
+        toast.error(data.error || 'Erreur lors de la régénération')
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de la régénération')
+    } finally {
+      setRegeneratingCode(false)
+    }
+  }
+
+  const handleLeaveHousehold = async () => {
+    if (!confirm('Voulez-vous vraiment quitter ce foyer ? Vous devrez créer ou rejoindre un nouveau foyer.')) {
+      return
+    }
+
+    try {
+      setLeavingHousehold(true)
+      const response = await fetch('/api/household', { method: 'DELETE' })
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success('Vous avez quitté le foyer')
+        setHousehold(null)
+        // Rafraîchir la page pour mettre à jour la session
+        router.refresh()
+      } else {
+        toast.error(data.error || 'Erreur lors de la sortie du foyer')
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de la sortie du foyer')
+    } finally {
+      setLeavingHousehold(false)
+    }
+  }
+
+  const copyInviteLink = () => {
+    if (household?.inviteCode) {
+      const link = `${window.location.origin}/rejoindre?code=${household.inviteCode}`
+      navigator.clipboard.writeText(link)
+      toast.success('Lien copié !')
+    }
+  }
+
+  const shareViaWhatsApp = () => {
+    if (household?.inviteCode) {
+      const link = `${window.location.origin}/rejoindre?code=${household.inviteCode}`
+      const message = `Rejoins mon foyer sur FoxFood ! Clique sur ce lien pour accéder à nos plats de la semaine : ${link}`
+      window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank')
+    }
+  }
 
   const fetchSettings = async () => {
     try {
@@ -46,13 +204,21 @@ export default function SettingsPage() {
       if (response.ok) {
         const data = await response.json()
         if (data) {
+          let dietaryPrefs = data.dietary_preferences || []
+          if (typeof dietaryPrefs === 'string') dietaryPrefs = JSON.parse(dietaryPrefs)
+
+          let avoidedIngs = data.avoided_ingredients || []
+          if (typeof avoidedIngs === 'string') avoidedIngs = JSON.parse(avoidedIngs)
+
           setSettings({
             delivery_day: data.delivery_day || '',
             delivery_time_slot: data.delivery_time_slot || '',
             notification_phone: data.notification_phone || '',
             notification_phone_secondary: data.notification_phone_secondary || '',
             notification_email: data.notification_email || session?.user?.email || '',
-            receive_notifications: data.receive_notifications !== false
+            receive_notifications: data.receive_notifications !== false,
+            dietary_preferences: dietaryPrefs,
+            avoided_ingredients: avoidedIngs
           })
 
           // Charger les rappels configurés
@@ -156,6 +322,8 @@ export default function SettingsPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           ...settings,
+          dietary_preferences: settings.dietary_preferences || [],
+          avoided_ingredients: settings.avoided_ingredients || [],
           reminders: [
             { days_before: 5, ...reminders.day5 },
             { days_before: 3, ...reminders.day3 },
@@ -245,7 +413,127 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Section 2: Rappels multiples */}
+        {/* Section 2: Mon foyer */}
+        <div className="border-b pb-6">
+          <h2 className="text-lg font-bold mb-4">🏠 Mon foyer</h2>
+
+          {householdLoading ? (
+            <div className="text-center py-4 text-gray-500">Chargement...</div>
+          ) : household ? (
+            <div className="space-y-4">
+              {/* Infos du foyer */}
+              <div className="bg-gray-50 rounded-lg p-4">
+                <p className="text-sm text-gray-600 mb-1">Nom du foyer</p>
+                <p className="font-semibold">{household.name}</p>
+              </div>
+
+              {/* Membres */}
+              <div>
+                <p className="text-sm font-medium text-gray-700 mb-2">
+                  Membres ({household.members?.length || 0})
+                </p>
+                <div className="space-y-2">
+                  {household.members?.map((member) => (
+                    <div
+                      key={member.id}
+                      className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg"
+                    >
+                      <div className="w-8 h-8 bg-primary-100 text-primary-600 rounded-full flex items-center justify-center text-sm font-semibold">
+                        {member.name?.charAt(0).toUpperCase() || '?'}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-sm truncate">
+                          {member.name}
+                          {member.id === household.createdBy && (
+                            <span className="ml-2 text-xs bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full">
+                              Créateur
+                            </span>
+                          )}
+                          {member.id === parseInt(session?.user?.id) && (
+                            <span className="ml-2 text-xs bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">
+                              Vous
+                            </span>
+                          )}
+                        </p>
+                        <p className="text-xs text-gray-500 truncate">{member.email}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Code d'invitation */}
+              <div className="border-t pt-4">
+                <p className="text-sm font-medium text-gray-700 mb-2">
+                  Inviter un membre
+                </p>
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="flex-1 bg-gray-100 px-4 py-2 rounded-lg font-mono text-lg tracking-wider text-center">
+                    {household.inviteCode}
+                  </div>
+                  {household.createdBy === parseInt(session?.user?.id) && (
+                    <button
+                      type="button"
+                      onClick={handleRegenerateCode}
+                      disabled={regeneratingCode}
+                      className="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-lg"
+                      title="Regénérer le code"
+                    >
+                      {regeneratingCode ? '...' : '🔄'}
+                    </button>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={copyInviteLink}
+                    className="flex-1 py-2 px-4 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200"
+                  >
+                    📋 Copier le lien
+                  </button>
+                  <button
+                    type="button"
+                    onClick={shareViaWhatsApp}
+                    className="flex-1 py-2 px-4 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600"
+                  >
+                    💬 WhatsApp
+                  </button>
+                </div>
+              </div>
+
+              {/* Quitter le foyer (si pas le créateur) */}
+              {household.createdBy !== parseInt(session?.user?.id) && (
+                <div className="border-t pt-4">
+                  <button
+                    type="button"
+                    onClick={handleLeaveHousehold}
+                    disabled={leavingHousehold}
+                    className="w-full py-2 px-4 text-red-600 border border-red-200 rounded-lg text-sm font-medium hover:bg-red-50 disabled:opacity-50"
+                  >
+                    {leavingHousehold ? 'Sortie en cours...' : '🚪 Quitter ce foyer'}
+                  </button>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="text-center py-6 bg-gray-50 rounded-lg">
+              <p className="text-gray-600 mb-4">
+                Vous n'appartenez à aucun foyer.
+              </p>
+              <div className="flex gap-3 justify-center">
+                <button
+                  type="button"
+                  onClick={() => router.push('/rejoindre')}
+                  className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700"
+                >
+                  Rejoindre un foyer
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Section 3: Rappels multiples */}
         <div className="border-b pb-6">
           <h2 className="text-lg font-bold mb-4">🔔 Rappels avant le passage</h2>
           <p className="text-sm text-gray-600 mb-4">
@@ -411,7 +699,142 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Section 3: Notifications */}
+        {/* Section 4: Préférences alimentaires */}
+        <div className="border-b pb-6">
+          <h2 className="text-lg font-bold mb-4">🥗 Préférences alimentaires</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Indiquez vos restrictions alimentaires. Les plats contenant ces ingredients seront masqués ou signalés.
+          </p>
+
+          <div className="space-y-3">
+            {/* Tags d'ingrédients à éviter */}
+            <div className="flex flex-wrap gap-2">
+              {dietaryTags.filter(tag =>
+                ['porc', 'produit_laitier', 'gluten', 'poisson', 'fruits_de_mer', 'fruits_a_coque', 'oeuf'].includes(tag.name)
+              ).map(tag => (
+                <button
+                  key={tag.id}
+                  type="button"
+                  onClick={() => toggleDietaryPreference(tag.name)}
+                  className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition border-2 ${
+                    settings.dietary_preferences?.includes(tag.name)
+                      ? 'bg-red-100 text-red-700 border-red-300'
+                      : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <span>{tag.emoji}</span>
+                  <span>Sans {tag.name.replace('_', ' ')}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* Tags de préférence positive */}
+            <div className="pt-4 border-t">
+              <p className="text-sm text-gray-600 mb-3">Préférences spécifiques :</p>
+              <div className="flex flex-wrap gap-2">
+                {dietaryTags.filter(tag =>
+                  ['halal', 'vegetarien', 'vegan'].includes(tag.name)
+                ).map(tag => (
+                  <button
+                    key={tag.id}
+                    type="button"
+                    onClick={() => toggleDietaryPreference(tag.name)}
+                    className={`inline-flex items-center gap-2 px-4 py-2 rounded-full text-sm font-medium transition border-2 ${
+                      settings.dietary_preferences?.includes(tag.name)
+                        ? 'bg-green-100 text-green-700 border-green-300'
+                        : 'bg-gray-50 text-gray-600 border-gray-200 hover:border-gray-300'
+                    }`}
+                  >
+                    <span>{tag.emoji}</span>
+                    <span>{tag.name.charAt(0).toUpperCase() + tag.name.slice(1)}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {settings.dietary_preferences?.length > 0 && (
+              <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                <p className="text-sm text-amber-800">
+                  <span className="font-medium">Vos préférences :</span>{' '}
+                  {settings.dietary_preferences.map(p => p.replace('_', ' ')).join(', ')}
+                </p>
+                <p className="text-xs text-amber-600 mt-1">
+                  Les plats incompatibles seront masqués de votre catalogue.
+                </p>
+              </div>
+            )}
+
+            {/* Ingrédients spécifiques à éviter */}
+            <div className="pt-4 border-t">
+              <p className="text-sm font-medium text-gray-700 mb-3">
+                Ingrédients spécifiques à éviter (allergies) :
+              </p>
+
+              {/* Recherche d'ingrédient */}
+              <div className="relative mb-3">
+                <input
+                  type="text"
+                  value={ingredientSearch}
+                  onChange={(e) => {
+                    setIngredientSearch(e.target.value)
+                    setShowIngredientDropdown(e.target.value.length > 0)
+                  }}
+                  onFocus={() => ingredientSearch.length > 0 && setShowIngredientDropdown(true)}
+                  placeholder="Rechercher un ingrédient..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm"
+                />
+
+                {/* Dropdown des résultats */}
+                {showIngredientDropdown && filteredIngredients.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {filteredIngredients.map(ing => (
+                      <button
+                        key={ing.id}
+                        type="button"
+                        onClick={() => addAvoidedIngredient(ing)}
+                        className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100 flex items-center gap-2"
+                      >
+                        <span>{ing.name}</span>
+                        {ing.dietary_tags && ing.dietary_tags.length > 0 && (
+                          <span className="text-xs text-gray-400">
+                            ({ing.dietary_tags.join(', ')})
+                          </span>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Liste des ingrédients évités */}
+              {settings.avoided_ingredients?.length > 0 ? (
+                <div className="flex flex-wrap gap-2">
+                  {settings.avoided_ingredients.map(ing => (
+                    <span
+                      key={ing.id}
+                      className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm"
+                    >
+                      {ing.name}
+                      <button
+                        type="button"
+                        onClick={() => removeAvoidedIngredient(ing.id)}
+                        className="ml-1 text-red-500 hover:text-red-700"
+                      >
+                        ✕
+                      </button>
+                    </span>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-gray-500 italic">
+                  Aucun ingrédient spécifique à éviter
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Section 5: Notifications */}
         <div>
           <h2 className="text-lg font-bold mb-4">📬 Notifications d'Emeric</h2>
 

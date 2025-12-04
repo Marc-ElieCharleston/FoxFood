@@ -4,7 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-**FoxFood** is a meal planning and delivery management application built for a chef (Emeric) to manage his weekly meal catalog and client orders. Clients can select up to 5 dishes per week, receive automated reminders, and request custom dishes. The admin can manage the dish catalog, review custom dish requests, and configure notification preferences.
+**FoxFood** is a meal planning and delivery management application built for a chef (Emeric) to manage his weekly meal catalog and client orders. Clients can select up to 5 dishes per week for up to 5 weeks in advance, receive automated reminders, and request custom dishes. The admin can manage the dish catalog with variants and ingredients, review custom dish requests, and configure notification preferences.
+
+**Key Features**:
+- Multi-week dish selection (up to 5 weeks, 5 dishes per week)
+- Dish variants system (Classique, Halal, Végétarien, etc.)
+- Ingredient management with dietary tags
+- Allergy system: users can avoid specific ingredients
+- Dietary preferences filtering (sans porc, halal, végétarien, etc.)
+- Household system for shared selections
 
 ## Development Commands
 
@@ -90,31 +98,45 @@ All notifications are logged to `notifications_log` table for audit trail.
 ### Database Schema
 
 **Core Tables**:
-- `users`: User accounts with role, delivery preferences
-- `dishes`: Meal catalog (name, category, description, active status)
-- `weekly_selections`: User's weekly dish selections (JSONB array of dish IDs)
+- `users`: User accounts with role, delivery preferences, `dietary_preferences` (JSONB), `avoided_ingredients` (JSONB)
+- `dishes`: Meal catalog (name, category, description, seasons, active status)
+- `dish_variants`: Variants for each dish (name, tags, is_default, active)
+- `ingredients`: Centralized ingredient list with `dietary_tags` (JSONB) and category
+- `variant_ingredients`: Links variants to ingredients with quantities
+- `weekly_selections`: User's weekly dish selections with `selected_variants` (JSONB)
+- `households`: Household groups for shared selections
 - `user_reminders`: Multiple configurable reminders per user (days_before: 1, 3, or 5)
 - `custom_dish_requests`: User requests with optional ingredient suggestions (JSONB)
 - `admin_settings`: Admin notification preferences and auto-reminder configuration
 - `notifications_log`: Audit log of all sent notifications
+- `dietary_tags`: Reference table for dietary tags (name, emoji, description)
 
 **Schema Files** (in `sql/` directory):
 - `schema.sql`: Base schema (users, dishes, weekly_selections)
 - `add_user_settings.sql`: User settings columns migration
-- `add_notifications_system.sql`: Notification tables (user_reminders, custom_dish_requests, admin_settings, notifications_log)
+- `add_notifications_system.sql`: Notification tables
+- `add_ingredients_system.sql`: Ingredients, variants, dietary tags
+- `add_household_system.sql`: Household tables
+- `add_seasons_to_dishes.sql`: Seasonal availability for dishes
 
 ### API Route Structure
 
 **User Routes**:
-- `/api/dishes`: GET (filter by active/category), POST (create), PUT (update), DELETE
-- `/api/selections`: GET (current week), POST (upsert selection, triggers admin notification)
-- `/api/settings`: GET/POST user reminder preferences
+- `/api/dishes`: GET (filter by active/category, includeVariants), POST (create), PUT (update), DELETE
+- `/api/selections`: GET (5 weeks), POST (multi-week upsert, triggers admin notification)
+- `/api/settings`: GET/POST user preferences including `dietary_preferences` and `avoided_ingredients`
 - `/api/custom-dishes`: GET (user's requests), POST (create request, triggers admin notification)
+- `/api/ingredients`: GET (filter by category/active/search), POST, PUT, DELETE
+- `/api/tags`: GET all dietary tags
+- `/api/household`: GET/POST/DELETE household management
+- `/api/variant-ingredients`: POST/DELETE manage ingredient-variant links
 
 **Admin Routes** (`/api/admin/*`):
 - `/api/admin/settings`: GET/POST admin notification preferences
 - `/api/admin/custom-dishes`: GET (all requests, filter by status)
 - `/api/admin/custom-dishes/[id]`: PUT (approve/reject), DELETE
+- `/api/admin/dishes/[id]/variants`: GET/POST/PUT/DELETE variant management
+- `/api/admin/users`: GET all users
 
 **Cron Routes**:
 - `/api/cron/send-reminders`: Protected by `CRON_SECRET`, calls `processReminders()`
@@ -122,37 +144,69 @@ All notifications are logged to `notifications_log` table for audit trail.
 ### Page Structure
 
 **User Pages**:
-- `/`: Home page with dish selection, category filters, custom dish request button
-- `/parametres`: Configure delivery day/time, multiple reminders (1, 3, 5 days), email/SMS preferences
+- `/`: Home page with multi-week dish selection, week selector, category/season filters, dietary filtering
+- `/parametres`: Configure delivery day/time, dietary preferences, avoided ingredients, reminders
+- `/rejoindre`: Join a household via invite code
 - `/login`, `/register`: Authentication pages
 
 **Admin Pages** (`/admin/*`):
-- `/admin`: Dish catalog management (CRUD operations)
+- `/admin`: Dish catalog management with variants (CRUD operations)
+- `/admin/ingredients`: Ingredient management with dietary tags
 - `/admin/plats-personnalises`: Review custom dish requests, approve/reject/delete with notes
 - `/admin/parametres`: Configure admin notification preferences and auto-reminder days
+- `/admin/utilisateurs`: User management
 
 All admin pages have shared navigation bar to switch between sections.
 
-### Weekly Selection Logic
+### Weekly Selection Logic (Multi-Week)
 
-Selections are tied to `week_start_date` (Monday of the week):
+Users can select dishes for up to 5 weeks in advance. The API returns and accepts selections for all 5 weeks:
 
 ```javascript
-// Calculate Monday of current week
-const today = new Date()
-const dayOfWeek = today.getDay()
-const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)
-const monday = new Date(today.setDate(diff))
-monday.setHours(0, 0, 0, 0)
+// GET /api/selections returns:
+{
+  weeks: ['2024-12-02', '2024-12-09', '2024-12-16', ...], // 5 Mondays
+  selections: {
+    week0: { selected_dishes: [1,2,3], selected_variants: {1: 5} },
+    week1: null, // No selection yet
+    ...
+  }
+}
 
-// Upsert pattern
-INSERT INTO weekly_selections (user_id, week_start_date, ...)
-VALUES (...)
-ON CONFLICT (user_id, week_start_date)
-DO UPDATE SET ...
+// POST /api/selections accepts:
+{
+  weeklySelections: {
+    week0: { dishes: [1,2,3], variants: {1: 5} },
+    week1: { dishes: [4,5], variants: {} },
+    ...
+  }
+}
 ```
 
-This ensures one selection per user per week.
+**Delivery day/time**: Retrieved from user settings, not specified per selection.
+
+### Dietary Filtering Logic
+
+Dishes are filtered based on user preferences:
+
+1. **Tag-based exclusions** (porc, gluten, produit_laitier, etc.): Hide variants with these tags
+2. **Positive preferences** (halal, végétarien, vegan): Only show variants with these tags
+3. **Avoided ingredients**: Hide variants containing specific ingredients
+
+```javascript
+const isVariantCompatible = (variant) => {
+  // Check avoided ingredients first
+  if (userAvoidedIngredients.length > 0 && variant.linked_ingredients) {
+    const hasAvoided = variant.linked_ingredients.some(
+      ing => userAvoidedIngredients.map(a => a.id).includes(ing.ingredient_id)
+    )
+    if (hasAvoided) return false
+  }
+
+  // Check tag preferences
+  // ... exclusion and positive tag logic
+}
+```
 
 ### Reminder Day Calculation
 

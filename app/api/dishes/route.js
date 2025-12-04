@@ -18,13 +18,33 @@ export async function GET(request) {
     const { searchParams } = new URL(request.url)
     const category = searchParams.get('category')
     const activeOnly = searchParams.get('active') === 'true'
+    const season = searchParams.get('season')
+
+    const includeVariants = searchParams.get('includeVariants') === 'true'
 
     let result
-    if (category && activeOnly) {
+    if (category && activeOnly && season) {
+      // Filtrer par categorie, actif et saison
+      result = await sql`
+        SELECT * FROM dishes
+        WHERE category = ${category}
+        AND active = true
+        AND (seasons @> ${JSON.stringify([season])}::jsonb OR seasons @> '["toutes"]'::jsonb)
+        ORDER BY name
+      `
+    } else if (category && activeOnly) {
       result = await sql`
         SELECT * FROM dishes
         WHERE category = ${category} AND active = true
         ORDER BY name
+      `
+    } else if (activeOnly && season) {
+      // Filtrer par actif et saison
+      result = await sql`
+        SELECT * FROM dishes
+        WHERE active = true
+        AND (seasons @> ${JSON.stringify([season])}::jsonb OR seasons @> '["toutes"]'::jsonb)
+        ORDER BY category, name
       `
     } else if (category) {
       result = await sql`
@@ -43,6 +63,41 @@ export async function GET(request) {
         SELECT * FROM dishes
         ORDER BY category, name
       `
+    }
+
+    // Si demandé, inclure les variantes pour chaque plat
+    if (includeVariants) {
+      const dishesWithVariants = await Promise.all(
+        result.rows.map(async (dish) => {
+          const variants = await sql`
+            SELECT * FROM dish_variants
+            WHERE dish_id = ${dish.id} AND active = true
+            ORDER BY is_default DESC, name ASC
+          `
+
+          // Pour chaque variante, récupérer ses ingrédients liés
+          const variantsWithIngredients = await Promise.all(
+            variants.rows.map(async (variant) => {
+              const ingredients = await sql`
+                SELECT vi.*, i.name as ingredient_name, i.dietary_tags
+                FROM variant_ingredients vi
+                JOIN ingredients i ON i.id = vi.ingredient_id
+                WHERE vi.variant_id = ${variant.id}
+              `
+              return {
+                ...variant,
+                linked_ingredients: ingredients.rows
+              }
+            })
+          )
+
+          return {
+            ...dish,
+            variants: variantsWithIngredients
+          }
+        })
+      )
+      return NextResponse.json(dishesWithVariants)
     }
 
     return NextResponse.json(result.rows)
@@ -66,7 +121,7 @@ export async function POST(request) {
       )
     }
 
-    const { name, category, description, ingredients } = await request.json()
+    const { name, category, description, ingredients, seasons } = await request.json()
 
     if (!name || !category) {
       return NextResponse.json(
@@ -75,9 +130,12 @@ export async function POST(request) {
       )
     }
 
+    // Par defaut, plat disponible toute l'annee
+    const dishSeasons = seasons && seasons.length > 0 ? seasons : ['toutes']
+
     const result = await sql`
-      INSERT INTO dishes (name, category, description, ingredients, active)
-      VALUES (${name}, ${category}, ${description || ''}, ${JSON.stringify(ingredients || [])}, true)
+      INSERT INTO dishes (name, category, description, ingredients, seasons, active)
+      VALUES (${name}, ${category}, ${description || ''}, ${JSON.stringify(ingredients || [])}, ${JSON.stringify(dishSeasons)}, true)
       RETURNING *
     `
 
@@ -102,7 +160,7 @@ export async function PUT(request) {
       )
     }
 
-    const { id, name, category, description, ingredients, active } = await request.json()
+    const { id, name, category, description, ingredients, seasons, active } = await request.json()
 
     if (!id || !name || !category) {
       return NextResponse.json(
@@ -111,12 +169,16 @@ export async function PUT(request) {
       )
     }
 
+    // Par defaut, plat disponible toute l'annee
+    const dishSeasons = seasons && seasons.length > 0 ? seasons : ['toutes']
+
     const result = await sql`
       UPDATE dishes
       SET name = ${name},
           category = ${category},
           description = ${description || ''},
           ingredients = ${JSON.stringify(ingredients || [])},
+          seasons = ${JSON.stringify(dishSeasons)},
           active = ${active !== undefined ? active : true},
           updated_at = CURRENT_TIMESTAMP
       WHERE id = ${id}

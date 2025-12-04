@@ -24,7 +24,13 @@
       "WebSearch",
       "Bash(dir .next)",
       "Bash(dir nul)",
-      "Bash(.gitignore)"
+      "Bash(.gitignore)",
+      "Bash(dir:*)",
+      "mcp__ide__getDiagnostics",
+      "Bash(npm run build:*)",
+      "Bash(where:*)",
+      "Bash(node run-migration.js:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []

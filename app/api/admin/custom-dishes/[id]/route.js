@@ -51,12 +51,42 @@ export async function PUT(request, { params }) {
       )
     }
 
-    // TODO: Envoyer notification à l'utilisateur
-    // Ce sera implémenté dans la phase 5
+    const updatedRequest = result.rows[0]
+
+    // Envoyer notification à l'utilisateur si statut changé (approved/rejected)
+    if (status === 'approved' || status === 'rejected') {
+      try {
+        // Récupérer les infos de l'utilisateur
+        const userResult = await sql`
+          SELECT id, name, email, notification_phone
+          FROM users
+          WHERE id = ${updatedRequest.user_id}
+        `
+
+        if (userResult.rows.length > 0) {
+          const user = userResult.rows[0]
+
+          const { notifyUserCustomDishResponse } = await import('@/lib/notifications')
+
+          await notifyUserCustomDishResponse({
+            userId: user.id,
+            userName: user.name,
+            userEmail: user.email,
+            userPhone: user.notification_phone,
+            dishName: updatedRequest.dish_name,
+            status: status,
+            adminNotes: admin_notes
+          })
+        }
+      } catch (notifError) {
+        console.error('Erreur notification utilisateur:', notifError)
+        // Ne pas bloquer la mise à jour si la notification échoue
+      }
+    }
 
     return NextResponse.json({
       message: 'Demande mise à jour avec succès',
-      request: result.rows[0]
+      request: updatedRequest
     })
   } catch (error) {
     console.error('Erreur lors de la mise à jour de la demande:', error)
