@@ -549,9 +549,11 @@ export default function OnboardingModal({ userName, userEmail, onComplete }) {
               {formData.household_size > BASE_PERSONS && (
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
                   <p className="text-sm text-amber-800 mb-3">
-                    <strong>Note :</strong> Pour {formData.household_size} personnes, le tarif est de{' '}
-                    <strong>{formData.household_size * PRICE_PER_PERSON_PER_WEEK}€/semaine</strong>{' '}
-                    (soit +{(formData.household_size - BASE_PERSONS) * PRICE_PER_PERSON_PER_WEEK}€ par rapport au forfait {BASE_PERSONS} personnes)
+                    <strong>Tarif :</strong> {PRICE_PER_PERSON_PER_WEEK}€ par personne et par semaine
+                    <br />
+                    <span className="text-amber-600">
+                      Soit <strong>{formData.household_size * PRICE_PER_PERSON_PER_WEEK}€/semaine</strong> pour {formData.household_size} personne{formData.household_size > 1 ? 's' : ''}
+                    </span>
                   </p>
                   <label className="flex items-start gap-3 cursor-pointer">
                     <input
@@ -561,7 +563,7 @@ export default function OnboardingModal({ userName, userEmail, onComplete }) {
                       onChange={(e) => setFormData({ ...formData, extra_fee_accepted: e.target.checked })}
                     />
                     <span className="text-sm text-amber-900">
-                      J'accepte le supplement tarifaire de {PRICE_PER_PERSON_PER_WEEK}€/semaine par personne
+                      J'accepte le tarif de {PRICE_PER_PERSON_PER_WEEK}€ par personne et par semaine
                     </span>
                   </label>
                 </div>

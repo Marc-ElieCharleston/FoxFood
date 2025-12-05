@@ -240,10 +240,14 @@ export default function AdminTestPage() {
 
             {formData.householdSize > 4 && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                <p className="text-sm text-amber-800">
-                  <strong>Note :</strong> Pour les foyers de plus de 4 personnes, un supplément de 20€/semaine s'applique pour couvrir les quantités supplémentaires.
+                <p className="text-sm text-amber-800 mb-3">
+                  <strong>Tarif :</strong> 20€ par personne et par semaine
+                  <br />
+                  <span className="text-amber-600">
+                    Soit <strong>{formData.householdSize * 20}€/semaine</strong> pour {formData.householdSize} personnes
+                  </span>
                 </p>
-                <label className="flex items-start gap-3 mt-3 cursor-pointer">
+                <label className="flex items-start gap-3 cursor-pointer">
                   <input
                     type="checkbox"
                     className="mt-1 w-4 h-4 text-primary-600"
@@ -251,7 +255,7 @@ export default function AdminTestPage() {
                     onChange={(e) => setFormData({ ...formData, extraFeeAccepted: e.target.checked })}
                   />
                   <span className="text-sm text-amber-900">
-                    J'accepte le supplément tarifaire de 20€/semaine
+                    J'accepte le tarif de 20€ par personne et par semaine
                   </span>
                 </label>
               </div>
