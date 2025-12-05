@@ -16,6 +16,7 @@ export default function SettingsPage() {
   const [householdLoading, setHouseholdLoading] = useState(true)
   const [regeneratingCode, setRegeneratingCode] = useState(false)
   const [leavingHousehold, setLeavingHousehold] = useState(false)
+  const [creatingHousehold, setCreatingHousehold] = useState(false)
 
   const [settings, setSettings] = useState({
     delivery_day: '',
@@ -179,6 +180,30 @@ export default function SettingsPage() {
       toast.error('Erreur lors de la sortie du foyer')
     } finally {
       setLeavingHousehold(false)
+    }
+  }
+
+  const handleCreateHousehold = async () => {
+    try {
+      setCreatingHousehold(true)
+      const response = await fetch('/api/household', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: `Foyer de ${session?.user?.name || 'Mon foyer'}` })
+      })
+      const data = await response.json()
+
+      if (response.ok) {
+        toast.success('Foyer créé avec succès !')
+        fetchHousehold() // Recharger les infos du foyer
+      } else {
+        toast.error(data.error || 'Erreur lors de la création')
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de la création du foyer')
+    } finally {
+      setCreatingHousehold(false)
     }
   }
 
@@ -564,13 +589,24 @@ export default function SettingsPage() {
               <p className="text-gray-600 mb-4">
                 Vous n'appartenez à aucun foyer.
               </p>
-              <div className="flex gap-3 justify-center">
+              <p className="text-sm text-gray-500 mb-4">
+                Créez un foyer pour inviter votre partenaire, ou rejoignez un foyer existant.
+              </p>
+              <div className="flex gap-3 justify-center flex-wrap">
+                <button
+                  type="button"
+                  onClick={handleCreateHousehold}
+                  disabled={creatingHousehold}
+                  className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700 disabled:opacity-50"
+                >
+                  {creatingHousehold ? 'Création...' : '➕ Créer mon foyer'}
+                </button>
                 <button
                   type="button"
                   onClick={() => router.push('/rejoindre')}
-                  className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-700"
+                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300"
                 >
-                  Rejoindre un foyer
+                  🔗 Rejoindre un foyer
                 </button>
               </div>
             </div>
