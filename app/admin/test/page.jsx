@@ -5,17 +5,24 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import AdminNav from '@/components/AdminNav'
 
+// Configuration des prix (même que OnboardingModal)
+const PRICE_PER_PERSON_PER_WEEK = 20
+const BASE_PERSONS = 4
+
 export default function AdminTestPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
 
   // État pour simuler l'onboarding
   const [step, setStep] = useState(1)
+  const [joinMode, setJoinMode] = useState(false)
+  const [joinCode, setJoinCode] = useState('')
   const [formData, setFormData] = useState({
     householdName: '',
     deliveryDay: '',
     deliveryTimeSlot: '',
     householdSize: 2,
+    extraFeeAccepted: false,
     reminders: {
       day5: { enabled: false, email: false, sms: false },
       day3: { enabled: true, email: true, sms: false },
@@ -62,11 +69,14 @@ export default function AdminTestPage() {
 
   const resetDemo = () => {
     setStep(1)
+    setJoinMode(false)
+    setJoinCode('')
     setFormData({
       householdName: '',
       deliveryDay: '',
       deliveryTimeSlot: '',
       householdSize: 2,
+      extraFeeAccepted: false,
       reminders: {
         day5: { enabled: false, email: false, sms: false },
         day3: { enabled: true, email: true, sms: false },
@@ -84,43 +94,114 @@ export default function AdminTestPage() {
     switch (step) {
       case 1:
         return (
-          <div className="space-y-6">
-            <div className="text-center">
-              <span className="text-5xl block mb-4">🏠</span>
-              <h3 className="text-xl font-bold text-gray-800">Nom de votre foyer</h3>
-              <p className="text-gray-500 text-sm mt-2">
-                Donnez un nom à votre foyer pour le personnaliser
-              </p>
-            </div>
+          <div className="space-y-5">
+            {!joinMode ? (
+              <>
+                <div className="text-center">
+                  <span className="text-4xl block mb-3">🏠</span>
+                  <h3 className="text-lg font-bold text-gray-800">Créer votre foyer</h3>
+                  <p className="text-gray-500 text-sm mt-1">
+                    Donnez un nom à votre foyer
+                  </p>
+                </div>
 
-            <div>
-              <input
-                type="text"
-                value={formData.householdName}
-                onChange={(e) => setFormData({ ...formData, householdName: e.target.value })}
-                placeholder="Ex: Famille Dupont, Chez nous..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-center"
-              />
-            </div>
+                <input
+                  type="text"
+                  value={formData.householdName}
+                  onChange={(e) => setFormData({ ...formData, householdName: e.target.value })}
+                  placeholder="Ex: Chez les Dupont, Notre nid..."
+                  className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-center"
+                />
 
-            <button
-              onClick={() => setStep(2)}
-              disabled={!formData.householdName.trim()}
-              className="w-full py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
-            >
-              Continuer
-            </button>
+                <div className="pt-4 border-t">
+                  <p className="text-center text-sm text-gray-500 mb-3">
+                    Votre partenaire a déjà un foyer ?
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => setJoinMode(true)}
+                    className="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition"
+                  >
+                    🔗 Rejoindre un foyer existant
+                  </button>
+                </div>
+
+                <button
+                  onClick={() => setStep(2)}
+                  disabled={!formData.householdName.trim()}
+                  className="w-full py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+                >
+                  Continuer
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="text-center">
+                  <span className="text-4xl block mb-3">🔗</span>
+                  <h3 className="text-lg font-bold text-gray-800">Rejoindre un foyer</h3>
+                  <p className="text-gray-500 text-sm mt-1">
+                    Entrez le code d'invitation de votre partenaire
+                  </p>
+                </div>
+
+                <input
+                  type="text"
+                  value={joinCode}
+                  onChange={(e) => setJoinCode(e.target.value.toUpperCase().slice(0, 6))}
+                  placeholder="ABC123"
+                  className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 text-center text-2xl font-mono tracking-widest uppercase"
+                  maxLength={6}
+                />
+
+                {joinCode.length === 6 && (
+                  <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                    <div className="flex items-center gap-3">
+                      <span className="text-2xl">✅</span>
+                      <div>
+                        <p className="font-semibold text-green-800">Foyer trouvé !</p>
+                        <p className="text-sm text-green-700">
+                          <strong>Foyer Demo</strong> · 2 membres
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {joinCode.length === 6 && (
+                  <button
+                    type="button"
+                    onClick={() => setStep(5)}
+                    className="w-full py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 transition"
+                  >
+                    ✓ Rejoindre ce foyer
+                  </button>
+                )}
+
+                <div className="pt-4 border-t">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setJoinMode(false)
+                      setJoinCode('')
+                    }}
+                    className="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition"
+                  >
+                    ← Créer mon propre foyer
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         )
 
       case 2:
         return (
-          <div className="space-y-6">
+          <div className="space-y-5">
             <div className="text-center">
-              <span className="text-5xl block mb-4">📅</span>
-              <h3 className="text-xl font-bold text-gray-800">Passage d'Emeric</h3>
-              <p className="text-gray-500 text-sm mt-2">
-                Quand souhaitez-vous qu'Emeric passe chez vous ?
+              <span className="text-4xl block mb-3">📅</span>
+              <h3 className="text-lg font-bold text-gray-800">Passage d'Emeric</h3>
+              <p className="text-gray-500 text-sm mt-1">
+                Quand souhaitez-vous qu'Emeric passe ?
               </p>
             </div>
 
@@ -154,7 +235,7 @@ export default function AdminTestPage() {
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, deliveryTimeSlot: 'morning' })}
-                  className={`py-4 px-4 rounded-xl text-center transition ${
+                  className={`py-4 px-3 rounded-xl text-center transition ${
                     formData.deliveryTimeSlot === 'morning'
                       ? 'bg-primary-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -167,7 +248,7 @@ export default function AdminTestPage() {
                 <button
                   type="button"
                   onClick={() => setFormData({ ...formData, deliveryTimeSlot: 'afternoon' })}
-                  className={`py-4 px-4 rounded-xl text-center transition ${
+                  className={`py-4 px-3 rounded-xl text-center transition ${
                     formData.deliveryTimeSlot === 'afternoon'
                       ? 'bg-primary-600 text-white'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -200,62 +281,74 @@ export default function AdminTestPage() {
 
       case 3:
         return (
-          <div className="space-y-6">
+          <div className="space-y-5">
             <div className="text-center">
-              <span className="text-5xl block mb-4">👥</span>
-              <h3 className="text-xl font-bold text-gray-800">Nombre de personnes</h3>
-              <p className="text-gray-500 text-sm mt-2">
-                Combien de personnes mangent dans votre foyer ?
+              <span className="text-4xl block mb-3">👥</span>
+              <h3 className="text-lg font-bold text-gray-800">Nombre de personnes</h3>
+              <p className="text-gray-500 text-sm mt-1">
+                Combien de personnes dans votre foyer ?
               </p>
             </div>
 
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-              <p className="text-sm text-blue-800">
-                <strong>Info :</strong> Le nombre de personnes influence les quantités préparées par Emeric pour chaque plat.
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
+              <p className="text-sm text-blue-800 text-center">
+                <strong>{PRICE_PER_PERSON_PER_WEEK}€ / personne / semaine</strong>
+              </p>
+              <p className="text-xs text-blue-600 text-center mt-1">
+                Cela détermine les quantités préparées
               </p>
             </div>
 
-            <div>
-              <div className="flex items-center justify-center gap-4">
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, householdSize: Math.max(1, formData.householdSize - 1) })}
-                  className="w-12 h-12 rounded-full bg-gray-200 text-gray-700 text-2xl font-bold hover:bg-gray-300 transition"
-                >
-                  -
-                </button>
-                <div className="text-center">
-                  <span className="text-5xl font-bold text-primary-600">{formData.householdSize}</span>
-                  <p className="text-sm text-gray-500 mt-1">personne{formData.householdSize > 1 ? 's' : ''}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => setFormData({ ...formData, householdSize: Math.min(10, formData.householdSize + 1) })}
-                  className="w-12 h-12 rounded-full bg-gray-200 text-gray-700 text-2xl font-bold hover:bg-gray-300 transition"
-                >
-                  +
-                </button>
+            <div className="flex items-center justify-center gap-4">
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, householdSize: Math.max(1, formData.householdSize - 1) })}
+                className="w-12 h-12 rounded-full bg-gray-200 text-gray-700 text-2xl font-bold hover:bg-gray-300 transition"
+              >
+                -
+              </button>
+              <div className="text-center px-4">
+                <span className="text-5xl font-bold text-primary-600">{formData.householdSize}</span>
+                <p className="text-sm text-gray-500 mt-1">personne{formData.householdSize > 1 ? 's' : ''}</p>
               </div>
+              <button
+                type="button"
+                onClick={() => setFormData({ ...formData, householdSize: Math.min(10, formData.householdSize + 1) })}
+                className="w-12 h-12 rounded-full bg-gray-200 text-gray-700 text-2xl font-bold hover:bg-gray-300 transition"
+              >
+                +
+              </button>
             </div>
 
-            {formData.householdSize > 4 && (
+            {/* Affichage du prix total */}
+            <div className="bg-primary-50 border border-primary-200 rounded-xl p-4 text-center">
+              <p className="text-sm text-primary-700">Estimation hebdomadaire</p>
+              <p className="text-3xl font-bold text-primary-600 mt-1">
+                {formData.householdSize * PRICE_PER_PERSON_PER_WEEK}€<span className="text-lg font-normal">/semaine</span>
+              </p>
+              <p className="text-xs text-primary-500 mt-2">
+                {formData.householdSize} personne{formData.householdSize > 1 ? 's' : ''} × {PRICE_PER_PERSON_PER_WEEK}€
+              </p>
+            </div>
+
+            {formData.householdSize > BASE_PERSONS && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
                 <p className="text-sm text-amber-800 mb-3">
-                  <strong>Tarif :</strong> 20€ par personne et par semaine
+                  <strong>Tarif :</strong> {PRICE_PER_PERSON_PER_WEEK}€ par personne et par semaine
                   <br />
                   <span className="text-amber-600">
-                    Soit <strong>{formData.householdSize * 20}€/semaine</strong> pour {formData.householdSize} personnes
+                    Soit <strong>{formData.householdSize * PRICE_PER_PERSON_PER_WEEK}€/semaine</strong> pour {formData.householdSize} personne{formData.householdSize > 1 ? 's' : ''}
                   </span>
                 </p>
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
                     type="checkbox"
-                    className="mt-1 w-4 h-4 text-primary-600"
-                    checked={formData.extraFeeAccepted || false}
+                    className="mt-0.5 w-5 h-5 text-amber-600 rounded"
+                    checked={formData.extraFeeAccepted}
                     onChange={(e) => setFormData({ ...formData, extraFeeAccepted: e.target.checked })}
                   />
                   <span className="text-sm text-amber-900">
-                    J'accepte le tarif de 20€ par personne et par semaine
+                    J'accepte le tarif de {PRICE_PER_PERSON_PER_WEEK}€ par personne et par semaine
                   </span>
                 </label>
               </div>
@@ -270,7 +363,7 @@ export default function AdminTestPage() {
               </button>
               <button
                 onClick={() => setStep(4)}
-                disabled={formData.householdSize > 4 && !formData.extraFeeAccepted}
+                disabled={formData.householdSize > BASE_PERSONS && !formData.extraFeeAccepted}
                 className="flex-1 py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
                 Continuer
@@ -281,18 +374,18 @@ export default function AdminTestPage() {
 
       case 4:
         return (
-          <div className="space-y-6">
+          <div className="space-y-5">
             <div className="text-center">
-              <span className="text-5xl block mb-4">🔔</span>
-              <h3 className="text-xl font-bold text-gray-800">Vos rappels</h3>
-              <p className="text-gray-500 text-sm mt-2">
-                Configurez quand vous souhaitez être rappelé de faire votre sélection
+              <span className="text-4xl block mb-3">🔔</span>
+              <h3 className="text-lg font-bold text-gray-800">Vos rappels</h3>
+              <p className="text-gray-500 text-sm mt-1">
+                Quand voulez-vous être rappelé ?
               </p>
             </div>
 
             <div className="space-y-3">
-              {/* Rappel 5 jours */}
-              <div className={`border rounded-xl p-4 transition ${formData.reminders.day5.enabled ? 'border-primary-300 bg-primary-50' : 'border-gray-200 bg-gray-50'}`}>
+              {/* 5 jours */}
+              <div className={`border rounded-xl p-3.5 transition ${formData.reminders.day5.enabled ? 'border-primary-300 bg-primary-50' : 'border-gray-200 bg-gray-50'}`}>
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
@@ -302,11 +395,10 @@ export default function AdminTestPage() {
                   />
                   <div className="flex-1">
                     <span className="font-medium text-sm">5 jours avant</span>
-                    <p className="text-xs text-gray-500">Rappel anticipé</p>
                   </div>
                 </label>
                 {formData.reminders.day5.enabled && (
-                  <div className="mt-3 ml-8 flex gap-4">
+                  <div className="mt-2 ml-8 flex gap-4">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="checkbox"
@@ -329,8 +421,8 @@ export default function AdminTestPage() {
                 )}
               </div>
 
-              {/* Rappel 3 jours */}
-              <div className={`border rounded-xl p-4 transition ${formData.reminders.day3.enabled ? 'border-primary-300 bg-primary-50' : 'border-gray-200 bg-gray-50'}`}>
+              {/* 3 jours */}
+              <div className={`border rounded-xl p-3.5 transition ${formData.reminders.day3.enabled ? 'border-primary-300 bg-primary-50' : 'border-gray-200 bg-gray-50'}`}>
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
@@ -338,14 +430,13 @@ export default function AdminTestPage() {
                     onChange={() => handleReminderToggle('day3')}
                     className="w-5 h-5 text-primary-600 rounded"
                   />
-                  <div className="flex-1">
+                  <div className="flex-1 flex items-center gap-2">
                     <span className="font-medium text-sm">3 jours avant</span>
-                    <p className="text-xs text-gray-500">Rappel recommandé</p>
+                    <span className="text-xs bg-primary-100 text-primary-700 px-2 py-0.5 rounded-full">Populaire</span>
                   </div>
-                  <span className="text-xs bg-primary-100 text-primary-700 px-2 py-1 rounded-full">Populaire</span>
                 </label>
                 {formData.reminders.day3.enabled && (
-                  <div className="mt-3 ml-8 flex gap-4">
+                  <div className="mt-2 ml-8 flex gap-4">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="checkbox"
@@ -368,8 +459,8 @@ export default function AdminTestPage() {
                 )}
               </div>
 
-              {/* Rappel 1 jour */}
-              <div className={`border rounded-xl p-4 transition ${formData.reminders.day1.enabled ? 'border-primary-300 bg-primary-50' : 'border-gray-200 bg-gray-50'}`}>
+              {/* 1 jour */}
+              <div className={`border rounded-xl p-3.5 transition ${formData.reminders.day1.enabled ? 'border-primary-300 bg-primary-50' : 'border-gray-200 bg-gray-50'}`}>
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
@@ -377,14 +468,13 @@ export default function AdminTestPage() {
                     onChange={() => handleReminderToggle('day1')}
                     className="w-5 h-5 text-primary-600 rounded"
                   />
-                  <div className="flex-1">
+                  <div className="flex-1 flex items-center gap-2">
                     <span className="font-medium text-sm">1 jour avant</span>
-                    <p className="text-xs text-gray-500">Rappel de dernière minute</p>
+                    <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">Urgent</span>
                   </div>
-                  <span className="text-xs bg-amber-100 text-amber-700 px-2 py-1 rounded-full">Urgent</span>
                 </label>
                 {formData.reminders.day1.enabled && (
-                  <div className="mt-3 ml-8 flex gap-4">
+                  <div className="mt-2 ml-8 flex gap-4">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="checkbox"
@@ -428,57 +518,63 @@ export default function AdminTestPage() {
 
       case 5:
         return (
-          <div className="space-y-6">
+          <div className="space-y-5">
             <div className="text-center">
-              <span className="text-6xl block mb-4">🎉</span>
-              <h3 className="text-2xl font-bold text-gray-800">C'est tout bon !</h3>
-              <p className="text-gray-500 mt-2">
-                Votre foyer est configuré
-              </p>
+              <span className="text-5xl block mb-3">🎉</span>
+              <h3 className="text-xl font-bold text-gray-800">C'est tout bon !</h3>
+              <p className="text-gray-500 text-sm mt-1">Votre foyer est configuré</p>
             </div>
 
             {/* Récap */}
-            <div className="bg-gray-50 rounded-xl p-4 space-y-3">
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Foyer</span>
-                <span className="font-medium">{formData.householdName}</span>
+            <div className="bg-gray-50 rounded-xl p-4 space-y-2 text-sm">
+              <div className="flex justify-between">
+                <span className="text-gray-500">Foyer</span>
+                <span className="font-medium">{formData.householdName || 'Demo'}</span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Passage</span>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Passage</span>
                 <span className="font-medium">
                   {formData.deliveryDay} {formData.deliveryTimeSlot === 'morning' ? 'matin' : 'après-midi'}
                 </span>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Personnes</span>
+              <div className="flex justify-between">
+                <span className="text-gray-500">Personnes</span>
                 <span className="font-medium">{formData.householdSize}</span>
-              </div>
-              <div className="flex justify-between items-center">
-                <span className="text-sm text-gray-600">Rappels</span>
-                <span className="font-medium">
-                  {[
-                    formData.reminders.day5.enabled && '5j',
-                    formData.reminders.day3.enabled && '3j',
-                    formData.reminders.day1.enabled && '1j'
-                  ].filter(Boolean).join(', ') || 'Aucun'}
-                </span>
               </div>
             </div>
 
-            {/* Code d'invitation simulé */}
-            <div className="bg-primary-50 border border-primary-200 rounded-xl p-4 text-center">
-              <p className="text-sm text-primary-800 mb-2">Code d'invitation pour votre foyer</p>
-              <p className="text-3xl font-mono font-bold text-primary-600 tracking-wider">ABC123</p>
-              <p className="text-xs text-primary-600 mt-2">
-                Partagez ce code pour inviter d'autres membres
+            {/* Code d'invitation */}
+            <div className="mb-4">
+              <p className="text-sm text-gray-600 text-center mb-3">
+                Invitez votre partenaire à rejoindre votre foyer
               </p>
+              <div className="bg-primary-50 border border-primary-200 rounded-xl p-4 text-center mb-3">
+                <p className="text-xs text-primary-600 mb-1">Code d'invitation</p>
+                <p className="text-2xl font-mono font-bold tracking-widest text-primary-600">
+                  ABC123
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  onClick={() => alert('Lien copié ! (demo)')}
+                  className="flex items-center justify-center gap-2 py-2.5 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200"
+                >
+                  📋 Copier
+                </button>
+                <button
+                  onClick={() => alert('Ouverture WhatsApp (demo)')}
+                  className="flex items-center justify-center gap-2 py-2.5 bg-green-500 text-white rounded-lg text-sm font-medium hover:bg-green-600"
+                >
+                  💬 WhatsApp
+                </button>
+              </div>
             </div>
 
             <button
               onClick={resetDemo}
               className="w-full py-3 bg-primary-600 text-white rounded-xl font-bold hover:bg-primary-700 transition"
             >
-              Recommencer la démo
+              Choisir mes plats (démo)
             </button>
           </div>
         )
@@ -492,7 +588,7 @@ export default function AdminTestPage() {
     <div className="max-w-7xl mx-auto min-h-[calc(100vh-200px)]">
       <div className="mb-8">
         <h1 className="text-2xl md:text-3xl font-bold mb-2">Test Onboarding</h1>
-        <p className="text-gray-600 text-sm">Prévisualisation du parcours d'inscription</p>
+        <p className="text-gray-600 text-sm">Prévisualisation du parcours d'inscription (synchronisé avec le vrai onboarding)</p>
       </div>
 
       <AdminNav />
@@ -514,18 +610,18 @@ export default function AdminTestPage() {
               </div>
 
               {/* Header modal */}
-              <div className="bg-gradient-to-r from-primary-500 to-primary-600 p-4 text-white text-center">
-                <p className="text-sm opacity-90">Bienvenue sur FoxFood</p>
+              <div className="bg-gradient-to-r from-primary-500 to-primary-600 p-4 text-white">
+                <p className="text-primary-100 text-sm">Bienvenue sur FoxFood !</p>
                 <h2 className="text-lg font-bold">Configuration</h2>
                 {/* Progress */}
-                <div className="flex justify-center gap-1.5 mt-3">
+                <div className="mt-3 flex gap-1.5">
                   {[1, 2, 3, 4].map(s => (
                     <div
                       key={s}
                       className={`h-1.5 rounded-full transition-all ${
-                        s < step ? 'w-6 bg-white' :
-                        s === step ? 'w-6 bg-white' :
-                        'w-1.5 bg-white/50'
+                        s < step ? 'flex-1 bg-white' :
+                        s === step ? 'flex-1 bg-white' :
+                        'w-1.5 bg-white/40'
                       }`}
                     />
                   ))}
@@ -554,7 +650,7 @@ export default function AdminTestPage() {
                   <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step > 1 ? 'bg-green-100 text-green-600' : step === 1 ? 'bg-primary-100 text-primary-600' : 'bg-gray-100'}`}>
                     {step > 1 ? '✓' : '1'}
                   </span>
-                  Nom du foyer
+                  Nom du foyer / Rejoindre
                 </li>
                 <li className={`flex items-center gap-2 ${step === 2 ? 'text-primary-600 font-medium' : ''}`}>
                   <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step > 2 ? 'bg-green-100 text-green-600' : step === 2 ? 'bg-primary-100 text-primary-600' : 'bg-gray-100'}`}>
@@ -566,7 +662,7 @@ export default function AdminTestPage() {
                   <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step > 3 ? 'bg-green-100 text-green-600' : step === 3 ? 'bg-primary-100 text-primary-600' : 'bg-gray-100'}`}>
                     {step > 3 ? '✓' : '3'}
                   </span>
-                  Nombre de personnes
+                  Nombre de personnes ({PRICE_PER_PERSON_PER_WEEK}€/pers/sem)
                 </li>
                 <li className={`flex items-center gap-2 ${step === 4 ? 'text-primary-600 font-medium' : ''}`}>
                   <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step > 4 ? 'bg-green-100 text-green-600' : step === 4 ? 'bg-primary-100 text-primary-600' : 'bg-gray-100'}`}>
