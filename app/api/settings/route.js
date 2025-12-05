@@ -27,7 +27,8 @@ export async function GET(request) {
         receive_notifications,
         settings_completed,
         dietary_preferences,
-        avoided_ingredients
+        avoided_ingredients,
+        household_size
       FROM users
       WHERE id = ${userId}
       LIMIT 1
@@ -74,6 +75,7 @@ export async function POST(request) {
       receive_notifications,
       dietary_preferences,
       avoided_ingredients,
+      household_size,
       reminders
     } = await request.json()
 
@@ -115,6 +117,7 @@ export async function POST(request) {
         receive_notifications = ${receive_notifications !== false},
         dietary_preferences = ${JSON.stringify(dietary_preferences || [])}::jsonb,
         avoided_ingredients = ${JSON.stringify(avoided_ingredients || [])}::jsonb,
+        household_size = ${household_size || 1},
         settings_completed = true,
         updated_at = CURRENT_TIMESTAMP
       WHERE id = ${userId}

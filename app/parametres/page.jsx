@@ -25,7 +25,8 @@ export default function SettingsPage() {
     notification_email: '',
     receive_notifications: true,
     dietary_preferences: [],
-    avoided_ingredients: []
+    avoided_ingredients: [],
+    household_size: 1
   })
 
   const [dietaryTags, setDietaryTags] = useState([])
@@ -218,7 +219,8 @@ export default function SettingsPage() {
             notification_email: data.notification_email || session?.user?.email || '',
             receive_notifications: data.receive_notifications !== false,
             dietary_preferences: dietaryPrefs,
-            avoided_ingredients: avoidedIngs
+            avoided_ingredients: avoidedIngs,
+            household_size: data.household_size || 1
           })
 
           // Charger les rappels configurés
@@ -416,6 +418,48 @@ export default function SettingsPage() {
         {/* Section 2: Mon foyer */}
         <div className="border-b pb-6">
           <h2 className="text-lg font-bold mb-4">🏠 Mon foyer</h2>
+
+          {/* Nombre de personnes */}
+          <div className="mb-6">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Nombre de personnes à nourrir *
+            </label>
+            <p className="text-xs text-gray-500 mb-2">
+              Utilisé pour calculer les quantités d'ingrédients
+            </p>
+            <div className="flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => setSettings(prev => ({ ...prev, household_size: Math.max(1, (prev.household_size || 1) - 1) }))}
+                className="w-10 h-10 rounded-full bg-gray-100 text-gray-700 font-bold hover:bg-gray-200 transition"
+              >
+                -
+              </button>
+              <span className="text-2xl font-bold text-primary-600 w-12 text-center">
+                {settings.household_size || 1}
+              </span>
+              <button
+                type="button"
+                onClick={() => setSettings(prev => ({ ...prev, household_size: Math.min(10, (prev.household_size || 1) + 1) }))}
+                className="w-10 h-10 rounded-full bg-gray-100 text-gray-700 font-bold hover:bg-gray-200 transition"
+              >
+                +
+              </button>
+              <span className="text-sm text-gray-500">personne{(settings.household_size || 1) > 1 ? 's' : ''}</span>
+            </div>
+            {settings.household_size > 4 && (
+              <p className="text-xs text-amber-600 mt-2">
+                ⚠️ Un supplément de 20€/semaine s'applique au-delà de 4 personnes
+              </p>
+            )}
+          </div>
+
+          <hr className="mb-4" />
+
+          <h3 className="text-md font-semibold mb-3">👥 Foyer partagé (optionnel)</h3>
+          <p className="text-xs text-gray-500 mb-4">
+            Partagez vos sélections avec d'autres membres de votre famille
+          </p>
 
           {householdLoading ? (
             <div className="text-center py-4 text-gray-500">Chargement...</div>

@@ -687,7 +687,13 @@ export default function AdminPage() {
           onClick={() => router.push('/admin/ingredients')}
           className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm"
         >
-          Ingredients
+          Ingrédients
+        </button>
+        <button
+          onClick={() => router.push('/admin/recap')}
+          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm"
+        >
+          📋 Récap
         </button>
         <button
           onClick={() => router.push('/admin/plats-personnalises')}
@@ -705,7 +711,7 @@ export default function AdminPage() {
           onClick={() => router.push('/admin/parametres')}
           className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm"
         >
-          Parametres
+          Paramètres
         </button>
       </div>
 

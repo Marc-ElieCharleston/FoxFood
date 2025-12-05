@@ -44,8 +44,10 @@ export default function Home() {
   const [selectedDishForVariant, setSelectedDishForVariant] = useState(null)
   const [userDietaryPreferences, setUserDietaryPreferences] = useState([])
   const [userAvoidedIngredients, setUserAvoidedIngredients] = useState([])
+  const [userHouseholdSize, setUserHouseholdSize] = useState(1)
   const [favorites, setFavorites] = useState([])
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
+  const [showIngredientsSummary, setShowIngredientsSummary] = useState(false)
 
   const MAX_DISHES_PER_WEEK = 5
   const MAX_WEEKS = 4
@@ -242,6 +244,10 @@ export default function Home() {
           let avoided = data.avoided_ingredients
           if (typeof avoided === 'string') avoided = JSON.parse(avoided)
           setUserAvoidedIngredients(avoided || [])
+        }
+        // Charger le nombre de personnes
+        if (data?.household_size) {
+          setUserHouseholdSize(data.household_size)
         }
       }
     } catch (error) {
@@ -637,6 +643,90 @@ export default function Home() {
     vegetation: { name: 'Végétarien', emoji: '🥗', color: 'bg-green-500' }
   }
 
+  // Catégories d'ingrédients pour le récap
+  const ingredientCategoryLabels = {
+    viande: { name: 'Viandes', emoji: '🥩' },
+    poisson: { name: 'Poissons & Fruits de mer', emoji: '🐟' },
+    legume: { name: 'Légumes', emoji: '🥬' },
+    fruit: { name: 'Fruits', emoji: '🍎' },
+    feculent: { name: 'Féculents', emoji: '🍚' },
+    produit_laitier: { name: 'Produits laitiers', emoji: '🧀' },
+    epice: { name: 'Épices & Condiments', emoji: '🧂' },
+    autre: { name: 'Autres', emoji: '📦' }
+  }
+
+  // Collecter tous les ingrédients des plats sélectionnés par semaine
+  const getIngredientsForWeek = (weekIndex) => {
+    const weekKey = `week${weekIndex}`
+    const weekData = weeklySelections[weekKey]
+    const weekDishIds = weekData?.dishes || []
+    const weekVariants = weekData?.variants || {}
+
+    const ingredientsMap = {}
+
+    weekDishIds.forEach(dishId => {
+      const dish = dishes.find(d => d.id === dishId)
+      if (!dish) return
+
+      const variantId = weekVariants[dishId]
+      const variant = dish.variants?.find(v => v.id === variantId) || dish.variants?.[0]
+
+      if (variant?.linked_ingredients) {
+        variant.linked_ingredients.forEach(ing => {
+          const key = `${ing.ingredient_id}`
+          if (ingredientsMap[key]) {
+            // Additionner les quantités si même ingrédient
+            ingredientsMap[key].quantity += parseFloat(ing.quantity || 1)
+          } else {
+            ingredientsMap[key] = {
+              id: ing.ingredient_id,
+              name: ing.ingredient_name || ing.name,
+              category: ing.ingredient_category || ing.category || 'autre',
+              quantity: parseFloat(ing.quantity || 1),
+              unit: ing.unit || ''
+            }
+          }
+        })
+      }
+    })
+
+    // Grouper par catégorie
+    const grouped = {}
+    Object.values(ingredientsMap).forEach(ing => {
+      const cat = ing.category || 'autre'
+      if (!grouped[cat]) grouped[cat] = []
+      grouped[cat].push({
+        ...ing,
+        // Multiplier par le nombre de personnes
+        totalQuantity: ing.quantity * userHouseholdSize
+      })
+    })
+
+    return grouped
+  }
+
+  // Collecter tous les ingrédients de toutes les semaines
+  const getAllIngredients = () => {
+    const allIngredients = {}
+
+    for (let i = 0; i < MAX_WEEKS; i++) {
+      const weekIngredients = getIngredientsForWeek(i)
+      Object.entries(weekIngredients).forEach(([category, ingredients]) => {
+        if (!allIngredients[category]) allIngredients[category] = []
+        ingredients.forEach(ing => {
+          const existing = allIngredients[category].find(e => e.id === ing.id)
+          if (existing) {
+            existing.totalQuantity += ing.totalQuantity
+          } else {
+            allIngredients[category].push({ ...ing })
+          }
+        })
+      })
+    }
+
+    return allIngredients
+  }
+
   const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
   const timeSlots = ['Matin (8h-12h)', 'Midi (12h-14h)', 'Après-midi (14h-18h)', 'Soir (18h-20h)']
 
@@ -805,6 +895,59 @@ export default function Home() {
             <p className="text-sm text-gray-500 mb-4">
               Le jour et créneau de passage sont configurés dans vos paramètres.
             </p>
+
+            {/* Section ingrédients */}
+            <div className="border-t pt-4 mb-4">
+              <button
+                type="button"
+                onClick={() => setShowIngredientsSummary(!showIngredientsSummary)}
+                className="w-full flex items-center justify-between text-left"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-lg">🥕</span>
+                  <span className="font-semibold">Liste des ingrédients</span>
+                  <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">
+                    {userHouseholdSize} pers.
+                  </span>
+                </div>
+                <span className="text-gray-400">{showIngredientsSummary ? '▲' : '▼'}</span>
+              </button>
+
+              {showIngredientsSummary && (
+                <div className="mt-4 space-y-4">
+                  {Object.entries(getAllIngredients()).length === 0 ? (
+                    <p className="text-sm text-gray-500 italic">
+                      Aucun ingrédient lié aux plats sélectionnés
+                    </p>
+                  ) : (
+                    Object.entries(getAllIngredients())
+                      .sort(([a], [b]) => {
+                        const order = ['viande', 'poisson', 'legume', 'fruit', 'feculent', 'produit_laitier', 'epice', 'autre']
+                        return order.indexOf(a) - order.indexOf(b)
+                      })
+                      .map(([category, ingredients]) => (
+                        <div key={category} className="bg-gray-50 rounded-lg p-3">
+                          <h5 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                            <span>{ingredientCategoryLabels[category]?.emoji || '📦'}</span>
+                            {ingredientCategoryLabels[category]?.name || category}
+                          </h5>
+                          <ul className="space-y-1">
+                            {ingredients.map(ing => (
+                              <li key={ing.id} className="text-sm flex justify-between">
+                                <span>{ing.name}</span>
+                                <span className="text-gray-500">
+                                  {ing.totalQuantity % 1 === 0 ? ing.totalQuantity : ing.totalQuantity.toFixed(1)}
+                                  {ing.unit && ` ${ing.unit}`}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ))
+                  )}
+                </div>
+              )}
+            </div>
 
             <button
               onClick={handleSaveSelection}
