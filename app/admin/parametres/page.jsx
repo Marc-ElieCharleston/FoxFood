@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import AdminNav from '@/components/AdminNav'
 
 export default function AdminSettingsPage() {
   const { data: session, status } = useSession()
@@ -109,39 +110,7 @@ export default function AdminSettingsPage() {
         </p>
       </div>
 
-      {/* Navigation admin */}
-      <div className="mb-6 flex gap-2 flex-wrap">
-        <button
-          onClick={() => router.push('/admin')}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm"
-        >
-          Catalogue
-        </button>
-        <button
-          onClick={() => router.push('/admin/plats-personnalises')}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm"
-        >
-          Plats perso
-        </button>
-        <button
-          onClick={() => router.push('/admin/utilisateurs')}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm"
-        >
-          Utilisateurs
-        </button>
-        <button
-          onClick={() => router.push('/admin/parametres')}
-          className="px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold text-sm"
-        >
-          Paramètres
-        </button>
-        <button
-          onClick={() => router.push('/admin/test')}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm"
-        >
-          Test
-        </button>
-      </div>
+      <AdminNav />
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 space-y-6">
         {/* Section 1: Coordonnées de notification */}

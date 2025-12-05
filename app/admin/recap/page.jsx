@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import { generateAdminWeeklyRecapPDF } from '@/lib/pdf-generator'
+import AdminNav from '@/components/AdminNav'
 
 export default function AdminRecapPage() {
   const { data: session, status } = useSession()
@@ -82,45 +83,7 @@ export default function AdminRecapPage() {
         </p>
       </div>
 
-      {/* Navigation admin */}
-      <div className="mb-6 flex gap-2 flex-wrap">
-        <button
-          onClick={() => router.push('/admin')}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm"
-        >
-          Catalogue
-        </button>
-        <button
-          onClick={() => router.push('/admin/ingredients')}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm"
-        >
-          Ingrédients
-        </button>
-        <button
-          onClick={() => router.push('/admin/recap')}
-          className="px-4 py-2 bg-primary-600 text-white rounded-lg font-semibold text-sm"
-        >
-          Récap
-        </button>
-        <button
-          onClick={() => router.push('/admin/plats-personnalises')}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm"
-        >
-          Plats perso
-        </button>
-        <button
-          onClick={() => router.push('/admin/utilisateurs')}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm"
-        >
-          Utilisateurs
-        </button>
-        <button
-          onClick={() => router.push('/admin/parametres')}
-          className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition text-sm"
-        >
-          Paramètres
-        </button>
-      </div>
+      <AdminNav />
 
       {/* Sélecteur de semaine */}
       <div className="mb-6 flex items-center gap-3">
