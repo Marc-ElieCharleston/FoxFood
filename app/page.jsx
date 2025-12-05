@@ -1228,7 +1228,8 @@ export default function Home() {
           {filteredDishes.map(dish => {
             const isSelected = selectedDishes.includes(dish.id)
             const selectedVariant = getSelectedVariant(dish)
-            const hasMultipleVariants = dish.variants && dish.variants.length > 1
+            const compatibleVariants = getCompatibleVariants(dish)
+            const hasMultipleCompatibleVariants = compatibleVariants.length > 1
 
             // Obtenir les tags de la variante selectionnee
             let variantTags = []
@@ -1275,9 +1276,14 @@ export default function Home() {
                           {selectedVariant.name}
                         </span>
                       )}
-                      {hasMultipleVariants && !isSelected && (
-                        <span className="text-xs text-purple-500">
-                          🏷️ {dish.variants.length} options
+                      {hasMultipleCompatibleVariants && !isSelected && (
+                        <span className="text-xs text-purple-500" title={compatibleVariants.map(v => v.name).join(', ')}>
+                          🏷️ {compatibleVariants.map(v => v.name).join(' • ')}
+                        </span>
+                      )}
+                      {compatibleVariants.length === 1 && !isSelected && compatibleVariants[0]?.name !== 'Classique' && (
+                        <span className="text-xs bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded">
+                          {compatibleVariants[0].name}
                         </span>
                       )}
                       {getSeasonEmojis(dish.seasons) && (
@@ -1343,7 +1349,7 @@ export default function Home() {
             </div>
 
             <div className="space-y-2">
-              {selectedDishForVariant.variants?.map(variant => {
+              {getCompatibleVariants(selectedDishForVariant).map(variant => {
                 let tags = variant.tags || []
                 if (typeof tags === 'string') tags = JSON.parse(tags)
 
@@ -1361,7 +1367,7 @@ export default function Home() {
                       <span className="font-medium">{variant.name}</span>
                       {variant.is_default && (
                         <span className="text-xs bg-purple-200 text-purple-700 px-2 py-0.5 rounded-full">
-                          Recommande
+                          Recommandé
                         </span>
                       )}
                     </div>
