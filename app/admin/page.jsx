@@ -1606,7 +1606,17 @@ export default function AdminPage() {
                   <li>• <strong>Catégorie</strong> : viandes, poissons ou vegetation</li>
                   <li>• <strong>Description</strong> : Description du plat</li>
                   <li>• <strong>Saisons</strong> : printemps, ete, automne, hiver, toutes</li>
+                  <li>• <strong>Ingrédients</strong> : format <code className="bg-blue-100 px-1 rounded">quantité+unité:nom</code></li>
                 </ul>
+                <div className="mt-3 pt-3 border-t border-blue-200">
+                  <p className="text-xs text-blue-600 font-medium mb-1">Exemple d'ingrédients :</p>
+                  <code className="text-xs text-blue-800 bg-blue-100 px-2 py-1 rounded block">
+                    200g:poulet, 100g:riz, 2pc:oeufs, 1c.a.s:huile
+                  </code>
+                  <p className="text-xs text-blue-600 mt-2">
+                    Unités : g, kg, ml, L, pc (pièce), c.a.s (cuillère)
+                  </p>
+                </div>
               </div>
 
               {/* Télécharger template */}

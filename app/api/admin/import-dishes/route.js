@@ -44,6 +44,59 @@ export async function POST(request) {
       errors: [...errors]
     }
 
+    // Cache des ingrédients pour éviter les requêtes répétées
+    const ingredientCache = new Map()
+
+    // Fonction pour obtenir ou créer un ingrédient
+    const getOrCreateIngredient = async (ingredientName, unit) => {
+      const normalizedName = ingredientName.toLowerCase().trim()
+
+      // Vérifier le cache
+      if (ingredientCache.has(normalizedName)) {
+        return ingredientCache.get(normalizedName)
+      }
+
+      // Chercher dans la base
+      const existing = await sql`
+        SELECT id, name, category, default_unit FROM ingredients
+        WHERE LOWER(name) = ${normalizedName}
+      `
+
+      if (existing.rows.length > 0) {
+        ingredientCache.set(normalizedName, existing.rows[0])
+        return existing.rows[0]
+      }
+
+      // Créer le nouvel ingrédient
+      // Deviner la catégorie basée sur le nom
+      let category = 'autre'
+      const nameLower = normalizedName
+      if (/poulet|boeuf|porc|agneau|veau|canard|dinde|lapin|jambon|lardon|saucisse|viande/.test(nameLower)) {
+        category = 'viande'
+      } else if (/saumon|thon|cabillaud|crevette|moule|poisson|fruit.?de.?mer|calamar/.test(nameLower)) {
+        category = 'poisson'
+      } else if (/carotte|oignon|tomate|courgette|aubergine|poivron|haricot|petit.?pois|épinard|salade|légume|champignon|brocoli|chou/.test(nameLower)) {
+        category = 'legume'
+      } else if (/pomme(?!.?de.?terre)|poire|banane|orange|citron|fraise|fruit|raisin|mangue/.test(nameLower)) {
+        category = 'fruit'
+      } else if (/riz|pâte|pasta|pomme.?de.?terre|semoule|quinoa|lentille|pois.?chiche|féculent|pain/.test(nameLower)) {
+        category = 'feculent'
+      } else if (/lait|crème|fromage|beurre|yaourt|parmesan|mozzarella|gruyère/.test(nameLower)) {
+        category = 'produit_laitier'
+      } else if (/sel|poivre|curry|cumin|paprika|herbe|thym|romarin|basilic|persil|épice|huile|vinaigre|sauce|moutarde|ail|échalote/.test(nameLower)) {
+        category = 'epice'
+      }
+
+      const newIngredient = await sql`
+        INSERT INTO ingredients (name, category, default_unit, active)
+        VALUES (${ingredientName.trim()}, ${category}, ${unit || 'g'}, true)
+        RETURNING id, name, category, default_unit
+      `
+
+      ingredientCache.set(normalizedName, newIngredient.rows[0])
+      return newIngredient.rows[0]
+    }
+
     for (const dish of dishes) {
       try {
         // Vérifier si le plat existe déjà (par nom)
@@ -63,11 +116,34 @@ export async function POST(request) {
           RETURNING id, name
         `
 
+        const dishId = result.rows[0].id
+
         // Créer automatiquement une variante "Classique" par défaut
-        await sql`
+        const variantResult = await sql`
           INSERT INTO dish_variants (dish_id, name, tags, is_default, active)
-          VALUES (${result.rows[0].id}, 'Classique', '[]', true, true)
+          VALUES (${dishId}, 'Classique', '[]', true, true)
+          RETURNING id
         `
+
+        const variantId = variantResult.rows[0].id
+
+        // Ajouter les ingrédients à la variante
+        if (dish.ingredients && dish.ingredients.length > 0) {
+          for (const ing of dish.ingredients) {
+            try {
+              const ingredient = await getOrCreateIngredient(ing.name, ing.unit)
+
+              // Lier l'ingrédient à la variante
+              await sql`
+                INSERT INTO variant_ingredients (variant_id, ingredient_id, quantity, unit)
+                VALUES (${variantId}, ${ingredient.id}, ${ing.quantity}, ${ing.unit})
+              `
+            } catch (ingErr) {
+              console.error(`Erreur ingrédient "${ing.name}":`, ingErr)
+              // Continuer malgré l'erreur d'un ingrédient
+            }
+          }
+        }
 
         results.inserted.push(dish.name)
       } catch (err) {
