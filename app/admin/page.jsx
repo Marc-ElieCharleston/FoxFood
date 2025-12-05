@@ -42,6 +42,10 @@ export default function AdminPage() {
   // States pour les ingrédients liés
   const [allIngredients, setAllIngredients] = useState([])
   const [variantLinkedIngredients, setVariantLinkedIngredients] = useState([])
+
+  // State pour la modal des ingrédients d'un plat
+  const [showIngredientsModal, setShowIngredientsModal] = useState(false)
+  const [selectedDishIngredients, setSelectedDishIngredients] = useState(null)
   const [ingredientSearch, setIngredientSearch] = useState('')
   const [showIngredientSearch, setShowIngredientSearch] = useState(false)
   const [newIngredientQty, setNewIngredientQty] = useState(100)
@@ -176,6 +180,40 @@ export default function AdminPage() {
       setDietaryTags(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error('Erreur lors du chargement des tags:', error)
+    }
+  }
+
+  // Ouvrir la modal des ingrédients d'un plat
+  const openIngredientsModal = async (dish) => {
+    setSelectedDishIngredients({ ...dish, loadingIngredients: true, variantIngredients: [] })
+    setShowIngredientsModal(true)
+
+    try {
+      // Récupérer les variantes du plat avec leurs ingrédients
+      const response = await fetch(`/api/variants?dishId=${dish.id}`)
+      const variantsData = await response.json()
+
+      // Pour chaque variante, récupérer les ingrédients liés
+      const variantsWithIngredients = await Promise.all(
+        (Array.isArray(variantsData) ? variantsData : []).map(async (variant) => {
+          try {
+            const ingResponse = await fetch(`/api/variant-ingredients?variantId=${variant.id}`)
+            const ingData = await ingResponse.json()
+            return { ...variant, linkedIngredients: Array.isArray(ingData) ? ingData : [] }
+          } catch {
+            return { ...variant, linkedIngredients: [] }
+          }
+        })
+      )
+
+      setSelectedDishIngredients(prev => ({
+        ...prev,
+        loadingIngredients: false,
+        variantIngredients: variantsWithIngredients
+      }))
+    } catch (error) {
+      console.error('Erreur:', error)
+      setSelectedDishIngredients(prev => ({ ...prev, loadingIngredients: false }))
     }
   }
 
@@ -1079,25 +1117,25 @@ export default function AdminPage() {
             <table className="w-full table-fixed">
               <thead>
                 <tr className="bg-gradient-to-r from-primary-50 to-primary-100 border-b border-primary-200">
-                  <th className="w-[20%] px-4 py-3 text-left text-xs font-semibold text-primary-700 uppercase tracking-wider">
+                  <th className="w-[22%] px-4 py-3 text-left text-xs font-semibold text-primary-700 uppercase tracking-wider">
                     Nom du plat
                   </th>
-                  <th className="w-[10%] px-3 py-3 text-left text-xs font-semibold text-primary-700 uppercase tracking-wider">
+                  <th className="w-[9%] px-3 py-3 text-left text-xs font-semibold text-primary-700 uppercase tracking-wider">
                     Cat.
                   </th>
-                  <th className="w-[8%] px-2 py-3 text-center text-xs font-semibold text-primary-700 uppercase tracking-wider">
+                  <th className="w-[7%] px-2 py-3 text-center text-xs font-semibold text-primary-700 uppercase tracking-wider">
                     Saisons
                   </th>
-                  <th className="w-[6%] px-2 py-3 text-center text-xs font-semibold text-primary-700 uppercase tracking-wider">
+                  <th className="w-[5%] px-2 py-3 text-center text-xs font-semibold text-primary-700 uppercase tracking-wider">
                     Ing.
                   </th>
-                  <th className="w-[26%] px-3 py-3 text-left text-xs font-semibold text-primary-700 uppercase tracking-wider">
+                  <th className="w-[30%] px-3 py-3 text-left text-xs font-semibold text-primary-700 uppercase tracking-wider">
                     Description
                   </th>
-                  <th className="w-[8%] px-2 py-3 text-center text-xs font-semibold text-primary-700 uppercase tracking-wider">
+                  <th className="w-[10%] px-2 py-3 text-center text-xs font-semibold text-primary-700 uppercase tracking-wider">
                     Statut
                   </th>
-                  <th className="w-[22%] px-3 py-3 text-right text-xs font-semibold text-primary-700 uppercase tracking-wider">
+                  <th className="w-[17%] px-3 py-3 text-right text-xs font-semibold text-primary-700 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -1109,9 +1147,9 @@ export default function AdminPage() {
                     className={`${!dish.active ? 'opacity-40' : ''} ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-primary-50 transition-colors`}
                   >
                     <td className="px-4 py-3">
-                      <div className="flex items-center gap-2">
-                        <div className={`w-2 h-2 rounded-full flex-shrink-0 ${dish.active ? 'bg-success-500' : 'bg-gray-300'}`}></div>
-                        <span className="text-sm font-medium text-gray-900 truncate">{dish.name}</span>
+                      <div className="flex items-start gap-2">
+                        <div className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${dish.active ? 'bg-success-500' : 'bg-gray-300'}`}></div>
+                        <span className="text-sm font-medium text-gray-900 line-clamp-2" title={dish.name}>{dish.name}</span>
                       </div>
                     </td>
                     <td className="px-3 py-3">
@@ -1129,26 +1167,26 @@ export default function AdminPage() {
                       </span>
                     </td>
                     <td className="px-2 py-3 text-center">
-                      {getIngredientsCount(dish.ingredients) > 0 ? (
-                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
-                          {getIngredientsCount(dish.ingredients)}
-                        </span>
-                      ) : (
-                        <span className="text-gray-400 text-xs">-</span>
-                      )}
+                      <button
+                        onClick={() => openIngredientsModal(dish)}
+                        className="p-1.5 text-amber-600 bg-amber-50 rounded-full hover:bg-amber-100 transition-colors"
+                        title="Voir les ingrédients"
+                      >
+                        🔍
+                      </button>
                     </td>
                     <td className="px-3 py-3">
-                      <p className="text-sm text-gray-600 truncate" title={dish.description || ''}>
+                      <p className="text-sm text-gray-600 line-clamp-2" title={dish.description || ''}>
                         {dish.description || <span className="text-gray-400 italic">-</span>}
                       </p>
                     </td>
                     <td className="px-2 py-3 text-center">
-                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                      <span className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
                         dish.active
                           ? 'bg-success-100 text-success-700'
                           : 'bg-gray-100 text-gray-600'
                       }`}>
-                        {dish.active ? '✓' : '○'}
+                        {dish.active ? '✓ Actif' : '○ Inactif'}
                       </span>
                     </td>
                     <td className="px-3 py-3 text-right">
@@ -1700,6 +1738,95 @@ export default function AdminPage() {
                     className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium"
                   >
                     Importer un autre fichier
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal des ingrédients */}
+      {showIngredientsModal && selectedDishIngredients && (
+        <div className="fixed inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
+              <div>
+                <h2 className="text-lg font-bold">🥕 Ingrédients</h2>
+                <p className="text-sm text-gray-600">{selectedDishIngredients.name}</p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowIngredientsModal(false)
+                  setSelectedDishIngredients(null)
+                }}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="p-6">
+              {selectedDishIngredients.loadingIngredients ? (
+                <div className="text-center py-8 text-gray-500">Chargement...</div>
+              ) : selectedDishIngredients.variantIngredients?.length === 0 ? (
+                <div className="text-center py-8">
+                  <p className="text-gray-500 mb-3">Aucune variante avec ingrédients</p>
+                  <button
+                    onClick={() => {
+                      setShowIngredientsModal(false)
+                      openVariantsModal(selectedDishIngredients)
+                    }}
+                    className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700"
+                  >
+                    🏷️ Gérer les variantes
+                  </button>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <p className="text-xs text-gray-500 bg-amber-50 border border-amber-200 rounded-lg p-3">
+                    💡 Quantités affichées <strong>pour 1 personne</strong>. Les quantités seront multipliées par le nombre de personnes du foyer.
+                  </p>
+
+                  {selectedDishIngredients.variantIngredients?.map(variant => {
+                    if (!variant.linkedIngredients || variant.linkedIngredients.length === 0) return null
+
+                    return (
+                      <div key={variant.id} className="border rounded-lg overflow-hidden">
+                        <div className={`px-4 py-2 font-medium text-sm flex items-center gap-2 ${
+                          variant.is_default ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-700'
+                        }`}>
+                          <span>{variant.name}</span>
+                          {variant.is_default && (
+                            <span className="text-xs bg-purple-200 px-2 py-0.5 rounded-full">Par défaut</span>
+                          )}
+                        </div>
+                        <div className="divide-y">
+                          {variant.linkedIngredients.map((ing, idx) => (
+                            <div key={idx} className="px-4 py-2 flex justify-between items-center text-sm">
+                              <span className="text-gray-700">{ing.ingredient_name}</span>
+                              <span className="text-gray-500 font-medium">
+                                {ing.quantity === 0 ? (
+                                  <span className="text-amber-600 italic">qsp</span>
+                                ) : (
+                                  <>{ing.quantity % 1 === 0 ? ing.quantity : ing.quantity.toFixed(1)} {ing.unit}</>
+                                )}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )
+                  })}
+
+                  <button
+                    onClick={() => {
+                      setShowIngredientsModal(false)
+                      openVariantsModal(selectedDishIngredients)
+                    }}
+                    className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200"
+                  >
+                    ✏️ Modifier les ingrédients
                   </button>
                 </div>
               )}
