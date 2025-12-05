@@ -75,7 +75,7 @@ export default function AdminRecapPage() {
   }
 
   return (
-    <div className="max-w-6xl mx-auto min-h-[calc(100vh-200px)]">
+    <div className="max-w-7xl mx-auto min-h-[calc(100vh-200px)]">
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold mb-2">📋 Récap de la semaine</h1>
         <p className="text-gray-600 text-sm">
