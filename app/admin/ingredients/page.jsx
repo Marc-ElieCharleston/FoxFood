@@ -47,6 +47,7 @@ export default function IngredientsPage() {
     { value: 'oeuf', label: 'Oeuf', emoji: '🥚' },
     { value: 'epice', label: 'Epice', emoji: '🌶️' },
     { value: 'condiment', label: 'Condiment', emoji: '🫒' },
+    { value: 'surgele', label: 'Surgelé', emoji: '❄️' },
     { value: 'autre', label: 'Autre', emoji: '📦' },
   ]
 

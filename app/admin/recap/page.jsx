@@ -44,18 +44,44 @@ export default function AdminRecapPage() {
     }
   }
 
-  const ingredientCategoryLabels = {
-    viande: { name: 'Viandes', emoji: '🥩' },
-    poisson: { name: 'Poissons & Fruits de mer', emoji: '🐟' },
-    legume: { name: 'Légumes', emoji: '🥬' },
-    fruit: { name: 'Fruits', emoji: '🍎' },
-    feculent: { name: 'Féculents', emoji: '🍚' },
-    produit_laitier: { name: 'Produits laitiers', emoji: '🧀' },
-    epice: { name: 'Épices & Condiments', emoji: '🧂' },
-    autre: { name: 'Autres', emoji: '📦' }
+  // Regrouper les catégories en rayons de courses
+  const shoppingCategories = {
+    frais: {
+      name: 'Frais',
+      emoji: '🥩',
+      categories: ['viande', 'poisson', 'produit_laitier', 'oeuf']
+    },
+    legumes: {
+      name: 'Légumes & Fruits',
+      emoji: '🥬',
+      categories: ['legume', 'fruit']
+    },
+    epicerie: {
+      name: 'Épicerie',
+      emoji: '🛒',
+      categories: ['feculent', 'epice', 'condiment', 'fruits_a_coque', 'autre']
+    },
+    surgeles: {
+      name: 'Surgelés',
+      emoji: '❄️',
+      categories: ['surgele']
+    }
   }
 
-  const categoryOrder = ['viande', 'poisson', 'legume', 'fruit', 'feculent', 'produit_laitier', 'epice', 'autre']
+  const shoppingOrder = ['frais', 'legumes', 'epicerie', 'surgeles']
+
+  // Fonction pour regrouper les ingrédients par rayon
+  const getShoppingItems = (shoppingCat) => {
+    if (!weekData?.ingredients) return []
+    const { categories } = shoppingCategories[shoppingCat]
+    const items = []
+    categories.forEach(cat => {
+      if (weekData.ingredients[cat]) {
+        items.push(...weekData.ingredients[cat])
+      }
+    })
+    return items.sort((a, b) => a.name.localeCompare(b.name))
+  }
 
   if (status === 'loading' || loading) {
     return <div className="text-center py-12">Chargement...</div>
@@ -221,27 +247,31 @@ export default function AdminRecapPage() {
                 </p>
               ) : (
                 <div className="space-y-4">
-                  {categoryOrder
-                    .filter(cat => weekData.ingredients[cat]?.length > 0)
-                    .map(category => (
-                      <div key={category} className="border rounded-lg p-3">
-                        <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                          <span>{ingredientCategoryLabels[category]?.emoji || '📦'}</span>
-                          {ingredientCategoryLabels[category]?.name || category}
-                        </h4>
-                        <ul className="space-y-1">
-                          {weekData.ingredients[category].map((ing, idx) => (
-                            <li key={idx} className="text-sm flex justify-between">
-                              <span>{ing.name}</span>
-                              <span className="text-gray-500 font-medium">
-                                {ing.totalQuantity % 1 === 0 ? ing.totalQuantity : ing.totalQuantity.toFixed(1)}
-                                {ing.unit && ` ${ing.unit}`}
-                              </span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-                    ))}
+                  {shoppingOrder
+                    .filter(shoppingCat => getShoppingItems(shoppingCat).length > 0)
+                    .map(shoppingCat => {
+                      const items = getShoppingItems(shoppingCat)
+                      const { name, emoji } = shoppingCategories[shoppingCat]
+                      return (
+                        <div key={shoppingCat} className="border rounded-lg p-3">
+                          <h4 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                            <span>{emoji}</span>
+                            {name}
+                          </h4>
+                          <ul className="space-y-1">
+                            {items.map((ing, idx) => (
+                              <li key={idx} className="text-sm flex justify-between">
+                                <span>{ing.name}</span>
+                                <span className="text-gray-500 font-medium">
+                                  {ing.totalQuantity % 1 === 0 ? ing.totalQuantity : ing.totalQuantity.toFixed(1)}
+                                  {ing.unit && ` ${ing.unit}`}
+                                </span>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      )
+                    })}
                 </div>
               )}
             </div>
