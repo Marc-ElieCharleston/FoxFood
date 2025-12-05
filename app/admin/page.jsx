@@ -1075,29 +1075,29 @@ export default function AdminPage() {
           </div>
 
           {/* Vue desktop - Table améliorée */}
-          <div className="hidden lg:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <table className="min-w-full">
+          <div className="hidden lg:block bg-white rounded-lg shadow-sm border border-gray-200 overflow-x-auto">
+            <table className="w-full table-fixed">
               <thead>
                 <tr className="bg-gradient-to-r from-primary-50 to-primary-100 border-b border-primary-200">
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-primary-700 uppercase tracking-wider">
+                  <th className="w-[20%] px-4 py-3 text-left text-xs font-semibold text-primary-700 uppercase tracking-wider">
                     Nom du plat
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-primary-700 uppercase tracking-wider">
-                    Catégorie
+                  <th className="w-[10%] px-3 py-3 text-left text-xs font-semibold text-primary-700 uppercase tracking-wider">
+                    Cat.
                   </th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-primary-700 uppercase tracking-wider">
+                  <th className="w-[8%] px-2 py-3 text-center text-xs font-semibold text-primary-700 uppercase tracking-wider">
                     Saisons
                   </th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-primary-700 uppercase tracking-wider">
-                    Ingr.
+                  <th className="w-[6%] px-2 py-3 text-center text-xs font-semibold text-primary-700 uppercase tracking-wider">
+                    Ing.
                   </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-primary-700 uppercase tracking-wider">
+                  <th className="w-[26%] px-3 py-3 text-left text-xs font-semibold text-primary-700 uppercase tracking-wider">
                     Description
                   </th>
-                  <th className="px-6 py-4 text-center text-xs font-semibold text-primary-700 uppercase tracking-wider">
+                  <th className="w-[8%] px-2 py-3 text-center text-xs font-semibold text-primary-700 uppercase tracking-wider">
                     Statut
                   </th>
-                  <th className="px-6 py-4 text-right text-xs font-semibold text-primary-700 uppercase tracking-wider">
+                  <th className="w-[22%] px-3 py-3 text-right text-xs font-semibold text-primary-700 uppercase tracking-wider">
                     Actions
                   </th>
                 </tr>
@@ -1108,71 +1108,71 @@ export default function AdminPage() {
                     key={dish.id}
                     className={`${!dish.active ? 'opacity-40' : ''} ${index % 2 === 0 ? 'bg-white' : 'bg-gray-50'} hover:bg-primary-50 transition-colors`}
                   >
-                    <td className="px-6 py-4">
+                    <td className="px-4 py-3">
                       <div className="flex items-center gap-2">
                         <div className={`w-2 h-2 rounded-full flex-shrink-0 ${dish.active ? 'bg-success-500' : 'bg-gray-300'}`}></div>
-                        <span className="text-sm font-medium text-gray-900">{dish.name}</span>
+                        <span className="text-sm font-medium text-gray-900 truncate">{dish.name}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                        dish.category === 'viandes' ? 'bg-red-100 text-red-700 border border-red-200' :
-                        dish.category === 'poissons' ? 'bg-blue-100 text-blue-700 border border-blue-200' :
-                        'bg-green-100 text-green-700 border border-green-200'
+                    <td className="px-3 py-3">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
+                        dish.category === 'viandes' ? 'bg-red-100 text-red-700' :
+                        dish.category === 'poissons' ? 'bg-blue-100 text-blue-700' :
+                        'bg-green-100 text-green-700'
                       }`}>
                         {categoryLabels[dish.category]}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className="text-lg" title="Saisons disponibles">
+                    <td className="px-2 py-3 text-center">
+                      <span className="text-base" title="Saisons disponibles">
                         {getSeasonEmojis(dish.seasons)}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-center">
+                    <td className="px-2 py-3 text-center">
                       {getIngredientsCount(dish.ingredients) > 0 ? (
-                        <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
-                          🥕 {getIngredientsCount(dish.ingredients)}
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+                          {getIngredientsCount(dish.ingredients)}
                         </span>
                       ) : (
                         <span className="text-gray-400 text-xs">-</span>
                       )}
                     </td>
-                    <td className="px-6 py-4">
-                      <p className="text-sm text-gray-600 max-w-md truncate">
-                        {dish.description || <span className="text-gray-400 italic">Aucune description</span>}
+                    <td className="px-3 py-3">
+                      <p className="text-sm text-gray-600 truncate" title={dish.description || ''}>
+                        {dish.description || <span className="text-gray-400 italic">-</span>}
                       </p>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <span className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                    <td className="px-2 py-3 text-center">
+                      <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                         dish.active
-                          ? 'bg-success-100 text-success-700 border border-success-200'
-                          : 'bg-gray-100 text-gray-600 border border-gray-200'
+                          ? 'bg-success-100 text-success-700'
+                          : 'bg-gray-100 text-gray-600'
                       }`}>
-                        {dish.active ? '✓ Actif' : '○ Inactif'}
+                        {dish.active ? '✓' : '○'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="px-3 py-3 text-right">
+                      <div className="flex items-center justify-end gap-1">
                         <button
                           onClick={() => openVariantsModal(dish)}
-                          className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-purple-600 bg-purple-50 rounded-md hover:bg-purple-100 border border-purple-200 transition-colors"
+                          className="px-2 py-1 text-xs font-medium text-purple-600 bg-purple-50 rounded hover:bg-purple-100 transition-colors"
+                          title="Gérer les variantes"
                         >
-                          <span className="mr-1">🏷️</span>
-                          Variantes
+                          🏷️
                         </button>
                         <button
                           onClick={() => handleEdit(dish)}
-                          className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-secondary-600 bg-secondary-50 rounded-md hover:bg-secondary-100 border border-secondary-200 transition-colors"
+                          className="px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
+                          title="Modifier"
                         >
-                          <span className="mr-1">✏️</span>
-                          Modifier
+                          ✏️
                         </button>
                         <button
                           onClick={() => handleDelete(dish.id)}
-                          className="inline-flex items-center px-3 py-1.5 text-xs font-medium text-danger-600 bg-danger-50 rounded-md hover:bg-danger-100 border border-danger-200 transition-colors"
+                          className="px-2 py-1 text-xs font-medium text-red-600 bg-red-50 rounded hover:bg-red-100 transition-colors"
+                          title="Supprimer"
                         >
-                          <span className="mr-1">🗑️</span>
-                          Supprimer
+                          🗑️
                         </button>
                       </div>
                     </td>
