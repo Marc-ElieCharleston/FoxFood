@@ -14,6 +14,13 @@ export default function OnboardingModal({ userName, userEmail, onComplete }) {
   const [inviteCode, setInviteCode] = useState(null)
   const totalSteps = 4
 
+  // Pour rejoindre un foyer existant
+  const [joinMode, setJoinMode] = useState(false)
+  const [joinCode, setJoinCode] = useState('')
+  const [joiningHousehold, setJoiningHousehold] = useState(false)
+  const [householdToJoin, setHouseholdToJoin] = useState(null)
+  const [checkingCode, setCheckingCode] = useState(false)
+
   const [formData, setFormData] = useState({
     household_name: '',
     delivery_day: '',
@@ -154,6 +161,65 @@ export default function OnboardingModal({ userName, userEmail, onComplete }) {
     window.open(`https://wa.me/?text=${encodeURIComponent(message)}`, '_blank')
   }
 
+  // Vérifier le code d'invitation
+  const checkInviteCode = async (code) => {
+    if (!code || code.length < 6) {
+      setHouseholdToJoin(null)
+      return
+    }
+
+    try {
+      setCheckingCode(true)
+      const response = await fetch(`/api/household/join?code=${code}`)
+      const data = await response.json()
+
+      if (data.valid) {
+        setHouseholdToJoin(data.household)
+      } else {
+        setHouseholdToJoin(null)
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      setHouseholdToJoin(null)
+    } finally {
+      setCheckingCode(false)
+    }
+  }
+
+  // Rejoindre le foyer existant
+  const handleJoinHousehold = async () => {
+    if (!joinCode || !householdToJoin) return
+
+    try {
+      setJoiningHousehold(true)
+      const response = await fetch('/api/household/join', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ inviteCode: joinCode })
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        // Marquer l'onboarding comme terminé
+        await fetch('/api/onboarding', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ joinedExistingHousehold: true })
+        })
+        toast.success('Vous avez rejoint le foyer !')
+        onComplete()
+      } else {
+        toast.error(data.error || 'Erreur lors de la jonction')
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de la jonction au foyer')
+    } finally {
+      setJoiningHousehold(false)
+    }
+  }
+
   // Ecran de succes
   if (showSuccess) {
     return (
@@ -248,24 +314,114 @@ export default function OnboardingModal({ userName, userEmail, onComplete }) {
 
         {/* Content */}
         <div className="p-5">
-          {/* Step 1: Nom du foyer */}
+          {/* Step 1: Nom du foyer ou rejoindre */}
           {step === 1 && (
             <div className="space-y-5">
-              <div className="text-center">
-                <span className="text-4xl block mb-3">🏠</span>
-                <h3 className="text-lg font-bold text-gray-800">Nom de votre foyer</h3>
-                <p className="text-gray-500 text-sm mt-1">
-                  Personnalisez le nom de votre foyer
-                </p>
-              </div>
+              {!joinMode ? (
+                <>
+                  <div className="text-center">
+                    <span className="text-4xl block mb-3">🏠</span>
+                    <h3 className="text-lg font-bold text-gray-800">Créer votre foyer</h3>
+                    <p className="text-gray-500 text-sm mt-1">
+                      Donnez un nom à votre foyer
+                    </p>
+                  </div>
 
-              <input
-                type="text"
-                value={formData.household_name}
-                onChange={(e) => setFormData({ ...formData, household_name: e.target.value })}
-                placeholder="Ex: Chez les Dupont, Notre nid..."
-                className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-center"
-              />
+                  <input
+                    type="text"
+                    value={formData.household_name}
+                    onChange={(e) => setFormData({ ...formData, household_name: e.target.value })}
+                    placeholder="Ex: Chez les Dupont, Notre nid..."
+                    className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 focus:border-primary-500 text-center"
+                  />
+
+                  <div className="pt-4 border-t">
+                    <p className="text-center text-sm text-gray-500 mb-3">
+                      Votre partenaire a déjà un foyer ?
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setJoinMode(true)}
+                      className="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition"
+                    >
+                      🔗 Rejoindre un foyer existant
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="text-center">
+                    <span className="text-4xl block mb-3">🔗</span>
+                    <h3 className="text-lg font-bold text-gray-800">Rejoindre un foyer</h3>
+                    <p className="text-gray-500 text-sm mt-1">
+                      Entrez le code d'invitation de votre partenaire
+                    </p>
+                  </div>
+
+                  <input
+                    type="text"
+                    value={joinCode}
+                    onChange={(e) => {
+                      const code = e.target.value.toUpperCase().slice(0, 6)
+                      setJoinCode(code)
+                      if (code.length === 6) {
+                        checkInviteCode(code)
+                      } else {
+                        setHouseholdToJoin(null)
+                      }
+                    }}
+                    placeholder="ABC123"
+                    className="w-full px-4 py-4 border border-gray-300 rounded-xl focus:ring-2 focus:ring-primary-500 text-center text-2xl font-mono tracking-widest uppercase"
+                    maxLength={6}
+                  />
+
+                  {checkingCode && (
+                    <p className="text-center text-sm text-gray-500">Vérification...</p>
+                  )}
+
+                  {householdToJoin && (
+                    <div className="bg-green-50 border border-green-200 rounded-xl p-4">
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl">✅</span>
+                        <div>
+                          <p className="font-semibold text-green-800">Foyer trouvé !</p>
+                          <p className="text-sm text-green-700">
+                            <strong>{householdToJoin.name || `Foyer de ${householdToJoin.creatorName}`}</strong>
+                            {householdToJoin.memberCount > 0 && (
+                              <> · {householdToJoin.memberCount} membre{householdToJoin.memberCount > 1 ? 's' : ''}</>
+                            )}
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {householdToJoin && (
+                    <button
+                      type="button"
+                      onClick={handleJoinHousehold}
+                      disabled={joiningHousehold}
+                      className="w-full py-3 bg-green-600 text-white rounded-xl font-bold hover:bg-green-700 disabled:opacity-50 transition"
+                    >
+                      {joiningHousehold ? 'Jonction en cours...' : '✓ Rejoindre ce foyer'}
+                    </button>
+                  )}
+
+                  <div className="pt-4 border-t">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setJoinMode(false)
+                        setJoinCode('')
+                        setHouseholdToJoin(null)
+                      }}
+                      className="w-full py-3 bg-gray-100 text-gray-700 rounded-xl font-medium hover:bg-gray-200 transition"
+                    >
+                      ← Créer mon propre foyer
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           )}
 

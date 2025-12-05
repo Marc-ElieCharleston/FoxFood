@@ -15,6 +15,20 @@ export async function POST(request) {
       )
     }
 
+    const body = await request.json()
+    const userId = parseInt(session.user.id)
+
+    // Cas spécial : l'utilisateur rejoint un foyer existant
+    if (body.joinedExistingHousehold) {
+      // Simplement marquer l'onboarding comme terminé
+      await sql`
+        UPDATE users
+        SET onboarding_completed = true, settings_completed = true, updated_at = CURRENT_TIMESTAMP
+        WHERE id = ${userId}
+      `
+      return NextResponse.json({ success: true, message: 'Foyer rejoint avec succès' })
+    }
+
     const {
       household_name,
       delivery_day,
@@ -24,9 +38,7 @@ export async function POST(request) {
       notification_email,
       notification_phone,
       reminders
-    } = await request.json()
-
-    const userId = parseInt(session.user.id)
+    } = body
 
     // Validation
     if (!delivery_day || !delivery_time_slot) {
