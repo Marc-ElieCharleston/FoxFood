@@ -734,7 +734,7 @@ export default function AdminPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto">
+    <div className="max-w-7xl mx-auto min-h-[calc(100vh-200px)]">
       <div className="mb-8">
         <h1 className="text-3xl font-bold mb-2">Administration FoxFood</h1>
         <p className="text-gray-600">Gestion des plats du catalogue</p>
@@ -1436,8 +1436,9 @@ export default function AdminPage() {
                               <option value="kg">kg</option>
                               <option value="ml">ml</option>
                               <option value="L">L</option>
-                              <option value="piece">pc</option>
+                              <option value="pc">pc</option>
                               <option value="c.a.s">c.a.s</option>
+                              <option value="qsp">qsp</option>
                             </select>
                           </div>
 
@@ -1611,10 +1612,13 @@ export default function AdminPage() {
                 <div className="mt-3 pt-3 border-t border-blue-200">
                   <p className="text-xs text-blue-600 font-medium mb-1">Exemple d'ingrédients :</p>
                   <code className="text-xs text-blue-800 bg-blue-100 px-2 py-1 rounded block">
-                    200g:poulet, 100g:riz, 2pc:oeufs, 1c.a.s:huile
+                    200g:poulet, 100g:riz, 2pc:oeufs, 0:sel, 0:poivre
                   </code>
                   <p className="text-xs text-blue-600 mt-2">
                     Unités : g, kg, ml, L, pc (pièce), c.a.s (cuillère)
+                  </p>
+                  <p className="text-xs text-amber-600 mt-1">
+                    💡 <strong>0:sel</strong> = épice à volonté (non calculée par personne)
                   </p>
                 </div>
               </div>

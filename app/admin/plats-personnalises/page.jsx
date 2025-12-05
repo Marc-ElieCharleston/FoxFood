@@ -148,7 +148,7 @@ export default function AdminCustomDishesPage() {
   const pendingCount = requests.filter(r => r.status === 'pending').length
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-4xl mx-auto min-h-[calc(100vh-200px)]">
       <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold mb-2">Plats personnalisés</h1>

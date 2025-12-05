@@ -164,7 +164,7 @@ export default function AdminUsersPage() {
   }
 
   return (
-    <div className="max-w-7xl mx-auto pb-20">
+    <div className="max-w-7xl mx-auto pb-20 min-h-[calc(100vh-200px)]">
       {/* Header */}
       <div className="mb-4">
         <h1 className="text-2xl md:text-3xl font-bold mb-2">Gestion des utilisateurs</h1>

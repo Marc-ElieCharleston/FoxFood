@@ -101,7 +101,7 @@ export default function AdminSettingsPage() {
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="max-w-2xl mx-auto min-h-[calc(100vh-200px)]">
       <div className="mb-6">
         <h1 className="text-2xl md:text-3xl font-bold mb-2">Paramètres Admin</h1>
         <p className="text-gray-600 text-sm">
