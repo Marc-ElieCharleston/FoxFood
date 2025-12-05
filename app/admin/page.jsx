@@ -17,6 +17,10 @@ export default function AdminPage() {
   const [editingDish, setEditingDish] = useState(null)
   const [importing, setImporting] = useState(false)
   const [newIngredient, setNewIngredient] = useState('')
+  const [showImportModal, setShowImportModal] = useState(false)
+  const [importFile, setImportFile] = useState(null)
+  const [importResult, setImportResult] = useState(null)
+  const [importLoading, setImportLoading] = useState(false)
 
   // States pour les variantes
   const [showVariantsModal, setShowVariantsModal] = useState(false)
@@ -537,6 +541,67 @@ export default function AdminPage() {
     }
   }
 
+  // Télécharger le template Excel
+  const handleDownloadTemplate = async () => {
+    try {
+      const response = await fetch('/api/admin/import-dishes')
+      if (response.ok) {
+        const blob = await response.blob()
+        const url = window.URL.createObjectURL(blob)
+        const a = document.createElement('a')
+        a.href = url
+        a.download = 'foxfood-template-plats.xlsx'
+        document.body.appendChild(a)
+        a.click()
+        window.URL.revokeObjectURL(url)
+        document.body.removeChild(a)
+        toast.success('Template téléchargé!')
+      } else {
+        toast.error('Erreur lors du téléchargement')
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors du téléchargement')
+    }
+  }
+
+  // Importer depuis Excel
+  const handleExcelImport = async () => {
+    if (!importFile) {
+      toast.error('Sélectionnez un fichier')
+      return
+    }
+
+    try {
+      setImportLoading(true)
+      const formData = new FormData()
+      formData.append('file', importFile)
+
+      const response = await fetch('/api/admin/import-dishes', {
+        method: 'POST',
+        body: formData
+      })
+
+      const data = await response.json()
+
+      if (response.ok) {
+        setImportResult(data)
+        if (data.summary.inserted > 0) {
+          toast.success(`${data.summary.inserted} plat(s) importé(s)!`)
+          fetchDishes()
+        }
+      } else {
+        setImportResult({ error: data.error, details: data.details })
+        toast.error(data.error || 'Erreur lors de l\'import')
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de l\'import')
+    } finally {
+      setImportLoading(false)
+    }
+  }
+
   const handleSubmit = async (e) => {
     e.preventDefault()
 
@@ -730,6 +795,17 @@ export default function AdminPage() {
           >
             <span className="hidden sm:inline">➕ Nouveau plat</span>
             <span className="sm:hidden">➕ Nouveau</span>
+          </button>
+
+          <button
+            onClick={() => {
+              setShowImportModal(true)
+              setImportFile(null)
+              setImportResult(null)
+            }}
+            className="px-3 py-2 md:px-4 md:py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold text-sm"
+          >
+            📊 Import Excel
           </button>
 
           {dishes.length === 0 && (
@@ -1498,6 +1574,157 @@ export default function AdminPage() {
                     </div>
                   )}
                 </>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal Import Excel */}
+      {showImportModal && (
+        <div className="fixed inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+            <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
+              <div>
+                <h2 className="text-xl font-bold">📊 Import Excel</h2>
+                <p className="text-sm text-gray-500">Importez plusieurs plats depuis un fichier Excel</p>
+              </div>
+              <button
+                onClick={() => setShowImportModal(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              {/* Instructions */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                <h3 className="font-semibold text-blue-800 mb-2">Format attendu :</h3>
+                <ul className="text-sm text-blue-700 space-y-1">
+                  <li>• <strong>Nom</strong> : Nom du plat (obligatoire)</li>
+                  <li>• <strong>Catégorie</strong> : viandes, poissons ou vegetation</li>
+                  <li>• <strong>Description</strong> : Description du plat</li>
+                  <li>• <strong>Saisons</strong> : printemps, ete, automne, hiver, toutes</li>
+                </ul>
+              </div>
+
+              {/* Télécharger template */}
+              <button
+                onClick={handleDownloadTemplate}
+                className="w-full px-4 py-3 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 font-medium flex items-center justify-center gap-2"
+              >
+                <span>📥</span>
+                <span>Télécharger le template Excel</span>
+              </button>
+
+              {/* Upload */}
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center">
+                <input
+                  type="file"
+                  accept=".xlsx,.xls"
+                  onChange={(e) => {
+                    setImportFile(e.target.files[0])
+                    setImportResult(null)
+                  }}
+                  className="hidden"
+                  id="excel-import"
+                />
+                <label
+                  htmlFor="excel-import"
+                  className="cursor-pointer"
+                >
+                  <div className="text-4xl mb-2">📄</div>
+                  {importFile ? (
+                    <p className="text-green-600 font-medium">{importFile.name}</p>
+                  ) : (
+                    <p className="text-gray-500">Cliquez pour sélectionner un fichier .xlsx</p>
+                  )}
+                </label>
+              </div>
+
+              {/* Bouton importer */}
+              {importFile && !importResult && (
+                <button
+                  onClick={handleExcelImport}
+                  disabled={importLoading}
+                  className="w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold disabled:opacity-50"
+                >
+                  {importLoading ? 'Import en cours...' : `Importer ${importFile.name}`}
+                </button>
+              )}
+
+              {/* Résultat de l'import */}
+              {importResult && (
+                <div className="space-y-3">
+                  {importResult.error ? (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+                      <p className="font-semibold text-red-700 mb-2">Erreur : {importResult.error}</p>
+                      {importResult.details && importResult.details.length > 0 && (
+                        <ul className="text-sm text-red-600 space-y-1">
+                          {importResult.details.map((err, i) => (
+                            <li key={i}>• {err}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                      <p className="font-semibold text-green-700 mb-2">Import terminé!</p>
+                      <div className="grid grid-cols-3 gap-4 text-center">
+                        <div>
+                          <p className="text-2xl font-bold text-green-600">{importResult.summary.inserted}</p>
+                          <p className="text-xs text-gray-600">Importés</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-amber-600">{importResult.summary.skipped}</p>
+                          <p className="text-xs text-gray-600">Ignorés</p>
+                        </div>
+                        <div>
+                          <p className="text-2xl font-bold text-red-600">{importResult.summary.errors}</p>
+                          <p className="text-xs text-gray-600">Erreurs</p>
+                        </div>
+                      </div>
+
+                      {/* Détails */}
+                      {importResult.details.inserted.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-green-200">
+                          <p className="text-xs font-medium text-green-700 mb-1">Plats importés :</p>
+                          <p className="text-xs text-green-600">{importResult.details.inserted.join(', ')}</p>
+                        </div>
+                      )}
+
+                      {importResult.details.skipped.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-green-200">
+                          <p className="text-xs font-medium text-amber-700 mb-1">Ignorés (existent déjà) :</p>
+                          <p className="text-xs text-amber-600">{importResult.details.skipped.join(', ')}</p>
+                        </div>
+                      )}
+
+                      {importResult.details.errors.length > 0 && (
+                        <div className="mt-3 pt-3 border-t border-green-200">
+                          <p className="text-xs font-medium text-red-700 mb-1">Erreurs :</p>
+                          <ul className="text-xs text-red-600 space-y-0.5">
+                            {importResult.details.errors.map((err, i) => (
+                              <li key={i}>• {err}</li>
+                            ))}
+                          </ul>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Bouton pour réimporter */}
+                  <button
+                    onClick={() => {
+                      setImportFile(null)
+                      setImportResult(null)
+                    }}
+                    className="w-full px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-medium"
+                  >
+                    Importer un autre fichier
+                  </button>
+                </div>
               )}
             </div>
           </div>

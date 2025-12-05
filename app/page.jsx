@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import OnboardingModal from '@/components/OnboardingModal'
+import { generateOrderRecapPDF } from '@/lib/pdf-generator'
 
 export default function Home() {
   const router = useRouter()
@@ -949,13 +950,57 @@ export default function Home() {
               )}
             </div>
 
-            <button
-              onClick={handleSaveSelection}
-              disabled={saving || getTotalDishesCount() === 0}
-              className="w-full py-3 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {saving ? 'Enregistrement...' : '💾 Enregistrer toutes les semaines'}
-            </button>
+            <div className="flex gap-2">
+              <button
+                onClick={handleSaveSelection}
+                disabled={saving || getTotalDishesCount() === 0}
+                className="flex-1 py-3 bg-primary-600 text-white rounded-lg font-bold hover:bg-primary-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {saving ? 'Enregistrement...' : '💾 Enregistrer'}
+              </button>
+              <button
+                onClick={() => {
+                  // Collecter les plats pour le PDF
+                  const allDishes = []
+                  for (let i = 0; i < MAX_WEEKS; i++) {
+                    const weekKey = `week${i}`
+                    const weekData = weeklySelections[weekKey]
+                    const weekDishIds = weekData?.dishes || []
+                    const weekVariants = weekData?.variants || {}
+
+                    weekDishIds.forEach(dishId => {
+                      const dish = dishes.find(d => d.id === dishId)
+                      if (dish) {
+                        const variantId = weekVariants[dishId]
+                        const variant = dish.variants?.find(v => v.id === variantId)
+                        allDishes.push({
+                          name: dish.name,
+                          variantName: variant?.name || null
+                        })
+                      }
+                    })
+                  }
+
+                  const doc = generateOrderRecapPDF({
+                    clientName: session.user.name,
+                    weekStart: weekDates[0] || new Date().toISOString(),
+                    householdSize: userHouseholdSize,
+                    dishes: allDishes,
+                    ingredients: getAllIngredients(),
+                    deliveryDay: null,
+                    deliveryTime: null
+                  })
+
+                  doc.save(`foxfood-commande-${new Date().toISOString().split('T')[0]}.pdf`)
+                  toast.success('PDF téléchargé!')
+                }}
+                disabled={getTotalDishesCount() === 0}
+                className="px-4 py-3 bg-gray-200 text-gray-700 rounded-lg font-bold hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                title="Télécharger le récap en PDF"
+              >
+                📄
+              </button>
+            </div>
           </div>
         </div>
       )}

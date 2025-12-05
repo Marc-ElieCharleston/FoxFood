@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
+import { generateAdminWeeklyRecapPDF } from '@/lib/pdf-generator'
 
 export default function AdminRecapPage() {
   const { data: session, status } = useSession()
@@ -171,6 +172,25 @@ export default function AdminRecapPage() {
                   <p className="text-2xl font-bold text-amber-600">{weekData.totalPersons || 0}</p>
                   <p className="text-xs text-gray-600">Couverts</p>
                 </div>
+                <button
+                  onClick={() => {
+                    const doc = generateAdminWeeklyRecapPDF({
+                      weekStart: weekData.weekStart,
+                      weekEnd: weekData.weekEnd,
+                      clients: weekData.clients || [],
+                      ingredients: weekData.ingredients || {},
+                      totalDishes: weekData.totalDishes || 0,
+                      totalPersons: weekData.totalPersons || 0
+                    })
+                    doc.save(`foxfood-recap-${weekData.weekStart}.pdf`)
+                    toast.success('PDF téléchargé!')
+                  }}
+                  className="bg-gray-100 px-4 py-2 rounded-lg hover:bg-gray-200 transition flex flex-col items-center justify-center"
+                  title="Télécharger le récap en PDF"
+                >
+                  <span className="text-2xl">📄</span>
+                  <span className="text-xs text-gray-600">PDF</span>
+                </button>
               </div>
             </div>
           </div>
