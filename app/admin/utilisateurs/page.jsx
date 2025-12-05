@@ -15,6 +15,7 @@ export default function AdminUsersPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [filterStatus, setFilterStatus] = useState('all') // all, with_selection, without_selection
   const [filterActive, setFilterActive] = useState('all') // all, active, inactive
+  const [filterOnboarding, setFilterOnboarding] = useState('all') // all, completed, pending
   const [selectedUser, setSelectedUser] = useState(null) // Pour le modal des plats
   const [editingUser, setEditingUser] = useState(null) // Pour le modal d'édition
   const [togglingUser, setTogglingUser] = useState(null) // ID de l'utilisateur en cours de toggle
@@ -153,7 +154,11 @@ export default function AdminUsersPage() {
                          (filterActive === 'active' && user.active !== false) ||
                          (filterActive === 'inactive' && user.active === false)
 
-    return matchesSearch && matchesFilter && matchesActive
+    const matchesOnboarding = filterOnboarding === 'all' ||
+                              (filterOnboarding === 'completed' && user.onboarding_completed) ||
+                              (filterOnboarding === 'pending' && !user.onboarding_completed)
+
+    return matchesSearch && matchesFilter && matchesActive && matchesOnboarding
   })
 
   if (status === 'loading' || loading) {
@@ -178,7 +183,7 @@ export default function AdminUsersPage() {
 
       {/* Stats - Grid mobile-friendly */}
       {stats && (
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-3 mb-6">
+        <div className="grid grid-cols-2 md:grid-cols-6 gap-3 mb-6">
           <div className="bg-white rounded-lg shadow p-4 border-l-4 border-primary-500">
             <div className="text-2xl md:text-3xl font-bold text-gray-900">{stats.active || 0}</div>
             <div className="text-xs md:text-sm text-gray-600 mt-1">Clients actifs</div>
@@ -187,6 +192,18 @@ export default function AdminUsersPage() {
             <div className="text-2xl md:text-3xl font-bold text-gray-500">{stats.inactive || 0}</div>
             <div className="text-xs md:text-sm text-gray-600 mt-1">Inactifs</div>
           </div>
+          <div className="bg-white rounded-lg shadow p-4 border-l-4 border-purple-500">
+            <div className="text-2xl md:text-3xl font-bold text-purple-600">
+              {users.filter(u => u.onboarding_completed).length}
+            </div>
+            <div className="text-xs md:text-sm text-gray-600 mt-1">Onboarding OK</div>
+          </div>
+          <div className="bg-white rounded-lg shadow p-4 border-l-4 border-amber-500">
+            <div className="text-2xl md:text-3xl font-bold text-amber-600">
+              {users.filter(u => !u.onboarding_completed).length}
+            </div>
+            <div className="text-xs md:text-sm text-gray-600 mt-1">Onboarding ⏳</div>
+          </div>
           <div className="bg-white rounded-lg shadow p-4 border-l-4 border-success-500">
             <div className="text-2xl md:text-3xl font-bold text-success-600">{stats.with_selection}</div>
             <div className="text-xs md:text-sm text-gray-600 mt-1">Ont choisi</div>
@@ -194,10 +211,6 @@ export default function AdminUsersPage() {
           <div className="bg-white rounded-lg shadow p-4 border-l-4 border-danger-500">
             <div className="text-2xl md:text-3xl font-bold text-danger-600">{stats.without_selection}</div>
             <div className="text-xs md:text-sm text-gray-600 mt-1">En attente</div>
-          </div>
-          <div className="bg-white rounded-lg shadow p-4 border-l-4 border-secondary-500">
-            <div className="text-2xl md:text-3xl font-bold text-secondary-600">{stats.with_settings}</div>
-            <div className="text-xs md:text-sm text-gray-600 mt-1">Configurés</div>
           </div>
         </div>
       )}
@@ -248,7 +261,7 @@ export default function AdminUsersPage() {
         </div>
 
         {/* Filtres sélection */}
-        <div className="flex gap-2 flex-wrap">
+        <div className="flex gap-2 flex-wrap mb-3">
           <span className="text-xs text-gray-500 self-center mr-1">Selection:</span>
           <button
             onClick={() => setFilterStatus('all')}
@@ -281,6 +294,41 @@ export default function AdminUsersPage() {
             ⏳ En attente
           </button>
         </div>
+
+        {/* Filtres onboarding */}
+        <div className="flex gap-2 flex-wrap">
+          <span className="text-xs text-gray-500 self-center mr-1">Onboarding:</span>
+          <button
+            onClick={() => setFilterOnboarding('all')}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
+              filterOnboarding === 'all'
+                ? 'bg-primary-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            Tous
+          </button>
+          <button
+            onClick={() => setFilterOnboarding('completed')}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
+              filterOnboarding === 'completed'
+                ? 'bg-purple-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            🎓 Terminé
+          </button>
+          <button
+            onClick={() => setFilterOnboarding('pending')}
+            className={`px-3 py-1.5 rounded-full text-xs font-medium transition ${
+              filterOnboarding === 'pending'
+                ? 'bg-amber-600 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            🚀 En cours
+          </button>
+        </div>
       </div>
 
       {/* Liste des utilisateurs en cards - Mobile-first */}
@@ -305,6 +353,11 @@ export default function AdminUsersPage() {
                     {user.active === false && (
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-gray-200 text-gray-600 border border-gray-300">
                         INACTIF
+                      </span>
+                    )}
+                    {!user.onboarding_completed && (
+                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 border border-amber-300">
+                        🚀 Onboarding
                       </span>
                     )}
                     {user.has_selection ? (
