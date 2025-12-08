@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
+import { toast } from 'sonner'
 import AdminNav from '@/components/AdminNav'
 
 // Configuration des prix (même que OnboardingModal)
@@ -12,6 +13,15 @@ const BASE_PERSONS = 4
 export default function AdminTestPage() {
   const { data: session, status } = useSession()
   const router = useRouter()
+
+  // État pour les tests de notification
+  const [notifTab, setNotifTab] = useState('onboarding') // 'onboarding' ou 'notifications'
+  const [notifType, setNotifType] = useState('reminder')
+  const [notifMethod, setNotifMethod] = useState('email')
+  const [notifEmail, setNotifEmail] = useState('')
+  const [notifPhone, setNotifPhone] = useState('')
+  const [notifDays, setNotifDays] = useState(3)
+  const [sendingNotif, setSendingNotif] = useState(false)
 
   // État pour simuler l'onboarding
   const [step, setStep] = useState(1)
@@ -36,9 +46,48 @@ export default function AdminTestPage() {
     if (status === 'authenticated') {
       if (session.user.role !== 'admin') {
         router.push('/')
+      } else {
+        // Pré-remplir l'email avec celui de l'admin connecté
+        setNotifEmail(session.user.email)
       }
     }
   }, [status, session, router])
+
+  // Fonction pour envoyer une notification de test
+  const sendTestNotification = async () => {
+    setSendingNotif(true)
+    try {
+      const response = await fetch('/api/admin/test-notification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          type: notifType,
+          method: notifMethod,
+          email: notifEmail,
+          phone: notifPhone,
+          daysBeforeDelivery: notifDays
+        })
+      })
+
+      const data = await response.json()
+
+      if (response.ok && data.success) {
+        if (data.results.email?.success) {
+          toast.success('Email de test envoyé !')
+        }
+        if (data.results.sms?.success) {
+          toast.success(data.results.sms.simulated ? 'SMS simulé (pas encore configuré)' : 'SMS envoyé !')
+        }
+      } else {
+        toast.error(data.error || 'Erreur lors de l\'envoi')
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de l\'envoi')
+    } finally {
+      setSendingNotif(false)
+    }
+  }
 
   const handleReminderToggle = (day) => {
     setFormData(prev => ({
@@ -587,13 +636,207 @@ export default function AdminTestPage() {
   return (
     <div className="max-w-7xl mx-auto min-h-[calc(100vh-200px)]">
       <div className="mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold mb-2">Test Onboarding</h1>
-        <p className="text-gray-600 text-sm">Prévisualisation du parcours d'inscription (synchronisé avec le vrai onboarding)</p>
+        <h1 className="text-2xl md:text-3xl font-bold mb-2">Zone de Test</h1>
+        <p className="text-gray-600 text-sm">Testez l'onboarding et les notifications</p>
       </div>
 
       <AdminNav />
 
-      {/* Prévisualisation */}
+      {/* Tabs */}
+      <div className="flex gap-2 mb-6">
+        <button
+          onClick={() => setNotifTab('onboarding')}
+          className={`px-4 py-2 rounded-lg font-medium transition ${
+            notifTab === 'onboarding'
+              ? 'bg-primary-600 text-white'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          📱 Onboarding
+        </button>
+        <button
+          onClick={() => setNotifTab('notifications')}
+          className={`px-4 py-2 rounded-lg font-medium transition ${
+            notifTab === 'notifications'
+              ? 'bg-primary-600 text-white'
+              : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+          }`}
+        >
+          🔔 Notifications
+        </button>
+      </div>
+
+      {notifTab === 'notifications' ? (
+        /* Section Test Notifications */
+        <div className="bg-white rounded-xl shadow-md p-6">
+          <h2 className="text-xl font-bold mb-6">Test des Notifications</h2>
+
+          <div className="grid md:grid-cols-2 gap-6">
+            {/* Configuration */}
+            <div className="space-y-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Type de notification
+                </label>
+                <select
+                  value={notifType}
+                  onChange={(e) => setNotifType(e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                >
+                  <option value="reminder">Rappel client (X jours avant)</option>
+                  <option value="selection">Nouvelle sélection (admin)</option>
+                  <option value="missing">Sélection manquante (admin)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Méthode d'envoi
+                </label>
+                <div className="flex gap-2">
+                  {['email', 'sms', 'both'].map(method => (
+                    <button
+                      key={method}
+                      onClick={() => setNotifMethod(method)}
+                      className={`flex-1 py-2 px-3 rounded-lg font-medium text-sm transition ${
+                        notifMethod === method
+                          ? 'bg-primary-600 text-white'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {method === 'email' ? '📧 Email' : method === 'sms' ? '📱 SMS' : '📧+📱 Les deux'}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {(notifMethod === 'email' || notifMethod === 'both') && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Email de destination
+                  </label>
+                  <input
+                    type="email"
+                    value={notifEmail}
+                    onChange={(e) => setNotifEmail(e.target.value)}
+                    placeholder="votre@email.com"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                </div>
+              )}
+
+              {(notifMethod === 'sms' || notifMethod === 'both') && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Téléphone de destination
+                  </label>
+                  <input
+                    type="tel"
+                    value={notifPhone}
+                    onChange={(e) => setNotifPhone(e.target.value)}
+                    placeholder="+33612345678"
+                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                  />
+                  <p className="text-xs text-amber-600 mt-1">
+                    ⚠️ SMS simulé pour l'instant (OVH SMS à configurer)
+                  </p>
+                </div>
+              )}
+
+              {notifType === 'reminder' && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Jours avant livraison
+                  </label>
+                  <div className="flex gap-2">
+                    {[1, 3, 5].map(days => (
+                      <button
+                        key={days}
+                        onClick={() => setNotifDays(days)}
+                        className={`flex-1 py-2 px-3 rounded-lg font-medium text-sm transition ${
+                          notifDays === days
+                            ? 'bg-primary-600 text-white'
+                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        }`}
+                      >
+                        {days} jour{days > 1 ? 's' : ''}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <button
+                onClick={sendTestNotification}
+                disabled={sendingNotif || (!notifEmail && notifMethod !== 'sms') || (!notifPhone && notifMethod !== 'email')}
+                className="w-full py-3 bg-green-600 text-white rounded-lg font-bold hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              >
+                {sendingNotif ? 'Envoi en cours...' : '🚀 Envoyer le test'}
+              </button>
+            </div>
+
+            {/* Aperçu */}
+            <div>
+              <h3 className="font-semibold text-gray-700 mb-3">Aperçu du message</h3>
+              <div className="bg-gray-50 rounded-xl p-4 border">
+                {notifType === 'reminder' && (
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium text-gray-800">
+                      📧 Objet: Rappel: Sélectionnez vos plats - {notifDays} jour{notifDays > 1 ? 's' : ''} restant{notifDays > 1 ? 's' : ''}
+                    </p>
+                    <hr />
+                    <div className="text-sm text-gray-600">
+                      <p className="font-bold text-lg mb-2">Bonjour ! 👋</p>
+                      <p>Emeric passe dans <strong>{notifDays} jour{notifDays > 1 ? 's' : ''}</strong> !</p>
+                      <p className="mt-2">N'oubliez pas de sélectionner vos plats pour cette semaine.</p>
+                      <div className="mt-4">
+                        <span className="inline-block bg-primary-600 text-white px-4 py-2 rounded-lg text-sm">
+                          Choisir mes plats
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+                {notifType === 'selection' && (
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium text-gray-800">
+                      📧 Objet: Un client a fait sa sélection
+                    </p>
+                    <hr />
+                    <div className="text-sm text-gray-600">
+                      <p className="font-bold text-lg mb-2">Nouvelle sélection 🎉</p>
+                      <p><strong>Client Test</strong> a terminé sa sélection :</p>
+                      <ul className="list-disc list-inside mt-2">
+                        <li>Poulet rôti aux herbes</li>
+                        <li>Gratin dauphinois</li>
+                        <li>Tarte aux pommes</li>
+                      </ul>
+                    </div>
+                  </div>
+                )}
+                {notifType === 'missing' && (
+                  <div className="space-y-3">
+                    <p className="text-sm font-medium text-gray-800">
+                      📧 Objet: Client sans sélection
+                    </p>
+                    <hr />
+                    <div className="text-sm text-gray-600">
+                      <p className="font-bold text-lg mb-2">Sélection manquante ⚠️</p>
+                      <p><strong>Client Test</strong> n'a pas encore sélectionné ses plats.</p>
+                      <p className="mt-2">Son passage est prévu dans <strong>{notifDays} jour{notifDays > 1 ? 's' : ''}</strong>.</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              <div className="mt-4 p-3 bg-blue-50 rounded-lg text-sm text-blue-700">
+                <strong>💡 Info:</strong> Les emails de test sont marqués [TEST] et loggés dans la base de données.
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : (
+      /* Section Onboarding */
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Aperçu Mobile */}
         <div>
@@ -704,6 +947,7 @@ export default function AdminTestPage() {
           </div>
         </div>
       </div>
+      )}
     </div>
   )
 }
