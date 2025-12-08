@@ -30,7 +30,10 @@
       "Bash(npm run build:*)",
       "Bash(where:*)",
       "Bash(node run-migration.js:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(node:*)",
+      "Bash(npm outdated:*)",
+      "WebFetch(domain:api.ovh.com)"
     ],
     "deny": [],
     "ask": []
