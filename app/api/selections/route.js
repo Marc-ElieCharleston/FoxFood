@@ -209,7 +209,7 @@ export async function POST(request) {
       results.push({ week: i, status: 'saved', data: result.rows[0] })
     }
 
-    // Envoyer notification à l'admin (une seule fois pour toutes les semaines)
+    // Envoyer notification à TOUS les admins (une seule fois pour toutes les semaines)
     try {
       const adminSettingsResult = await sql`
         SELECT
@@ -218,18 +218,16 @@ export async function POST(request) {
           a.send_email,
           a.send_sms,
           a.notify_on_selection,
-          u.email as user_email
+          u.email as user_email,
+          u.name as admin_name
         FROM admin_settings a
         JOIN users u ON a.user_id = u.id
         WHERE u.role = 'admin'
         AND a.notify_on_selection = true
-        LIMIT 1
       `
 
       if (adminSettingsResult.rows.length > 0) {
-        const adminSettings = adminSettingsResult.rows[0]
-
-        // Récupérer tous les plats sélectionnés
+        // Récupérer tous les plats sélectionnés (une seule fois)
         const allDishIds = []
         const allVariantSelections = {}
         for (const weekData of Object.values(weeklySelections)) {
@@ -272,15 +270,24 @@ export async function POST(request) {
 
           const { notifyAdminOnSelection } = await import('@/lib/notifications')
 
-          await notifyAdminOnSelection({
-            adminEmail: adminSettings.notification_email || adminSettings.user_email,
-            adminPhone: adminSettings.notification_phone,
-            sendEmail: adminSettings.send_email,
-            sendSMS: adminSettings.send_sms,
-            userName: session.user.name,
-            userEmail: session.user.email,
-            selectedDishes: dishNames
-          })
+          // Envoyer la notification à TOUS les admins
+          for (const adminSettings of adminSettingsResult.rows) {
+            try {
+              await notifyAdminOnSelection({
+                adminEmail: adminSettings.notification_email || adminSettings.user_email,
+                adminPhone: adminSettings.notification_phone,
+                sendEmail: adminSettings.send_email,
+                sendSMS: adminSettings.send_sms,
+                userName: session.user.name,
+                userEmail: session.user.email,
+                selectedDishes: dishNames
+              })
+              console.log(`Notification envoyée à ${adminSettings.admin_name}`)
+            } catch (adminNotifError) {
+              console.error(`Erreur notification admin ${adminSettings.admin_name}:`, adminNotifError)
+              // Continuer avec les autres admins même si un échoue
+            }
+          }
         }
       }
     } catch (notifError) {
