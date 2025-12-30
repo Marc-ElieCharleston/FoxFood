@@ -126,6 +126,19 @@ export async function POST(request) {
       }
     }
 
+    // Envoyer email de bienvenue à l'utilisateur
+    try {
+      const { sendWelcomeEmail } = await import('@/lib/notifications')
+      await sendWelcomeEmail({
+        userId,
+        userName: session.user.name,
+        userEmail: notification_email || session.user.email
+      })
+    } catch (notifError) {
+      console.error('Erreur envoi email bienvenue:', notifError)
+      // On continue même si la notification échoue
+    }
+
     // Si > 4 personnes et acceptation, envoyer notification à l'utilisateur et à l'admin
     if (household_size > 4 && extra_fee_accepted) {
       try {
