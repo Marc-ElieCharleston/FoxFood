@@ -16,14 +16,24 @@ export async function GET(request) {
 
     const userId = parseInt(session.user.id)
 
-    // Calculer les 5 prochains lundis
+    // Calculer les 5 prochains lundis (à partir du prochain lundi si on est après lundi)
     const weeks = []
     const today = new Date()
-    const dayOfWeek = today.getDay()
-    const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)
-    const firstMonday = new Date(today)
-    firstMonday.setDate(diff)
+    const dayOfWeek = today.getDay() // 0=Dimanche, 1=Lundi, ..., 6=Samedi
+
+    let firstMonday = new Date(today)
     firstMonday.setHours(0, 0, 0, 0)
+
+    if (dayOfWeek === 0) {
+      // Dimanche -> lundi suivant (demain)
+      firstMonday.setDate(today.getDate() + 1)
+    } else if (dayOfWeek === 1) {
+      // Lundi -> aujourd'hui
+      // firstMonday reste à today
+    } else {
+      // Mardi-Samedi -> lundi suivant
+      firstMonday.setDate(today.getDate() + (8 - dayOfWeek))
+    }
 
     for (let i = 0; i < 5; i++) {
       const monday = new Date(firstMonday)
@@ -122,13 +132,22 @@ export async function POST(request) {
       }
     }
 
-    // Calculer les dates des 5 prochains lundis
+    // Calculer les dates des 5 prochains lundis (à partir du prochain lundi si on est après lundi)
     const today = new Date()
-    const dayOfWeek = today.getDay()
-    const diff = today.getDate() - dayOfWeek + (dayOfWeek === 0 ? -6 : 1)
-    const firstMonday = new Date(today)
-    firstMonday.setDate(diff)
+    const dayOfWeek = today.getDay() // 0=Dimanche, 1=Lundi, ..., 6=Samedi
+
+    let firstMonday = new Date(today)
     firstMonday.setHours(0, 0, 0, 0)
+
+    if (dayOfWeek === 0) {
+      // Dimanche -> lundi suivant
+      firstMonday.setDate(today.getDate() + 1)
+    } else if (dayOfWeek === 1) {
+      // Lundi -> aujourd'hui
+    } else {
+      // Mardi-Samedi -> lundi suivant
+      firstMonday.setDate(today.getDate() + (8 - dayOfWeek))
+    }
 
     const weekDates = []
     for (let i = 0; i < 5; i++) {
@@ -297,7 +316,22 @@ export async function POST(request) {
             return d.name
           })
 
-          const { notifyAdminOnSelection } = await import('@/lib/notifications')
+          const { notifyAdminOnSelection, getShoppingListData, generateShoppingListHtml } = await import('@/lib/notifications')
+
+          // Générer la liste de courses pour l'admin
+          let shoppingListHtml = ''
+          try {
+            const shoppingData = await getShoppingListData({
+              selectedDishes: uniqueDishIds,
+              selectedVariants: allVariantSelections,
+              householdSize
+            })
+            if (shoppingData) {
+              shoppingListHtml = generateShoppingListHtml(shoppingData)
+            }
+          } catch (shoppingError) {
+            console.error('Erreur génération liste de courses pour admin:', shoppingError)
+          }
 
           // Envoyer la notification à TOUS les admins
           for (const adminSettings of adminSettingsResult.rows) {
@@ -309,7 +343,8 @@ export async function POST(request) {
                 sendSMS: adminSettings.send_sms,
                 userName: session.user.name,
                 userEmail: session.user.email,
-                selectedDishes: dishNames
+                selectedDishes: dishNames,
+                shoppingListHtml
               })
               console.log(`Notification envoyée à ${adminSettings.admin_name}`)
             } catch (adminNotifError) {
