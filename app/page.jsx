@@ -1034,7 +1034,9 @@ export default function Home() {
           </div>
           {getTotalDishesCount() > 0 && (
             <div className="text-right">
-              <p className="text-lg font-bold text-primary-600">{getTotalDishesCount()}/{MAX_WEEKS * MAX_DISHES_PER_WEEK}</p>
+              <p className="text-lg font-bold text-primary-600">
+                {getTotalDishesCount()}/{Math.max(1, getActiveWeeksCount()) * MAX_DISHES_PER_WEEK}
+              </p>
               <p className="text-xs text-gray-500">{getActiveWeeksCount()} semaine{getActiveWeeksCount() > 1 ? 's' : ''}</p>
             </div>
           )}
