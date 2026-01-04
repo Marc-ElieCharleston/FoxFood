@@ -798,10 +798,10 @@ export default function Home() {
         </div>
       )}
 
-      {/* Bouton flottant de sélection */}
-      {getTotalDishesCount() > 0 && (
+      {/* Bouton flottant de sélection (caché quand modal ouverte) */}
+      {getTotalDishesCount() > 0 && !showSummary && (
         <button
-          onClick={() => setShowSummary(!showSummary)}
+          onClick={() => setShowSummary(true)}
           className="fixed bottom-4 right-4 z-50 bg-primary-600 text-white px-6 py-4 rounded-full shadow-lg font-bold flex items-center gap-2 hover:bg-primary-700 transition"
         >
           <span className="text-xl">🛒</span>
