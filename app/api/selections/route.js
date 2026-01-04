@@ -139,11 +139,14 @@ export async function POST(request) {
 
     // Récupérer le household_id et les paramètres de livraison de l'utilisateur
     const userResult = await sql`
-      SELECT household_id, delivery_day, delivery_time_slot FROM users WHERE id = ${userId}
+      SELECT household_id, delivery_day, delivery_time_slot, notification_email, email, household_size
+      FROM users WHERE id = ${userId}
     `
     const householdId = userResult.rows[0]?.household_id
     const deliveryDay = userResult.rows[0]?.delivery_day || 'Lundi'
     const deliveryTimeSlot = userResult.rows[0]?.delivery_time_slot || 'morning'
+    const userNotificationEmail = userResult.rows[0]?.notification_email || userResult.rows[0]?.email
+    const householdSize = userResult.rows[0]?.household_size || 1
 
     const results = []
 
@@ -207,6 +210,32 @@ export async function POST(request) {
         `
       }
       results.push({ week: i, status: 'saved', data: result.rows[0] })
+    }
+
+    // Envoyer la liste de courses pour chaque semaine avec des plats
+    try {
+      const { sendShoppingList } = await import('@/lib/notifications')
+
+      for (let i = 0; i < 5; i++) {
+        const weekKey = `week${i}`
+        const weekData = weeklySelections[weekKey]
+
+        if (weekData && weekData.dishes && weekData.dishes.length > 0) {
+          await sendShoppingList({
+            userId,
+            userName: session.user.name,
+            userEmail: userNotificationEmail,
+            householdSize,
+            weekStartDate: weekDates[i],
+            selectedDishes: weekData.dishes,
+            selectedVariants: weekData.variants || {}
+          })
+          console.log(`Liste de courses envoyée pour semaine ${i}`)
+        }
+      }
+    } catch (shoppingListError) {
+      console.error('Erreur envoi liste de courses:', shoppingListError)
+      // Ne pas bloquer la sauvegarde si l'envoi échoue
     }
 
     // Envoyer notification à TOUS les admins (une seule fois pour toutes les semaines)
