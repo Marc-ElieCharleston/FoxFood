@@ -467,7 +467,7 @@ export default function AdminUsersPage() {
                   className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
                 >
                   <div className="flex-1">
-                    <p className="font-medium text-gray-900">{dish.dish_name}</p>
+                    <p className="font-medium text-gray-900">{dish.name}</p>
                     <p className="text-sm text-gray-600 capitalize">{dish.category}</p>
                   </div>
                   {dish.quantity > 1 && (

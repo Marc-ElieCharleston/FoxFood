@@ -5,6 +5,7 @@ import { useSession } from 'next-auth/react'
 import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import OnboardingModal from '@/components/OnboardingModal'
+import HistoryModal from '@/components/HistoryModal'
 import { generateOrderRecapPDF } from '@/lib/pdf-generator'
 
 export default function Home() {
@@ -49,6 +50,7 @@ export default function Home() {
   const [favorites, setFavorites] = useState([])
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
   const [showIngredientsSummary, setShowIngredientsSummary] = useState(false)
+  const [showHistoryModal, setShowHistoryModal] = useState(false)
 
   const MAX_DISHES_PER_WEEK = 5
   const MAX_WEEKS = 4
@@ -772,6 +774,13 @@ export default function Home() {
         />
       )}
 
+      {/* Modal d'historique des commandes */}
+      <HistoryModal
+        isOpen={showHistoryModal}
+        onClose={() => setShowHistoryModal(false)}
+        userHouseholdSize={userHouseholdSize}
+      />
+
       {/* Banner de configuration des paramètres */}
       {showSettingsBanner && (
         <div className="mb-6 bg-primary-100 border-l-4 border-primary-600 p-4 rounded-lg">
@@ -969,9 +978,18 @@ export default function Home() {
 
       {/* En-tête */}
       <div className="mb-4">
-        <h1 className="text-2xl md:text-3xl font-bold mb-1">
-          Bonjour {session.user.name}!
-        </h1>
+        <div className="flex items-center justify-between">
+          <h1 className="text-2xl md:text-3xl font-bold mb-1">
+            Bonjour {session.user.name}!
+          </h1>
+          <button
+            onClick={() => setShowHistoryModal(true)}
+            className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition"
+          >
+            <span>📋</span>
+            <span className="hidden sm:inline">Historique</span>
+          </button>
+        </div>
         <p className="text-sm text-gray-600">
           Sélectionnez jusqu'à {MAX_DISHES_PER_WEEK} plats par semaine
         </p>
