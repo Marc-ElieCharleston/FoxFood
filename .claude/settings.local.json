@@ -33,7 +33,12 @@
       "Bash(find:*)",
       "Bash(node:*)",
       "Bash(npm outdated:*)",
-      "WebFetch(domain:api.ovh.com)"
+      "WebFetch(domain:api.ovh.com)",
+      "Bash(curl:*)",
+      "Bash(timeout:*)",
+      "Bash(ping:*)",
+      "Bash(cd:*)",
+      "Bash(git reset:*)"
     ],
     "deny": [],
     "ask": []

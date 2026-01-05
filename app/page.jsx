@@ -939,10 +939,13 @@ export default function Home() {
                             {ingredients.map(ing => (
                               <li key={ing.id} className="text-sm flex justify-between">
                                 <span>{ing.name}</span>
-                                <span className="text-gray-500">
-                                  {ing.totalQuantity % 1 === 0 ? ing.totalQuantity : ing.totalQuantity.toFixed(1)}
-                                  {ing.unit && ` ${ing.unit}`}
-                                </span>
+                                {/* Pas de quantité pour les épices */}
+                                {category !== 'epice' && (
+                                  <span className="text-gray-500">
+                                    {ing.totalQuantity % 1 === 0 ? ing.totalQuantity : ing.totalQuantity.toFixed(1)}
+                                    {ing.unit && ` ${ing.unit}`}
+                                  </span>
+                                )}
                               </li>
                             ))}
                           </ul>
