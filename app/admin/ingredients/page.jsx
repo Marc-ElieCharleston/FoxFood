@@ -193,12 +193,14 @@ export default function IngredientsPage() {
     return cat || { value: categoryName, label: categoryName, emoji: '📦' }
   }
 
-  const filteredIngredients = ingredients.filter(ing => {
-    const matchesCategory = filter === 'all' || ing.category === filter
-    const matchesSearch = !searchQuery ||
-      ing.name.toLowerCase().includes(searchQuery.toLowerCase())
-    return matchesCategory && matchesSearch
-  })
+  const filteredIngredients = ingredients
+    .filter(ing => {
+      const matchesCategory = filter === 'all' || ing.category === filter
+      const matchesSearch = !searchQuery ||
+        ing.name.toLowerCase().includes(searchQuery.toLowerCase())
+      return matchesCategory && matchesSearch
+    })
+    .sort((a, b) => a.name.localeCompare(b.name, 'fr', { sensitivity: 'base' }))
 
   if (status === 'loading' || !session) {
     return <div className="text-center py-8">Chargement...</div>

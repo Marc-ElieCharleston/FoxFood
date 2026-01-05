@@ -21,31 +21,31 @@ export async function GET(request) {
       result = await sql`
         SELECT * FROM ingredients
         WHERE category = ${category} AND active = true
-        ORDER BY name
+        ORDER BY LOWER(name)
       `
     } else if (category) {
       result = await sql`
         SELECT * FROM ingredients
         WHERE category = ${category}
-        ORDER BY name
+        ORDER BY LOWER(name)
       `
     } else if (activeOnly) {
       result = await sql`
         SELECT * FROM ingredients
         WHERE active = true
-        ORDER BY category, name
+        ORDER BY category, LOWER(name)
       `
     } else if (search) {
       result = await sql`
         SELECT * FROM ingredients
         WHERE name ILIKE ${'%' + search + '%'}
-        ORDER BY name
+        ORDER BY LOWER(name)
         LIMIT 20
       `
     } else {
       result = await sql`
         SELECT * FROM ingredients
-        ORDER BY category, name
+        ORDER BY category, LOWER(name)
       `
     }
 
