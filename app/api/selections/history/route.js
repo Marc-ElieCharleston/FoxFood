@@ -14,14 +14,14 @@ export async function GET() {
     const result = await sql`
       SELECT
         ws.id,
-        ws.week_start,
+        ws.week_start_date,
         ws.selected_dishes,
         ws.selected_variants,
         ws.created_at,
         ws.updated_at
       FROM weekly_selections ws
       WHERE ws.user_id = ${session.user.id}
-      ORDER BY ws.week_start DESC
+      ORDER BY ws.week_start_date DESC
       LIMIT 20
     `
 
@@ -73,7 +73,7 @@ export async function GET() {
 
       history.push({
         id: selection.id,
-        week_start: selection.week_start,
+        week_start: selection.week_start_date,
         selected_variants: selectedVariants,
         dishes: dishesWithVariants,
         created_at: selection.created_at
