@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { toast } from 'sonner'
 
 // Configuration des prix
-const PRICE_PER_PERSON_PER_WEEK = 20 // euros
+const EXTRA_FEE_PER_PERSON = 20 // euros supplémentaires par personne au-delà de 4
 const BASE_PERSONS = 4 // Nombre de personnes incluses dans le forfait de base
 
 export default function OnboardingModal({ userName, userEmail, onComplete }) {
@@ -506,11 +506,8 @@ export default function OnboardingModal({ userName, userEmail, onComplete }) {
               </div>
 
               <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
-                <p className="text-sm text-blue-800 text-center">
-                  <strong>{PRICE_PER_PERSON_PER_WEEK}€ / personne / semaine</strong>
-                </p>
-                <p className="text-xs text-blue-600 text-center mt-1">
-                  Cela determine les quantites preparees
+                <p className="text-xs text-blue-600 text-center">
+                  Cela détermine les quantités préparées par Emeric
                 </p>
               </div>
 
@@ -535,35 +532,23 @@ export default function OnboardingModal({ userName, userEmail, onComplete }) {
                 </button>
               </div>
 
-              {/* Affichage du prix total */}
-              <div className="bg-primary-50 border border-primary-200 rounded-xl p-4 text-center">
-                <p className="text-sm text-primary-700">Estimation hebdomadaire</p>
-                <p className="text-3xl font-bold text-primary-600 mt-1">
-                  {formData.household_size * PRICE_PER_PERSON_PER_WEEK}€<span className="text-lg font-normal">/semaine</span>
-                </p>
-                <p className="text-xs text-primary-500 mt-2">
-                  {formData.household_size} personne{formData.household_size > 1 ? 's' : ''} × {PRICE_PER_PERSON_PER_WEEK}€
-                </p>
-              </div>
-
               {formData.household_size > BASE_PERSONS && (
                 <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                  <p className="text-sm text-amber-800 mb-3">
-                    <strong>Tarif :</strong> {PRICE_PER_PERSON_PER_WEEK}€ par personne et par semaine
-                    <br />
-                    <span className="text-amber-600">
-                      Soit <strong>{formData.household_size * PRICE_PER_PERSON_PER_WEEK}€/semaine</strong> pour {formData.household_size} personne{formData.household_size > 1 ? 's' : ''}
-                    </span>
+                  <p className="text-2xl font-bold text-amber-700 text-center mb-2">
+                    +{(formData.household_size - BASE_PERSONS) * EXTRA_FEE_PER_PERSON}€
                   </p>
-                  <label className="flex items-start gap-3 cursor-pointer">
+                  <p className="text-sm text-amber-600 text-center mb-3">
+                    Supplément pour {formData.household_size - BASE_PERSONS} personne{formData.household_size - BASE_PERSONS > 1 ? 's' : ''} supplémentaire{formData.household_size - BASE_PERSONS > 1 ? 's' : ''}
+                  </p>
+                  <label className="flex items-center justify-center gap-3 cursor-pointer">
                     <input
                       type="checkbox"
-                      className="mt-0.5 w-5 h-5 text-amber-600 rounded"
+                      className="w-5 h-5 text-amber-600 rounded"
                       checked={formData.extra_fee_accepted}
                       onChange={(e) => setFormData({ ...formData, extra_fee_accepted: e.target.checked })}
                     />
                     <span className="text-sm text-amber-900">
-                      J'accepte le tarif de {PRICE_PER_PERSON_PER_WEEK}€ par personne et par semaine
+                      J'accepte ce supplément
                     </span>
                   </label>
                 </div>

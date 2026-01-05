@@ -39,7 +39,7 @@ export default function Home() {
   })
   const [newIngredient, setNewIngredient] = useState('')
   const [submittingCustomDish, setSubmittingCustomDish] = useState(false)
-  const [selectedSeasons, setSelectedSeasons] = useState([]) // tableau des saisons sélectionnées (vide = saison actuelle)
+  const [selectedSeasons, setSelectedSeasons] = useState(['hiver']) // Actuellement uniquement Hiver disponible
   const [dietaryTags, setDietaryTags] = useState([])
   const [showVariantModal, setShowVariantModal] = useState(false)
   const [selectedDishForVariant, setSelectedDishForVariant] = useState(null)
@@ -1089,55 +1089,14 @@ export default function Home() {
         </button>
       </div>
 
-      {/* Filtre de saison - sélection simple */}
+      {/* Filtre de saison - Actuellement uniquement Hiver */}
       <div className="mb-4">
         <div className="flex items-center gap-2 flex-wrap">
-          {/* Toutes les saisons dans l'ordre */}
-          {Object.entries(seasonEmojis).map(([season, emoji]) => {
-            const isCurrentSeason = season === getCurrentSeason()
-            const isSelected = selectedSeasons.length === 0
-              ? isCurrentSeason
-              : selectedSeasons.includes(season)
-
-            return (
-              <button
-                key={season}
-                onClick={() => {
-                  if (selectedSeasons.includes(season)) {
-                    // Cliquer sur la saison déjà sélectionnée → revenir à la saison actuelle
-                    setSelectedSeasons([])
-                  } else {
-                    // Sélectionner uniquement cette saison
-                    setSelectedSeasons([season])
-                  }
-                }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition ${
-                  isSelected
-                    ? 'bg-primary-600 text-white'
-                    : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                }`}
-              >
-                <span>{emoji}</span>
-                <span className="hidden sm:inline">{seasonLabels[season]}</span>
-                {isCurrentSeason && selectedSeasons.length === 0 && (
-                  <span className="text-xs opacity-75">(actuelle)</span>
-                )}
-              </button>
-            )
-          })}
-
-          {/* Bouton "Toutes saisons" */}
-          <button
-            onClick={() => setSelectedSeasons(['printemps', 'ete', 'automne', 'hiver'])}
-            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition ${
-              selectedSeasons.length === 4
-                ? 'bg-primary-600 text-white'
-                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-            }`}
-          >
-            <span>🌍</span>
-            <span className="hidden sm:inline">Toutes</span>
-          </button>
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-primary-600 text-white">
+            <span>❄️</span>
+            <span>Hiver</span>
+          </div>
+          <span className="text-xs text-gray-400 italic">Autres saisons bientôt disponibles</span>
         </div>
       </div>
 
