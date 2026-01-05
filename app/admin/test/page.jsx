@@ -7,7 +7,7 @@ import { toast } from 'sonner'
 import AdminNav from '@/components/AdminNav'
 
 // Configuration des prix (même que OnboardingModal)
-const PRICE_PER_PERSON_PER_WEEK = 20
+const EXTRA_FEE_PER_PERSON = 20
 const BASE_PERSONS = 4
 
 export default function AdminTestPage() {
@@ -341,10 +341,10 @@ export default function AdminTestPage() {
 
             <div className="bg-blue-50 border border-blue-200 rounded-xl p-3">
               <p className="text-sm text-blue-800 text-center">
-                <strong>{PRICE_PER_PERSON_PER_WEEK}€ / personne / semaine</strong>
+                <strong>Base : 1 à {BASE_PERSONS} personnes incluses</strong>
               </p>
               <p className="text-xs text-blue-600 text-center mt-1">
-                Cela détermine les quantités préparées
+                +{EXTRA_FEE_PER_PERSON}€/semaine par personne supplémentaire
               </p>
             </div>
 
@@ -369,25 +369,14 @@ export default function AdminTestPage() {
               </button>
             </div>
 
-            {/* Affichage du prix total */}
-            <div className="bg-primary-50 border border-primary-200 rounded-xl p-4 text-center">
-              <p className="text-sm text-primary-700">Estimation hebdomadaire</p>
-              <p className="text-3xl font-bold text-primary-600 mt-1">
-                {formData.householdSize * PRICE_PER_PERSON_PER_WEEK}€<span className="text-lg font-normal">/semaine</span>
-              </p>
-              <p className="text-xs text-primary-500 mt-2">
-                {formData.householdSize} personne{formData.householdSize > 1 ? 's' : ''} × {PRICE_PER_PERSON_PER_WEEK}€
-              </p>
-            </div>
-
+            {/* Affichage du supplément si > 4 personnes */}
             {formData.householdSize > BASE_PERSONS && (
               <div className="bg-amber-50 border border-amber-200 rounded-xl p-4">
-                <p className="text-sm text-amber-800 mb-3">
-                  <strong>Tarif :</strong> {PRICE_PER_PERSON_PER_WEEK}€ par personne et par semaine
-                  <br />
-                  <span className="text-amber-600">
-                    Soit <strong>{formData.householdSize * PRICE_PER_PERSON_PER_WEEK}€/semaine</strong> pour {formData.householdSize} personne{formData.householdSize > 1 ? 's' : ''}
-                  </span>
+                <p className="text-2xl font-bold text-amber-700 text-center mb-2">
+                  +{(formData.householdSize - BASE_PERSONS) * EXTRA_FEE_PER_PERSON}€
+                </p>
+                <p className="text-sm text-amber-600 text-center mb-3">
+                  Supplément pour {formData.householdSize - BASE_PERSONS} personne{formData.householdSize - BASE_PERSONS > 1 ? 's' : ''} supplémentaire{formData.householdSize - BASE_PERSONS > 1 ? 's' : ''}
                 </p>
                 <label className="flex items-start gap-3 cursor-pointer">
                   <input
@@ -397,7 +386,7 @@ export default function AdminTestPage() {
                     onChange={(e) => setFormData({ ...formData, extraFeeAccepted: e.target.checked })}
                   />
                   <span className="text-sm text-amber-900">
-                    J'accepte le tarif de {PRICE_PER_PERSON_PER_WEEK}€ par personne et par semaine
+                    J'accepte le supplément de +{(formData.householdSize - BASE_PERSONS) * EXTRA_FEE_PER_PERSON}€/semaine
                   </span>
                 </label>
               </div>
@@ -905,7 +894,7 @@ export default function AdminTestPage() {
                   <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step > 3 ? 'bg-green-100 text-green-600' : step === 3 ? 'bg-primary-100 text-primary-600' : 'bg-gray-100'}`}>
                     {step > 3 ? '✓' : '3'}
                   </span>
-                  Nombre de personnes ({PRICE_PER_PERSON_PER_WEEK}€/pers/sem)
+                  Nombre de personnes (+{EXTRA_FEE_PER_PERSON}€/pers &gt; {BASE_PERSONS})
                 </li>
                 <li className={`flex items-center gap-2 ${step === 4 ? 'text-primary-600 font-medium' : ''}`}>
                   <span className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${step > 4 ? 'bg-green-100 text-green-600' : step === 4 ? 'bg-primary-100 text-primary-600' : 'bg-gray-100'}`}>
