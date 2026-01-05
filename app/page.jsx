@@ -708,7 +708,28 @@ export default function Home() {
     return grouped
   }
 
-  // Collecter tous les ingrédients de toutes les semaines
+  // Collecter les ingrédients PAR SEMAINE
+  const getIngredientsByWeek = () => {
+    const byWeek = []
+
+    for (let i = 0; i < MAX_WEEKS; i++) {
+      const weekDishes = weeklySelections[`week${i}`]?.dishes || []
+      if (weekDishes.length === 0) continue
+
+      const weekIngredients = getIngredientsForWeek(i)
+      if (Object.keys(weekIngredients).length > 0) {
+        byWeek.push({
+          weekIndex: i,
+          weekDate: weekDates[i],
+          ingredients: weekIngredients
+        })
+      }
+    }
+
+    return byWeek
+  }
+
+  // Collecter tous les ingrédients de toutes les semaines (pour le total)
   const getAllIngredients = () => {
     const allIngredients = {}
 
@@ -927,39 +948,55 @@ export default function Home() {
               </button>
 
               {showIngredientsSummary && (
-                <div className="mt-4 space-y-4">
-                  {Object.entries(getAllIngredients()).length === 0 ? (
+                <div className="mt-4 space-y-6">
+                  {getIngredientsByWeek().length === 0 ? (
                     <p className="text-sm text-gray-500 italic">
                       Aucun ingrédient lié aux plats sélectionnés
                     </p>
                   ) : (
-                    Object.entries(getAllIngredients())
-                      .sort(([a], [b]) => {
-                        const order = ['viande', 'poisson', 'legume', 'fruit', 'feculent', 'produit_laitier', 'epice', 'autre']
-                        return order.indexOf(a) - order.indexOf(b)
-                      })
-                      .map(([category, ingredients]) => (
-                        <div key={category} className="bg-gray-50 rounded-lg p-3">
-                          <h5 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                            <span>{ingredientCategoryLabels[category]?.emoji || '📦'}</span>
-                            {ingredientCategoryLabels[category]?.name || category}
-                          </h5>
-                          <ul className="space-y-1">
-                            {ingredients.map(ing => (
-                              <li key={ing.id} className="text-sm flex justify-between">
-                                <span>{ing.name}</span>
-                                {/* Pas de quantité pour les épices */}
-                                {category !== 'epice' && (
-                                  <span className="text-gray-500">
-                                    {ing.totalQuantity % 1 === 0 ? ing.totalQuantity : ing.totalQuantity.toFixed(1)}
-                                    {ing.unit && ` ${ing.unit}`}
-                                  </span>
-                                )}
-                              </li>
-                            ))}
-                          </ul>
+                    getIngredientsByWeek().map((week) => (
+                      <div key={week.weekIndex} className="border border-primary-200 rounded-xl overflow-hidden">
+                        {/* En-tête de la semaine */}
+                        <div className="bg-primary-50 px-3 py-2 border-b border-primary-200">
+                          <h4 className="font-bold text-primary-700 text-sm">
+                            📅 Semaine du {week.weekDate
+                              ? new Date(week.weekDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' })
+                              : `Semaine ${week.weekIndex + 1}`
+                            }
+                          </h4>
                         </div>
-                      ))
+                        {/* Ingrédients de la semaine */}
+                        <div className="p-3 space-y-3">
+                          {Object.entries(week.ingredients)
+                            .sort(([a], [b]) => {
+                              const order = ['viande', 'poisson', 'legume', 'fruit', 'feculent', 'produit_laitier', 'epice', 'autre']
+                              return order.indexOf(a) - order.indexOf(b)
+                            })
+                            .map(([category, ingredients]) => (
+                              <div key={category} className="bg-gray-50 rounded-lg p-2">
+                                <h5 className="font-semibold text-xs mb-1 flex items-center gap-1">
+                                  <span>{ingredientCategoryLabels[category]?.emoji || '📦'}</span>
+                                  {ingredientCategoryLabels[category]?.name || category}
+                                </h5>
+                                <ul className="space-y-0.5">
+                                  {ingredients.map(ing => (
+                                    <li key={ing.id} className="text-xs flex justify-between">
+                                      <span>{ing.name}</span>
+                                      {category !== 'epice' && (
+                                        <span className="text-gray-500">
+                                          {ing.totalQuantity % 1 === 0 ? ing.totalQuantity : ing.totalQuantity.toFixed(1)}
+                                          {ing.unit && ` ${ing.unit}`}
+                                        </span>
+                                      )}
+                                    </li>
+                                  ))}
+                                </ul>
+                              </div>
+                            ))
+                          }
+                        </div>
+                      </div>
+                    ))
                   )}
                 </div>
               )}
