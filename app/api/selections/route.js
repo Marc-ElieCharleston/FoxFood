@@ -272,6 +272,7 @@ export async function POST(request) {
         JOIN users u ON a.user_id = u.id
         WHERE u.role = 'admin'
         AND a.notify_on_selection = true
+        ORDER BY CASE WHEN a.notification_email LIKE '%foxfood%' THEN 0 ELSE 1 END
       `
 
       if (adminSettingsResult.rows.length > 0) {
@@ -333,9 +334,14 @@ export async function POST(request) {
             console.error('Erreur génération liste de courses pour admin:', shoppingError)
           }
 
-          // Envoyer la notification à TOUS les admins
-          for (const adminSettings of adminSettingsResult.rows) {
+          // Envoyer la notification à TOUS les admins (avec délai pour éviter rate limit Resend)
+          for (let i = 0; i < adminSettingsResult.rows.length; i++) {
+            const adminSettings = adminSettingsResult.rows[i]
             try {
+              // Attendre 600ms entre chaque envoi pour respecter la limite de 2 req/sec
+              if (i > 0) {
+                await new Promise(resolve => setTimeout(resolve, 600))
+              }
               await notifyAdminOnSelection({
                 adminEmail: adminSettings.notification_email || adminSettings.user_email,
                 adminPhone: adminSettings.notification_phone,
