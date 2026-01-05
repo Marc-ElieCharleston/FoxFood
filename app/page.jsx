@@ -756,6 +756,9 @@ export default function Home() {
     // Charger les données
     fetchDishes()
     fetchCurrentSelection()
+    checkSettings() // Charger les paramètres (dont household_size)
+    fetchDietaryTags()
+    fetchFavorites()
   }
 
   return (
