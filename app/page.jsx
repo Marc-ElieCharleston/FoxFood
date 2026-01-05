@@ -1006,36 +1006,37 @@ export default function Home() {
           />
         </div>
 
-        {/* Navigation entre semaines si plusieurs */}
-        {getActiveWeeksCount() > 1 && (
-          <div className="flex items-center justify-center gap-2 mt-3 pt-3 border-t border-gray-100">
-            {Array.from({ length: MAX_WEEKS }).map((_, weekIndex) => {
-              const weekDishes = weeklySelections[`week${weekIndex}`]?.dishes || []
-              if (weekDishes.length === 0 && weekIndex !== activeWeek) return null
+        {/* Navigation entre semaines - toujours visible */}
+        <div className="flex items-center justify-center gap-1.5 mt-3 pt-3 border-t border-gray-100 overflow-x-auto">
+          {Array.from({ length: MAX_WEEKS }).map((_, weekIndex) => {
+            const weekDishes = weeklySelections[`week${weekIndex}`]?.dishes || []
+            const weekDate = weekDates[weekIndex]
+            let label = `Sem ${weekIndex + 1}`
+            if (weekDate) {
+              const date = new Date(weekDate)
+              label = `${date.getDate()}/${date.getMonth() + 1}`
+            }
 
-              const weekDate = weekDates[weekIndex]
-              let label = `S${weekIndex + 1}`
-              if (weekDate) {
-                const date = new Date(weekDate)
-                label = `${date.getDate()}/${date.getMonth() + 1}`
-              }
-
-              return (
-                <button
-                  key={weekIndex}
-                  onClick={() => setActiveWeek(weekIndex)}
-                  className={`px-3 py-1 rounded-full text-xs font-medium transition ${
-                    activeWeek === weekIndex
-                      ? 'bg-primary-600 text-white'
-                      : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
-                  }`}
-                >
-                  {label} ({weekDishes.length})
-                </button>
-              )
-            })}
-          </div>
-        )}
+            return (
+              <button
+                key={weekIndex}
+                onClick={() => setActiveWeek(weekIndex)}
+                className={`px-3 py-2 rounded-lg text-xs font-medium transition flex-shrink-0 ${
+                  activeWeek === weekIndex
+                    ? 'bg-primary-600 text-white shadow-sm'
+                    : weekDishes.length > 0
+                      ? 'bg-primary-100 text-primary-700 hover:bg-primary-200'
+                      : 'bg-gray-100 text-gray-500 hover:bg-gray-200'
+                }`}
+              >
+                <span className="block">{label}</span>
+                <span className="block text-[10px] opacity-75">
+                  {weekDishes.length > 0 ? `${weekDishes.length} plat${weekDishes.length > 1 ? 's' : ''}` : 'vide'}
+                </span>
+              </button>
+            )
+          })}
+        </div>
       </div>
 
       {/* Onglets de catégories - responsive */}
