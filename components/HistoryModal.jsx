@@ -3,19 +3,31 @@
 import { useState, useEffect } from 'react'
 import { toast } from 'sonner'
 
-const ingredientCategoryLabels = {
-  viande: { name: 'Viandes', emoji: '🥩' },
-  poisson: { name: 'Poissons', emoji: '🐟' },
-  legume: { name: 'Légumes', emoji: '🥕' },
-  fruit: { name: 'Fruits', emoji: '🍎' },
-  feculent: { name: 'Féculents', emoji: '🍞' },
-  produit_laitier: { name: 'Produits laitiers', emoji: '🥛' },
-  oeuf: { name: 'Oeufs', emoji: '🥚' },
-  epice: { name: 'Épices', emoji: '🌶️' },
-  condiment: { name: 'Condiments', emoji: '🫒' },
-  fruits_a_coque: { name: 'Fruits à coque', emoji: '🥜' },
-  surgele: { name: 'Surgelés', emoji: '❄️' },
-  autre: { name: 'Autres', emoji: '📦' }
+// 4 catégories simplifiées pour la liste de courses
+const shoppingCategoryLabels = {
+  frais: { name: 'Frais', emoji: '🥩' },
+  legumes: { name: 'Légumes', emoji: '🥬' },
+  epicerie: { name: 'Épicerie', emoji: '🥫' },
+  surgeles: { name: 'Surgelés', emoji: '❄️' }
+}
+
+// Mapping des catégories de la BDD vers les 4 catégories simplifiées
+const mapToShoppingCategory = (dbCategory) => {
+  const mapping = {
+    viande: 'frais',
+    poisson: 'frais',
+    produit_laitier: 'frais',
+    oeuf: 'frais',
+    legume: 'legumes',
+    fruit: 'legumes',
+    feculent: 'epicerie',
+    epice: 'epicerie',
+    condiment: 'epicerie',
+    fruits_a_coque: 'epicerie',
+    autre: 'epicerie',
+    surgele: 'surgeles'
+  }
+  return mapping[dbCategory] || 'epicerie'
 }
 
 export default function HistoryModal({ isOpen, onClose, userHouseholdSize = 1 }) {
@@ -242,32 +254,42 @@ export default function HistoryModal({ isOpen, onClose, userHouseholdSize = 1 })
                   </p>
                 ) : (
                   <div className="space-y-3">
-                    {Object.entries(shoppingList)
-                      .sort(([a], [b]) => {
-                        const order = ['viande', 'poisson', 'legume', 'fruit', 'feculent', 'produit_laitier', 'oeuf', 'epice', 'condiment', 'autre']
-                        return order.indexOf(a) - order.indexOf(b)
+                    {(() => {
+                      // Regrouper par les 4 catégories simplifiées
+                      const grouped = {}
+                      Object.entries(shoppingList).forEach(([dbCat, ingredients]) => {
+                        const shopCat = mapToShoppingCategory(dbCat)
+                        if (!grouped[shopCat]) grouped[shopCat] = []
+                        grouped[shopCat].push(...ingredients)
                       })
-                      .map(([category, ingredients]) => (
-                        <div key={category} className="bg-gray-50 rounded-lg p-3">
-                          <h5 className="font-semibold text-sm mb-2 flex items-center gap-2">
-                            <span>{ingredientCategoryLabels[category]?.emoji || '📦'}</span>
-                            {ingredientCategoryLabels[category]?.name || category}
-                          </h5>
-                          <ul className="space-y-1">
-                            {ingredients.map((ing, idx) => (
-                              <li key={idx} className="text-sm flex justify-between">
-                                <span>{ing.name}</span>
-                                {category !== 'epice' && ing.quantity && (
-                                  <span className="text-gray-500">
-                                    {ing.quantity % 1 === 0 ? ing.quantity : ing.quantity.toFixed(1)}
-                                    {ing.unit && ` ${ing.unit}`}
-                                  </span>
-                                )}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
+
+                      return Object.entries(grouped)
+                        .sort(([a], [b]) => {
+                          const order = ['frais', 'legumes', 'epicerie', 'surgeles']
+                          return order.indexOf(a) - order.indexOf(b)
+                        })
+                        .map(([category, ingredients]) => (
+                          <div key={category} className="bg-gray-50 rounded-lg p-3">
+                            <h5 className="font-semibold text-sm mb-2 flex items-center gap-2">
+                              <span>{shoppingCategoryLabels[category]?.emoji || '📦'}</span>
+                              {shoppingCategoryLabels[category]?.name || category}
+                            </h5>
+                            <ul className="space-y-1">
+                              {ingredients.map((ing, idx) => (
+                                <li key={idx} className="text-sm flex justify-between">
+                                  <span>{ing.name}</span>
+                                  {ing.quantity && (
+                                    <span className="text-gray-500">
+                                      {ing.quantity % 1 === 0 ? ing.quantity : ing.quantity.toFixed(1)}
+                                      {ing.unit && ` ${ing.unit}`}
+                                    </span>
+                                  )}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                        ))
+                    })()}
                   </div>
                 )}
               </div>

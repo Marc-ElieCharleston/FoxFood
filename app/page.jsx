@@ -651,16 +651,31 @@ export default function Home() {
     vegetation: { name: 'Végétarien', emoji: '🥗', color: 'bg-green-500' }
   }
 
-  // Catégories d'ingrédients pour le récap
-  const ingredientCategoryLabels = {
-    viande: { name: 'Viandes', emoji: '🥩' },
-    poisson: { name: 'Poissons & Fruits de mer', emoji: '🐟' },
-    legume: { name: 'Légumes', emoji: '🥬' },
-    fruit: { name: 'Fruits', emoji: '🍎' },
-    feculent: { name: 'Féculents', emoji: '🍚' },
-    produit_laitier: { name: 'Produits laitiers', emoji: '🧀' },
-    epice: { name: 'Épices & Condiments', emoji: '🧂' },
-    autre: { name: 'Autres', emoji: '📦' }
+  // 4 catégories simplifiées pour la liste de courses
+  const shoppingCategoryLabels = {
+    frais: { name: 'Frais', emoji: '🥩' },
+    legumes: { name: 'Légumes', emoji: '🥬' },
+    epicerie: { name: 'Épicerie', emoji: '🥫' },
+    surgeles: { name: 'Surgelés', emoji: '❄️' }
+  }
+
+  // Mapping des catégories de la BDD vers les 4 catégories simplifiées
+  const mapToShoppingCategory = (dbCategory) => {
+    const mapping = {
+      viande: 'frais',
+      poisson: 'frais',
+      produit_laitier: 'frais',
+      oeuf: 'frais',
+      legume: 'legumes',
+      fruit: 'legumes',
+      feculent: 'epicerie',
+      epice: 'epicerie',
+      condiment: 'epicerie',
+      fruits_a_coque: 'epicerie',
+      autre: 'epicerie',
+      surgele: 'surgeles'
+    }
+    return mapping[dbCategory] || 'epicerie'
   }
 
   // Collecter tous les ingrédients des plats sélectionnés par semaine
@@ -698,12 +713,13 @@ export default function Home() {
       }
     })
 
-    // Grouper par catégorie
+    // Grouper par catégorie simplifiée (4 catégories)
     const grouped = {}
     Object.values(ingredientsMap).forEach(ing => {
-      const cat = ing.category || 'autre'
-      if (!grouped[cat]) grouped[cat] = []
-      grouped[cat].push({
+      const dbCat = ing.category || 'autre'
+      const shoppingCat = mapToShoppingCategory(dbCat)
+      if (!grouped[shoppingCat]) grouped[shoppingCat] = []
+      grouped[shoppingCat].push({
         ...ing,
         // Multiplier par le nombre de personnes
         totalQuantity: ing.quantity * userHouseholdSize
@@ -974,14 +990,14 @@ export default function Home() {
                         <div className="p-3 space-y-3">
                           {Object.entries(week.ingredients)
                             .sort(([a], [b]) => {
-                              const order = ['viande', 'poisson', 'legume', 'fruit', 'feculent', 'produit_laitier', 'epice', 'autre']
+                              const order = ['frais', 'legumes', 'epicerie', 'surgeles']
                               return order.indexOf(a) - order.indexOf(b)
                             })
                             .map(([category, ingredients]) => (
                               <div key={category} className="bg-gray-50 rounded-lg p-2">
                                 <h5 className="font-semibold text-xs mb-1 flex items-center gap-1">
-                                  <span>{ingredientCategoryLabels[category]?.emoji || '📦'}</span>
-                                  {ingredientCategoryLabels[category]?.name || category}
+                                  <span>{shoppingCategoryLabels[category]?.emoji || '📦'}</span>
+                                  {shoppingCategoryLabels[category]?.name || category}
                                 </h5>
                                 <ul className="space-y-0.5">
                                   {ingredients.map(ing => (

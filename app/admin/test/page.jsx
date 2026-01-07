@@ -40,7 +40,7 @@ export default function AdminTestPage() {
     }
   })
 
-  const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
+  const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi']
 
   useEffect(() => {
     if (status === 'authenticated') {

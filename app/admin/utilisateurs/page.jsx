@@ -21,7 +21,7 @@ export default function AdminUsersPage() {
   const [togglingUser, setTogglingUser] = useState(null) // ID de l'utilisateur en cours de toggle
   const [savingUser, setSavingUser] = useState(false)
 
-  const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
+  const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi']
 
   useEffect(() => {
     if (status === 'authenticated') {

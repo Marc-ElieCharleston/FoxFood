@@ -42,7 +42,7 @@ export default function SettingsPage() {
     day1: { enabled: false, email: false, sms: false }
   })
 
-  const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
+  const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi']
   const timeSlots = [
     { value: 'morning', label: 'Matin (8h-12h)' },
     { value: 'afternoon', label: 'Après-midi (14h-18h)' }

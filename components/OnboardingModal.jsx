@@ -36,7 +36,7 @@ export default function OnboardingModal({ userName, userEmail, onComplete }) {
     }
   })
 
-  const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
+  const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi']
 
   const handleReminderToggle = (day) => {
     setFormData(prev => ({
