@@ -204,7 +204,12 @@ export default function Home() {
   // Charger les plats et la sélection existante
   useEffect(() => {
     if (status === 'authenticated') {
-      // Vérifier si l'onboarding est nécessaire
+      // Les admins sont redirigés vers le panel admin
+      if (session?.user?.role === 'admin') {
+        router.push('/admin')
+        return
+      }
+      // Vérifier si l'onboarding est nécessaire (seulement pour les clients)
       if (session?.user?.onboarding_completed === false) {
         setShowOnboardingModal(true)
       } else {
@@ -215,7 +220,7 @@ export default function Home() {
         fetchFavorites()
       }
     }
-  }, [status, session?.user?.onboarding_completed])
+  }, [status, session?.user?.onboarding_completed, session?.user?.role, router])
 
   const fetchDietaryTags = async () => {
     try {
