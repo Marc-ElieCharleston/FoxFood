@@ -231,15 +231,12 @@ export async function POST(request) {
       results.push({ week: i, status: 'saved', data: result.rows[0] })
     }
 
-    // Envoyer 2 emails groupés à l'utilisateur : choix + liste de courses
+    // Envoyer email récapitulatif au client (séparé par semaine)
     try {
-      const { sendUserDishSelectionSummary, sendUserShoppingListGrouped } = await import('@/lib/notifications')
+      const { sendUserSelectionSummary, getShoppingListData, generateShoppingListHtml } = await import('@/lib/notifications')
 
-      // Préparer les données des semaines avec plats
-      const weeksWithDishes = {}
-      const allDishIds = []
-      const allVariants = {}
-      let totalDishes = 0
+      // Préparer les données des semaines avec plats ET listes de courses
+      const weeksWithData = {}
 
       for (let i = 0; i < 5; i++) {
         const weekKey = `week${i}`
@@ -276,45 +273,41 @@ export async function POST(request) {
             return d.name
           })
 
-          weeksWithDishes[weekKey] = {
-            date: weekDates[i],
-            dishes: dishNames
+          // Générer la liste de courses pour cette semaine
+          let shoppingListHtml = ''
+          try {
+            const shoppingData = await getShoppingListData({
+              selectedDishes: weekData.dishes,
+              selectedVariants: weekData.variants || {},
+              householdSize
+            })
+            if (shoppingData) {
+              shoppingListHtml = generateShoppingListHtml(shoppingData)
+            }
+          } catch (shoppingError) {
+            console.error(`Erreur génération liste de courses semaine ${i}:`, shoppingError)
           }
 
-          allDishIds.push(...weekData.dishes)
-          Object.assign(allVariants, weekData.variants || {})
-          totalDishes += weekData.dishes.length
+          weeksWithData[weekKey] = {
+            date: weekDates[i],
+            dishes: dishNames,
+            shoppingListHtml
+          }
         }
       }
 
-      if (Object.keys(weeksWithDishes).length > 0) {
-        // Email 1: Récapitulatif des choix
-        await sendUserDishSelectionSummary({
-          userId,
-          userName: session.user.name,
-          userEmail: userNotificationEmail,
-          weeklySelections: weeksWithDishes,
-          totalDishes
-        })
-        console.log('Email récapitulatif des choix envoyé')
-
-        // Attendre 600ms pour respecter le rate limit Resend
-        await new Promise(resolve => setTimeout(resolve, 600))
-
-        // Email 2: Liste de courses groupée
-        await sendUserShoppingListGrouped({
+      if (Object.keys(weeksWithData).length > 0) {
+        await sendUserSelectionSummary({
           userId,
           userName: session.user.name,
           userEmail: userNotificationEmail,
           householdSize,
-          weeklySelections: weeksWithDishes,
-          allDishIds: [...new Set(allDishIds)], // Enlever les doublons
-          allVariants
+          weeklyData: weeksWithData
         })
-        console.log('Email liste de courses groupée envoyé')
+        console.log('Email récapitulatif envoyé au client')
       }
     } catch (shoppingListError) {
-      console.error('Erreur envoi emails utilisateur:', shoppingListError)
+      console.error('Erreur envoi email client:', shoppingListError)
       // Ne pas bloquer la sauvegarde si l'envoi échoue
     }
 
@@ -337,65 +330,71 @@ export async function POST(request) {
       `
 
       if (adminSettingsResult.rows.length > 0) {
-        // Récupérer tous les plats sélectionnés (une seule fois)
-        const allDishIds = []
-        const allVariantSelections = {}
-        for (const weekData of Object.values(weeklySelections)) {
-          if (weekData && weekData.dishes) {
-            allDishIds.push(...weekData.dishes)
-            Object.assign(allVariantSelections, weekData.variants || {})
+        const { notifyAdminOnSelection, getShoppingListData, generateShoppingListHtml } = await import('@/lib/notifications')
+
+        // Préparer les données PAR SEMAINE pour l'admin
+        const adminWeeksData = {}
+
+        for (let i = 0; i < 5; i++) {
+          const weekKey = `week${i}`
+          const weekData = weeklySelections[weekKey]
+
+          if (weekData && weekData.dishes && weekData.dishes.length > 0) {
+            // Récupérer les noms des plats
+            const dishesResult = await sql`
+              SELECT d.id, d.name FROM dishes d
+              WHERE d.id = ANY(${weekData.dishes})
+            `
+
+            // Récupérer les variantes si sélectionnées
+            const variantIds = Object.values(weekData.variants || {}).filter(id => id)
+            let variantsMap = {}
+            if (variantIds.length > 0) {
+              const variantsResult = await sql`
+                SELECT id, name FROM dish_variants
+                WHERE id = ANY(${variantIds})
+              `
+              variantsMap = variantsResult.rows.reduce((acc, v) => {
+                acc[v.id] = v.name
+                return acc
+              }, {})
+            }
+
+            // Construire la liste avec variantes
+            const dishNames = dishesResult.rows.map(d => {
+              const variantId = weekData.variants?.[d.id]
+              const variantName = variantId ? variantsMap[variantId] : null
+              if (variantName && variantName !== 'Classique') {
+                return `${d.name} (${variantName})`
+              }
+              return d.name
+            })
+
+            // Générer la liste de courses pour cette semaine
+            let shoppingListHtml = ''
+            try {
+              const shoppingData = await getShoppingListData({
+                selectedDishes: weekData.dishes,
+                selectedVariants: weekData.variants || {},
+                householdSize
+              })
+              if (shoppingData) {
+                shoppingListHtml = generateShoppingListHtml(shoppingData)
+              }
+            } catch (shoppingError) {
+              console.error(`Erreur génération liste de courses admin semaine ${i}:`, shoppingError)
+            }
+
+            adminWeeksData[weekKey] = {
+              date: weekDates[i],
+              dishes: dishNames,
+              shoppingListHtml
+            }
           }
         }
-        const uniqueDishIds = [...new Set(allDishIds)]
 
-        if (uniqueDishIds.length > 0) {
-          const dishesResult = await sql`
-            SELECT d.id, d.name FROM dishes d
-            WHERE d.id = ANY(${uniqueDishIds})
-          `
-
-          // Récupérer les variantes si sélectionnées
-          const variantIds = Object.values(allVariantSelections).filter(id => id)
-          let variantsMap = {}
-          if (variantIds.length > 0) {
-            const variantsResult = await sql`
-              SELECT id, name FROM dish_variants
-              WHERE id = ANY(${variantIds})
-            `
-            variantsMap = variantsResult.rows.reduce((acc, v) => {
-              acc[v.id] = v.name
-              return acc
-            }, {})
-          }
-
-          // Construire la liste avec variantes
-          const dishNames = dishesResult.rows.map(d => {
-            const variantId = allVariantSelections[d.id]
-            const variantName = variantId ? variantsMap[variantId] : null
-            if (variantName && variantName !== 'Classique') {
-              return `${d.name} (${variantName})`
-            }
-            return d.name
-          })
-
-          const { notifyAdminOnSelection, getShoppingListData, generateShoppingListHtml } = await import('@/lib/notifications')
-
-          // Générer la liste de courses pour l'admin
-          let shoppingListHtml = ''
-          try {
-            const shoppingData = await getShoppingListData({
-              selectedDishes: uniqueDishIds,
-              selectedVariants: allVariantSelections,
-              householdSize
-            })
-            if (shoppingData) {
-              shoppingListHtml = generateShoppingListHtml(shoppingData)
-            }
-          } catch (shoppingError) {
-            console.error('Erreur génération liste de courses pour admin:', shoppingError)
-          }
-
-          // Envoyer UN seul email à TOUS les admins avec choix + liste de courses (avec délai pour éviter rate limit Resend)
+        if (Object.keys(adminWeeksData).length > 0) {
+          // Envoyer UN seul email à TOUS les admins (avec délai pour éviter rate limit Resend)
           for (let i = 0; i < adminSettingsResult.rows.length; i++) {
             const adminSettings = adminSettingsResult.rows[i]
             try {
@@ -411,8 +410,7 @@ export async function POST(request) {
                 sendSMS: adminSettings.send_sms,
                 userName: session.user.name,
                 userEmail: session.user.email,
-                selectedDishes: dishNames,
-                shoppingListHtml,
+                weeklyData: adminWeeksData,
                 householdSize
               })
               console.log(`Notification complète envoyée à ${adminSettings.admin_name}`)
