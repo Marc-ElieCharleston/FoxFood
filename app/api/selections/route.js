@@ -231,29 +231,90 @@ export async function POST(request) {
       results.push({ week: i, status: 'saved', data: result.rows[0] })
     }
 
-    // Envoyer la liste de courses pour chaque semaine avec des plats
+    // Envoyer 2 emails groupés à l'utilisateur : choix + liste de courses
     try {
-      const { sendShoppingList } = await import('@/lib/notifications')
+      const { sendUserDishSelectionSummary, sendUserShoppingListGrouped } = await import('@/lib/notifications')
+
+      // Préparer les données des semaines avec plats
+      const weeksWithDishes = {}
+      const allDishIds = []
+      const allVariants = {}
+      let totalDishes = 0
 
       for (let i = 0; i < 5; i++) {
         const weekKey = `week${i}`
         const weekData = weeklySelections[weekKey]
 
         if (weekData && weekData.dishes && weekData.dishes.length > 0) {
-          await sendShoppingList({
-            userId,
-            userName: session.user.name,
-            userEmail: userNotificationEmail,
-            householdSize,
-            weekStartDate: weekDates[i],
-            selectedDishes: weekData.dishes,
-            selectedVariants: weekData.variants || {}
+          // Récupérer les noms des plats
+          const dishesResult = await sql`
+            SELECT d.id, d.name FROM dishes d
+            WHERE d.id = ANY(${weekData.dishes})
+          `
+
+          // Récupérer les variantes si sélectionnées
+          const variantIds = Object.values(weekData.variants || {}).filter(id => id)
+          let variantsMap = {}
+          if (variantIds.length > 0) {
+            const variantsResult = await sql`
+              SELECT id, name FROM dish_variants
+              WHERE id = ANY(${variantIds})
+            `
+            variantsMap = variantsResult.rows.reduce((acc, v) => {
+              acc[v.id] = v.name
+              return acc
+            }, {})
+          }
+
+          // Construire la liste avec variantes
+          const dishNames = dishesResult.rows.map(d => {
+            const variantId = weekData.variants?.[d.id]
+            const variantName = variantId ? variantsMap[variantId] : null
+            if (variantName && variantName !== 'Classique') {
+              return `${d.name} (${variantName})`
+            }
+            return d.name
           })
-          console.log(`Liste de courses envoyée pour semaine ${i}`)
+
+          weeksWithDishes[weekKey] = {
+            date: weekDates[i],
+            dishes: dishNames
+          }
+
+          allDishIds.push(...weekData.dishes)
+          Object.assign(allVariants, weekData.variants || {})
+          totalDishes += weekData.dishes.length
         }
       }
+
+      if (Object.keys(weeksWithDishes).length > 0) {
+        // Email 1: Récapitulatif des choix
+        await sendUserDishSelectionSummary({
+          userId,
+          userName: session.user.name,
+          userEmail: userNotificationEmail,
+          weeklySelections: weeksWithDishes,
+          totalDishes
+        })
+        console.log('Email récapitulatif des choix envoyé')
+
+        // Attendre 600ms pour respecter le rate limit Resend
+        await new Promise(resolve => setTimeout(resolve, 600))
+
+        // Email 2: Liste de courses groupée
+        await sendUserShoppingListGrouped({
+          userId,
+          userName: session.user.name,
+          userEmail: userNotificationEmail,
+          householdSize,
+          weeklySelections: weeksWithDishes,
+          allDishIds: [...new Set(allDishIds)], // Enlever les doublons
+          allVariants
+        })
+        console.log('Email liste de courses groupée envoyé')
+      }
     } catch (shoppingListError) {
-      console.error('Erreur envoi liste de courses:', shoppingListError)
+      console.error('Erreur envoi emails utilisateur:', shoppingListError)
       // Ne pas bloquer la sauvegarde si l'envoi échoue
     }
 
@@ -317,7 +378,7 @@ export async function POST(request) {
             return d.name
           })
 
-          const { notifyAdminOnSelection, notifyAdminShoppingList, getShoppingListData, generateShoppingListHtml } = await import('@/lib/notifications')
+          const { notifyAdminOnSelection, getShoppingListData, generateShoppingListHtml } = await import('@/lib/notifications')
 
           // Générer la liste de courses pour l'admin
           let shoppingListHtml = ''
@@ -334,7 +395,7 @@ export async function POST(request) {
             console.error('Erreur génération liste de courses pour admin:', shoppingError)
           }
 
-          // Envoyer 2 emails séparés à TOUS les admins (avec délai pour éviter rate limit Resend)
+          // Envoyer UN seul email à TOUS les admins avec choix + liste de courses (avec délai pour éviter rate limit Resend)
           for (let i = 0; i < adminSettingsResult.rows.length; i++) {
             const adminSettings = adminSettingsResult.rows[i]
             try {
@@ -343,7 +404,6 @@ export async function POST(request) {
                 await new Promise(resolve => setTimeout(resolve, 600))
               }
 
-              // Email 1: Choix de plats
               await notifyAdminOnSelection({
                 adminEmail: adminSettings.notification_email || adminSettings.user_email,
                 adminPhone: adminSettings.notification_phone,
@@ -351,25 +411,11 @@ export async function POST(request) {
                 sendSMS: adminSettings.send_sms,
                 userName: session.user.name,
                 userEmail: session.user.email,
-                selectedDishes: dishNames
+                selectedDishes: dishNames,
+                shoppingListHtml,
+                householdSize
               })
-              console.log(`Notification choix envoyée à ${adminSettings.admin_name}`)
-
-              // Attendre 600ms avant le 2e email
-              await new Promise(resolve => setTimeout(resolve, 600))
-
-              // Email 2: Liste de courses
-              if (shoppingListHtml && adminSettings.send_email) {
-                await notifyAdminShoppingList({
-                  adminEmail: adminSettings.notification_email || adminSettings.user_email,
-                  sendEmail: adminSettings.send_email,
-                  userName: session.user.name,
-                  userEmail: session.user.email,
-                  shoppingListHtml,
-                  householdSize
-                })
-                console.log(`Liste de courses envoyée à ${adminSettings.admin_name}`)
-              }
+              console.log(`Notification complète envoyée à ${adminSettings.admin_name}`)
             } catch (adminNotifError) {
               console.error(`Erreur notification admin ${adminSettings.admin_name}:`, adminNotifError)
               // Continuer avec les autres admins même si un échoue
