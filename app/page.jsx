@@ -51,6 +51,7 @@ export default function Home() {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false)
   const [showIngredientsSummary, setShowIngredientsSummary] = useState(false)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
+  const [resendingRecap, setResendingRecap] = useState(false)
 
   const MAX_DISHES_PER_WEEK = 5
   const MAX_WEEKS = 4
@@ -775,6 +776,34 @@ export default function Home() {
   const daysOfWeek = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche']
   const timeSlots = ['Matin (8h-12h)', 'Midi (12h-14h)', 'Après-midi (14h-18h)', 'Soir (18h-20h)']
 
+  // Renvoyer le récapitulatif des semaines futures
+  const handleResendRecap = async () => {
+    setResendingRecap(true)
+    try {
+      const response = await fetch('/api/selections/resend', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      })
+
+      if (response.ok) {
+        const data = await response.json()
+        toast.success(`Récapitulatif envoyé ! (${data.weeksCount} semaine${data.weeksCount > 1 ? 's' : ''})`)
+      } else {
+        const error = await response.json()
+        if (response.status === 404) {
+          toast.error('Aucune sélection future à envoyer')
+        } else {
+          toast.error(error.error || 'Erreur lors de l\'envoi')
+        }
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de l\'envoi du récapitulatif')
+    } finally {
+      setResendingRecap(false)
+    }
+  }
+
   if (status === 'loading') {
     return <div className="text-center py-12">Chargement...</div>
   }
@@ -1040,13 +1069,23 @@ export default function Home() {
           <h1 className="text-2xl md:text-3xl font-bold mb-1">
             Bonjour {session.user.name}!
           </h1>
-          <button
-            onClick={() => setShowHistoryModal(true)}
-            className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition"
-          >
-            <span>📋</span>
-            <span className="hidden sm:inline">Historique</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleResendRecap}
+              disabled={resendingRecap}
+              className="flex items-center gap-1.5 px-3 py-2 bg-primary-100 hover:bg-primary-200 rounded-lg text-sm font-medium text-primary-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <span>📧</span>
+              <span className="hidden sm:inline">{resendingRecap ? 'Envoi...' : 'Renvoyer récap'}</span>
+            </button>
+            <button
+              onClick={() => setShowHistoryModal(true)}
+              className="flex items-center gap-1.5 px-3 py-2 bg-gray-100 hover:bg-gray-200 rounded-lg text-sm font-medium text-gray-700 transition"
+            >
+              <span>📋</span>
+              <span className="hidden sm:inline">Historique</span>
+            </button>
+          </div>
         </div>
         <p className="text-sm text-gray-600">
           Sélectionnez jusqu'à {MAX_DISHES_PER_WEEK} plats par semaine
