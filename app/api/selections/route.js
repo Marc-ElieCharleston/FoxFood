@@ -317,7 +317,7 @@ export async function POST(request) {
             return d.name
           })
 
-          const { notifyAdminOnSelection, getShoppingListData, generateShoppingListHtml } = await import('@/lib/notifications')
+          const { notifyAdminOnSelection, notifyAdminShoppingList, getShoppingListData, generateShoppingListHtml } = await import('@/lib/notifications')
 
           // Générer la liste de courses pour l'admin
           let shoppingListHtml = ''
@@ -334,7 +334,7 @@ export async function POST(request) {
             console.error('Erreur génération liste de courses pour admin:', shoppingError)
           }
 
-          // Envoyer la notification à TOUS les admins (avec délai pour éviter rate limit Resend)
+          // Envoyer 2 emails séparés à TOUS les admins (avec délai pour éviter rate limit Resend)
           for (let i = 0; i < adminSettingsResult.rows.length; i++) {
             const adminSettings = adminSettingsResult.rows[i]
             try {
@@ -342,6 +342,8 @@ export async function POST(request) {
               if (i > 0) {
                 await new Promise(resolve => setTimeout(resolve, 600))
               }
+
+              // Email 1: Choix de plats
               await notifyAdminOnSelection({
                 adminEmail: adminSettings.notification_email || adminSettings.user_email,
                 adminPhone: adminSettings.notification_phone,
@@ -349,10 +351,25 @@ export async function POST(request) {
                 sendSMS: adminSettings.send_sms,
                 userName: session.user.name,
                 userEmail: session.user.email,
-                selectedDishes: dishNames,
-                shoppingListHtml
+                selectedDishes: dishNames
               })
-              console.log(`Notification envoyée à ${adminSettings.admin_name}`)
+              console.log(`Notification choix envoyée à ${adminSettings.admin_name}`)
+
+              // Attendre 600ms avant le 2e email
+              await new Promise(resolve => setTimeout(resolve, 600))
+
+              // Email 2: Liste de courses
+              if (shoppingListHtml && adminSettings.send_email) {
+                await notifyAdminShoppingList({
+                  adminEmail: adminSettings.notification_email || adminSettings.user_email,
+                  sendEmail: adminSettings.send_email,
+                  userName: session.user.name,
+                  userEmail: session.user.email,
+                  shoppingListHtml,
+                  householdSize
+                })
+                console.log(`Liste de courses envoyée à ${adminSettings.admin_name}`)
+              }
             } catch (adminNotifError) {
               console.error(`Erreur notification admin ${adminSettings.admin_name}:`, adminNotifError)
               // Continuer avec les autres admins même si un échoue
