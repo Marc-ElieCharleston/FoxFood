@@ -1088,22 +1088,28 @@ export default function AdminPage() {
                     )}
                   </div>
                 </div>
-                <div className="flex gap-2 mt-3">
+                <div className="grid grid-cols-2 gap-2 mt-3">
+                  <button
+                    onClick={() => openIngredientsModal(dish)}
+                    className="px-3 py-1.5 text-xs bg-amber-600 text-white rounded hover:bg-amber-700 font-semibold"
+                  >
+                    🥕 Ingrédients
+                  </button>
                   <button
                     onClick={() => openVariantsModal(dish)}
-                    className="flex-1 px-3 py-1.5 text-xs bg-purple-600 text-white rounded hover:bg-purple-700 font-semibold"
+                    className="px-3 py-1.5 text-xs bg-purple-600 text-white rounded hover:bg-purple-700 font-semibold"
                   >
                     🏷️ Variantes
                   </button>
                   <button
                     onClick={() => handleEdit(dish)}
-                    className="flex-1 px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 font-semibold"
+                    className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 font-semibold"
                   >
                     ✏️ Modifier
                   </button>
                   <button
                     onClick={() => handleDelete(dish.id)}
-                    className="flex-1 px-3 py-1.5 text-xs bg-red-600 text-white rounded hover:bg-red-700 font-semibold"
+                    className="px-3 py-1.5 text-xs bg-red-600 text-white rounded hover:bg-red-700 font-semibold"
                   >
                     🗑️ Suppr.
                   </button>

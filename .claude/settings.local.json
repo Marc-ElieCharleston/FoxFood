@@ -38,7 +38,9 @@
       "Bash(timeout:*)",
       "Bash(ping:*)",
       "Bash(cd:*)",
-      "Bash(git reset:*)"
+      "Bash(git reset:*)",
+      "Bash(psql:*)",
+      "Bash(git restore:*)"
     ],
     "deny": [],
     "ask": []
