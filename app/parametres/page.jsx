@@ -35,6 +35,17 @@ export default function SettingsPage() {
   const [ingredientSearch, setIngredientSearch] = useState('')
   const [showIngredientDropdown, setShowIngredientDropdown] = useState(false)
 
+  // États pour les remplacements d'ingrédients
+  const [replacements, setReplacements] = useState([])
+  const [loadingReplacements, setLoadingReplacements] = useState(false)
+  const [originalIngredientSearch, setOriginalIngredientSearch] = useState('')
+  const [replacementIngredientSearch, setReplacementIngredientSearch] = useState('')
+  const [showOriginalDropdown, setShowOriginalDropdown] = useState(false)
+  const [showReplacementDropdown, setShowReplacementDropdown] = useState(false)
+  const [selectedOriginalIngredient, setSelectedOriginalIngredient] = useState(null)
+  const [selectedReplacementIngredient, setSelectedReplacementIngredient] = useState(null)
+  const [addingReplacement, setAddingReplacement] = useState(false)
+
   // Rappels multiples: 5, 3, et 1 jours avant
   const [reminders, setReminders] = useState({
     day5: { enabled: false, email: false, sms: false },
@@ -54,6 +65,7 @@ export default function SettingsPage() {
       fetchHousehold()
       fetchDietaryTags()
       fetchAllIngredients()
+      fetchReplacements()
     }
   }, [status])
 
@@ -74,6 +86,80 @@ export default function SettingsPage() {
       setAllIngredients(Array.isArray(data) ? data : [])
     } catch (error) {
       console.error('Erreur chargement ingredients:', error)
+    }
+  }
+
+  const fetchReplacements = async () => {
+    try {
+      setLoadingReplacements(true)
+      const response = await fetch('/api/ingredient-replacements')
+      if (response.ok) {
+        const data = await response.json()
+        setReplacements(data.replacements || [])
+      }
+    } catch (error) {
+      console.error('Erreur chargement remplacements:', error)
+    } finally {
+      setLoadingReplacements(false)
+    }
+  }
+
+  const handleAddReplacement = async () => {
+    if (!selectedOriginalIngredient || !selectedReplacementIngredient) {
+      toast.error('Veuillez sélectionner les deux ingrédients')
+      return
+    }
+
+    try {
+      setAddingReplacement(true)
+      const response = await fetch('/api/ingredient-replacements', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          originalIngredientId: selectedOriginalIngredient.id,
+          replacementIngredientId: selectedReplacementIngredient.id
+        })
+      })
+
+      if (response.ok) {
+        toast.success('Remplacement ajouté!')
+        fetchReplacements()
+        setSelectedOriginalIngredient(null)
+        setSelectedReplacementIngredient(null)
+        setOriginalIngredientSearch('')
+        setReplacementIngredientSearch('')
+      } else {
+        const data = await response.json()
+        toast.error(data.error || 'Erreur lors de l\'ajout')
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de l\'ajout du remplacement')
+    } finally {
+      setAddingReplacement(false)
+    }
+  }
+
+  const handleDeleteReplacement = async (replacementId) => {
+    if (!confirm('Voulez-vous vraiment supprimer ce remplacement ?')) {
+      return
+    }
+
+    try {
+      const response = await fetch(`/api/ingredient-replacements?id=${replacementId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        toast.success('Remplacement supprimé')
+        fetchReplacements()
+      } else {
+        const data = await response.json()
+        toast.error(data.error || 'Erreur lors de la suppression')
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de la suppression')
     }
   }
 
@@ -110,10 +196,20 @@ export default function SettingsPage() {
     }))
   }
 
-  // Filtrer les ingredients pour la recherche
+  // Filtrer les ingredients pour la recherche (avoided ingredients)
   const filteredIngredients = allIngredients.filter(ing =>
     ing.name.toLowerCase().includes(ingredientSearch.toLowerCase()) &&
     !(settings.avoided_ingredients || []).some(a => a.id === ing.id)
+  ).slice(0, 8)
+
+  // Filtrer les ingredients pour les remplacements
+  const filteredOriginalIngredients = allIngredients.filter(ing =>
+    ing.name.toLowerCase().includes(originalIngredientSearch.toLowerCase()) &&
+    !replacements.some(r => r.original_ingredient_id === ing.id)
+  ).slice(0, 8)
+
+  const filteredReplacementIngredients = allIngredients.filter(ing =>
+    ing.name.toLowerCase().includes(replacementIngredientSearch.toLowerCase())
   ).slice(0, 8)
 
   const fetchHousehold = async () => {
@@ -914,7 +1010,151 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Section 5: Notifications */}
+        {/* Section 5: Remplacements d'ingrédients */}
+        <div className="border-b pb-6">
+          <h2 className="text-lg font-bold mb-4">🔄 Remplacements d'ingrédients</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Remplacez automatiquement certains ingrédients par d'autres dans vos listes de courses.
+            Utile pour les intolérances ou préférences spécifiques (ex: lait → lait de soja).
+          </p>
+
+          {/* Liste des remplacements actuels */}
+          <div className="mb-6">
+            <p className="text-sm font-medium text-gray-700 mb-3">
+              Remplacements actifs :
+            </p>
+
+            {loadingReplacements ? (
+              <div className="text-center py-4 text-gray-500">Chargement...</div>
+            ) : replacements.length > 0 ? (
+              <div className="space-y-2">
+                {replacements.map((replacement) => (
+                  <div
+                    key={replacement.id}
+                    className="flex items-center justify-between p-3 bg-blue-50 border border-blue-200 rounded-lg"
+                  >
+                    <div className="flex items-center gap-3 flex-1">
+                      <span className="font-medium text-gray-700">{replacement.original_name}</span>
+                      <span className="text-gray-400">→</span>
+                      <span className="font-medium text-blue-700">{replacement.replacement_name}</span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteReplacement(replacement.id)}
+                      className="text-red-500 hover:text-red-700 px-2"
+                      title="Supprimer"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-gray-500 italic">
+                Aucun remplacement configuré
+              </p>
+            )}
+          </div>
+
+          {/* Formulaire d'ajout */}
+          <div className="border-t pt-6">
+            <p className="text-sm font-medium text-gray-700 mb-3">
+              Ajouter un nouveau remplacement :
+            </p>
+
+            <div className="space-y-4">
+              {/* Ingrédient original */}
+              <div className="relative">
+                <label className="block text-xs text-gray-600 mb-1">
+                  Ingrédient à remplacer
+                </label>
+                <input
+                  type="text"
+                  value={selectedOriginalIngredient?.name || originalIngredientSearch}
+                  onChange={(e) => {
+                    setOriginalIngredientSearch(e.target.value)
+                    setSelectedOriginalIngredient(null)
+                    setShowOriginalDropdown(e.target.value.length > 0)
+                  }}
+                  onFocus={() => originalIngredientSearch.length > 0 && setShowOriginalDropdown(true)}
+                  placeholder="Rechercher l'ingrédient..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm"
+                />
+
+                {/* Dropdown des résultats */}
+                {showOriginalDropdown && !selectedOriginalIngredient && filteredOriginalIngredients.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {filteredOriginalIngredients.map(ing => (
+                      <button
+                        key={ing.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedOriginalIngredient(ing)
+                          setOriginalIngredientSearch(ing.name)
+                          setShowOriginalDropdown(false)
+                        }}
+                        className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100"
+                      >
+                        {ing.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Ingrédient de remplacement */}
+              <div className="relative">
+                <label className="block text-xs text-gray-600 mb-1">
+                  Remplacer par
+                </label>
+                <input
+                  type="text"
+                  value={selectedReplacementIngredient?.name || replacementIngredientSearch}
+                  onChange={(e) => {
+                    setReplacementIngredientSearch(e.target.value)
+                    setSelectedReplacementIngredient(null)
+                    setShowReplacementDropdown(e.target.value.length > 0)
+                  }}
+                  onFocus={() => replacementIngredientSearch.length > 0 && setShowReplacementDropdown(true)}
+                  placeholder="Rechercher l'ingrédient de remplacement..."
+                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm"
+                />
+
+                {/* Dropdown des résultats */}
+                {showReplacementDropdown && !selectedReplacementIngredient && filteredReplacementIngredients.length > 0 && (
+                  <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {filteredReplacementIngredients.map(ing => (
+                      <button
+                        key={ing.id}
+                        type="button"
+                        onClick={() => {
+                          setSelectedReplacementIngredient(ing)
+                          setReplacementIngredientSearch(ing.name)
+                          setShowReplacementDropdown(false)
+                        }}
+                        className="w-full px-3 py-2 text-left text-sm hover:bg-gray-100"
+                      >
+                        {ing.name}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Bouton d'ajout */}
+              <button
+                type="button"
+                onClick={handleAddReplacement}
+                disabled={addingReplacement || !selectedOriginalIngredient || !selectedReplacementIngredient}
+                className="w-full py-2 px-4 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {addingReplacement ? 'Ajout en cours...' : '➕ Ajouter le remplacement'}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Section 6: Notifications */}
         <div>
           <h2 className="text-lg font-bold mb-4">📬 Notifications d'Emeric</h2>
 

@@ -446,6 +446,39 @@ export default function Home() {
       return
     }
 
+    // Vérifier si des semaines ont moins de 5 plats et construire un message d'avertissement
+    const incompleteWeeks = []
+    Object.entries(weeklySelections).forEach(([weekKey, weekData]) => {
+      if (weekData && weekData.dishes && weekData.dishes.length > 0 && weekData.dishes.length < 5) {
+        const weekIndex = parseInt(weekKey.replace('week', ''))
+        const weekDate = weekDates[weekIndex]
+        if (weekDate) {
+          const date = new Date(weekDate)
+          const formattedDate = date.toLocaleDateString('fr-FR', {
+            day: 'numeric',
+            month: 'long'
+          })
+          incompleteWeeks.push({
+            date: formattedDate,
+            count: weekData.dishes.length
+          })
+        }
+      }
+    })
+
+    // Si des semaines sont incomplètes, demander confirmation
+    if (incompleteWeeks.length > 0) {
+      let warningMessage = '⚠️ Attention :\n\n'
+      incompleteWeeks.forEach(week => {
+        warningMessage += `• Semaine du ${week.date} : seulement ${week.count} plat${week.count > 1 ? 's' : ''} sur 5\n`
+      })
+      warningMessage += '\n💡 Vous pouvez sélectionner jusqu\'à 5 plats par semaine.\n\nVoulez-vous vraiment valider cette sélection ?'
+
+      if (!confirm(warningMessage)) {
+        return
+      }
+    }
+
     try {
       setSaving(true)
       const response = await fetch('/api/selections', {
