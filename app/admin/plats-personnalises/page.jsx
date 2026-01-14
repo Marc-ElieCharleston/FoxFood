@@ -137,19 +137,86 @@ export default function AdminCustomDishesPage() {
   }
 
   const approvedCount = requests.filter(r => r.status === 'approved').length
+  const rejectedCount = requests.filter(r => r.status === 'rejected').length
+  const totalCount = requests.length
+  const approvalRate = totalCount > 0 ? Math.round((approvedCount / totalCount) * 100) : 0
+
+  // Top 3 clients demandeurs
+  const topClients = Object.values(
+    requests.reduce((acc, req) => {
+      const key = req.user_id
+      if (!acc[key]) {
+        acc[key] = { name: req.user_name, email: req.user_email, count: 0 }
+      }
+      acc[key].count++
+      return acc
+    }, {})
+  )
+    .sort((a, b) => b.count - a.count)
+    .slice(0, 3)
 
   return (
     <div className="max-w-7xl mx-auto min-h-[calc(100vh-200px)]">
-      <div className="mb-6 flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold mb-2">Plats personnalisés</h1>
-          <p className="text-gray-600 text-sm">
-            Les demandes sont validées automatiquement. Refusez-les si besoin.
-          </p>
+      <div className="mb-6">
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold">Plats personnalisés</h1>
+            <p className="text-gray-600 text-sm">
+              Les demandes sont validées automatiquement. Refusez-les si besoin.
+            </p>
+          </div>
         </div>
-        {approvedCount > 0 && (
-          <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold">
-            {approvedCount} validée{approvedCount > 1 ? 's' : ''}
+
+        {/* Statistiques - 4 cards */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mt-4">
+          {/* Total */}
+          <div className="bg-white rounded-lg shadow p-4 border-l-4 border-blue-500">
+            <div className="text-2xl font-bold text-gray-800">{totalCount}</div>
+            <div className="text-xs text-gray-600 mt-1">Total demandes</div>
+          </div>
+
+          {/* Validées */}
+          <div className="bg-white rounded-lg shadow p-4 border-l-4 border-green-500">
+            <div className="text-2xl font-bold text-green-600">{approvedCount}</div>
+            <div className="text-xs text-gray-600 mt-1">
+              Validées {totalCount > 0 && `(${approvalRate}%)`}
+            </div>
+          </div>
+
+          {/* Refusées */}
+          <div className="bg-white rounded-lg shadow p-4 border-l-4 border-red-500">
+            <div className="text-2xl font-bold text-red-600">{rejectedCount}</div>
+            <div className="text-xs text-gray-600 mt-1">Refusées</div>
+          </div>
+
+          {/* Top demandeur */}
+          <div className="bg-white rounded-lg shadow p-4 border-l-4 border-purple-500">
+            <div className="text-2xl font-bold text-purple-600">
+              {topClients[0]?.count || 0}
+            </div>
+            <div className="text-xs text-gray-600 mt-1">
+              {topClients[0] ? `par ${topClients[0].name.split(' ')[0]}` : 'Top demandeur'}
+            </div>
+          </div>
+        </div>
+
+        {/* Top 3 clients (optionnel, visible sur desktop uniquement) */}
+        {topClients.length > 0 && (
+          <div className="hidden md:block mt-3 bg-white rounded-lg shadow p-4">
+            <h3 className="text-sm font-semibold text-gray-700 mb-2">🏆 Clients les plus actifs</h3>
+            <div className="flex gap-4">
+              {topClients.map((client, idx) => (
+                <div key={idx} className="flex items-center gap-2">
+                  <div className="w-6 h-6 rounded-full bg-purple-100 text-purple-700 flex items-center justify-center text-xs font-bold">
+                    {idx + 1}
+                  </div>
+                  <div>
+                    <div className="text-sm font-medium text-gray-800">{client.name}</div>
+                    <div className="text-xs text-gray-500">{client.count} demande{client.count > 1 ? 's' : ''}</div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         )}
       </div>

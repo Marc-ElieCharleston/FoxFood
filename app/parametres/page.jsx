@@ -1208,6 +1208,24 @@ export default function SettingsPage() {
             Vos demandes sont validées automatiquement. Elles apparaissent dans le catalogue dès leur création.
           </p>
 
+          {/* Badges récapitulatifs */}
+          {!loadingCustomDishes && customDishRequests.length > 0 && (
+            <div className="flex flex-wrap gap-2 mb-4">
+              <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded-full">
+                <span className="text-xs font-semibold text-green-700">
+                  {customDishRequests.filter(r => r.status === 'approved').length} validée{customDishRequests.filter(r => r.status === 'approved').length > 1 ? 's' : ''}
+                </span>
+              </div>
+              {customDishRequests.filter(r => r.status === 'rejected').length > 0 && (
+                <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-50 border border-red-200 rounded-full">
+                  <span className="text-xs font-semibold text-red-700">
+                    {customDishRequests.filter(r => r.status === 'rejected').length} refusée{customDishRequests.filter(r => r.status === 'rejected').length > 1 ? 's' : ''}
+                  </span>
+                </div>
+              )}
+            </div>
+          )}
+
           {loadingCustomDishes ? (
             <div className="text-center py-4 text-gray-500">Chargement...</div>
           ) : customDishRequests.length === 0 ? (
