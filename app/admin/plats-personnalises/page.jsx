@@ -11,10 +11,9 @@ export default function AdminCustomDishesPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [requests, setRequests] = useState([])
-  const [filter, setFilter] = useState('pending') // pending, approved, rejected, all
+  const [filter, setFilter] = useState('approved') // approved (défaut), rejected, all
   const [selectedRequest, setSelectedRequest] = useState(null)
   const [showModal, setShowModal] = useState(false)
-  const [actionType, setActionType] = useState('') // 'approve' or 'reject'
   const [adminNotes, setAdminNotes] = useState('')
   const [processing, setProcessing] = useState(false)
 
@@ -48,17 +47,14 @@ export default function AdminCustomDishesPage() {
     }
   }
 
-  const handleOpenModal = (request, action) => {
+  const handleOpenModal = (request) => {
     setSelectedRequest(request)
-    setActionType(action)
     setAdminNotes('')
     setShowModal(true)
   }
 
-  const handleSubmitAction = async () => {
+  const handleRejectRequest = async () => {
     if (!selectedRequest) return
-
-    const newStatus = actionType === 'approve' ? 'approved' : 'rejected'
 
     try {
       setProcessing(true)
@@ -66,27 +62,22 @@ export default function AdminCustomDishesPage() {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          status: newStatus,
           admin_notes: adminNotes
         })
       })
 
       if (response.ok) {
-        toast.success(
-          actionType === 'approve'
-            ? 'Demande approuvée avec succès!'
-            : 'Demande rejetée'
-        )
+        toast.success('Demande rejetée et plat désactivé')
         setShowModal(false)
         setSelectedRequest(null)
         fetchRequests()
       } else {
         const data = await response.json()
-        toast.error(data.error || 'Erreur lors de la mise à jour')
+        toast.error(data.error || 'Erreur lors du rejet')
       }
     } catch (error) {
       console.error('Erreur:', error)
-      toast.error('Erreur lors de la mise à jour')
+      toast.error('Erreur lors du rejet')
     } finally {
       setProcessing(false)
     }
@@ -116,11 +107,10 @@ export default function AdminCustomDishesPage() {
 
   const getStatusBadge = (status) => {
     const badges = {
-      pending: { bg: 'bg-yellow-100', text: 'text-yellow-800', label: 'En attente' },
-      approved: { bg: 'bg-green-100', text: 'text-green-800', label: 'Approuvée' },
+      approved: { bg: 'bg-green-100', text: 'text-green-800', label: 'Validée' },
       rejected: { bg: 'bg-red-100', text: 'text-red-800', label: 'Rejetée' }
     }
-    const badge = badges[status] || badges.pending
+    const badge = badges[status] || badges.approved
     return (
       <span className={`px-2 py-1 rounded-full text-xs font-semibold ${badge.bg} ${badge.text}`}>
         {badge.label}
@@ -146,7 +136,7 @@ export default function AdminCustomDishesPage() {
     return null
   }
 
-  const pendingCount = requests.filter(r => r.status === 'pending').length
+  const approvedCount = requests.filter(r => r.status === 'approved').length
 
   return (
     <div className="max-w-7xl mx-auto min-h-[calc(100vh-200px)]">
@@ -154,12 +144,12 @@ export default function AdminCustomDishesPage() {
         <div>
           <h1 className="text-2xl md:text-3xl font-bold mb-2">Plats personnalisés</h1>
           <p className="text-gray-600 text-sm">
-            Gérez les demandes de plats personnalisés de vos clients
+            Les demandes sont validées automatiquement. Refusez-les si besoin.
           </p>
         </div>
-        {pendingCount > 0 && (
-          <div className="bg-primary-500 text-white px-4 py-2 rounded-full font-bold">
-            {pendingCount} en attente
+        {approvedCount > 0 && (
+          <div className="bg-green-500 text-white px-4 py-2 rounded-full font-bold">
+            {approvedCount} validée{approvedCount > 1 ? 's' : ''}
           </div>
         )}
       </div>
@@ -169,8 +159,7 @@ export default function AdminCustomDishesPage() {
       {/* Filtres */}
       <div className="mb-6 flex gap-2 flex-wrap">
         {[
-          { value: 'pending', label: 'En attente', count: requests.filter(r => r.status === 'pending').length },
-          { value: 'approved', label: 'Approuvées', count: requests.filter(r => r.status === 'approved').length },
+          { value: 'approved', label: 'Validées', count: requests.filter(r => r.status === 'approved').length },
           { value: 'rejected', label: 'Rejetées', count: requests.filter(r => r.status === 'rejected').length },
           { value: 'all', label: 'Toutes', count: requests.length }
         ].map(({ value, label, count }) => (
@@ -249,24 +238,18 @@ export default function AdminCustomDishesPage() {
                   </div>
                 )}
 
-                {request.status === 'pending' && (
-                  <div className="flex gap-3 pt-3">
+                {request.status === 'approved' && (
+                  <div className="flex justify-end pt-3">
                     <button
-                      onClick={() => handleOpenModal(request, 'approve')}
-                      className="flex-1 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition"
+                      onClick={() => handleOpenModal(request)}
+                      className="px-6 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition"
                     >
-                      Approuver
-                    </button>
-                    <button
-                      onClick={() => handleOpenModal(request, 'reject')}
-                      className="flex-1 py-2 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition"
-                    >
-                      Rejeter
+                      Refuser ce plat
                     </button>
                   </div>
                 )}
 
-                {request.status !== 'pending' && (
+                {request.status === 'rejected' && (
                   <div className="flex justify-end pt-3">
                     <button
                       onClick={() => handleDelete(request.id)}
@@ -282,48 +265,50 @@ export default function AdminCustomDishesPage() {
         </div>
       )}
 
-      {/* Modal de confirmation */}
+      {/* Modal de rejet */}
       {showModal && selectedRequest && (
         <div className="fixed inset-0 bg-white/30 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-lg p-6 w-full max-w-md shadow-xl">
-            <h3 className="text-xl font-bold mb-4">
-              {actionType === 'approve' ? 'Approuver' : 'Rejeter'} la demande
+            <h3 className="text-xl font-bold mb-4 text-red-600">
+              Refuser ce plat personnalisé
             </h3>
 
-            <div className="mb-4 p-3 bg-gray-50 rounded-lg">
-              <p className="text-sm font-semibold">{selectedRequest.dish_name}</p>
-              <p className="text-xs text-gray-600">{selectedRequest.user_name}</p>
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-sm font-semibold text-gray-800">{selectedRequest.dish_name}</p>
+              <p className="text-xs text-gray-600">Demandé par {selectedRequest.user_name}</p>
+            </div>
+
+            <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+              <p className="text-sm text-yellow-800">
+                ⚠️ Le plat sera désactivé du catalogue et le client sera notifié.
+              </p>
             </div>
 
             <div className="mb-4">
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Notes (optionnel)
+                Raison du refus (recommandé)
               </label>
               <textarea
                 value={adminNotes}
                 onChange={(e) => setAdminNotes(e.target.value)}
-                placeholder="Ajoutez des notes pour le client..."
+                placeholder="Ex: Ingrédients non disponibles, trop complexe, etc."
                 rows={3}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500"
               />
             </div>
 
             <div className="flex gap-3">
               <button
-                onClick={handleSubmitAction}
+                onClick={handleRejectRequest}
                 disabled={processing}
-                className={`flex-1 py-2 rounded-lg font-semibold text-white transition ${
-                  actionType === 'approve'
-                    ? 'bg-green-600 hover:bg-green-700'
-                    : 'bg-red-600 hover:bg-red-700'
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
+                className="flex-1 py-2 rounded-lg font-semibold text-white bg-red-600 hover:bg-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {processing ? 'Traitement...' : 'Confirmer'}
+                {processing ? 'Rejet en cours...' : 'Confirmer le refus'}
               </button>
               <button
                 onClick={() => setShowModal(false)}
                 disabled={processing}
-                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition"
+                className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300 transition disabled:opacity-50"
               >
                 Annuler
               </button>

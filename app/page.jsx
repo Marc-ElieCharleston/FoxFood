@@ -547,7 +547,7 @@ export default function Home() {
       })
 
       if (response.ok) {
-        toast.success('Votre demande a été envoyée à Emeric!')
+        toast.success('✨ Plat personnalisé ajouté ! Il est maintenant disponible dans le catalogue.')
         setShowCustomDishModal(false)
         setCustomDishForm({
           dish_name: '',
@@ -555,6 +555,8 @@ export default function Home() {
           suggested_ingredients: []
         })
         setCustomDishFormType('simple')
+        // Recharger les plats pour afficher le nouveau plat
+        fetchDishes()
       } else {
         const data = await response.json()
         toast.error(data.error || 'Erreur lors de l\'envoi')

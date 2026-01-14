@@ -23,15 +23,10 @@ export async function PUT(request, { params }) {
     }
 
     const { id } = params
-    const { status, admin_notes } = await request.json()
+    const { admin_notes } = await request.json()
 
-    // Validation
-    if (!status || !['pending', 'approved', 'rejected'].includes(status)) {
-      return NextResponse.json(
-        { error: 'Statut invalide' },
-        { status: 400 }
-      )
-    }
+    // L'admin peut uniquement rejeter une demande (elles sont approuvées par défaut)
+    const status = 'rejected'
 
     // Mettre à jour la demande
     const result = await sql`
@@ -53,46 +48,26 @@ export async function PUT(request, { params }) {
 
     const updatedRequest = result.rows[0]
 
-    // Si le statut passe à "approved", créer automatiquement le plat dans le catalogue
-    if (status === 'approved') {
+    // Si le statut passe à "rejected", désactiver le plat dans le catalogue
+    if (status === 'rejected') {
       try {
-        // Créer le plat dans la table dishes
-        const dishResult = await sql`
-          INSERT INTO dishes (name, category, description, active, seasons)
-          VALUES (
-            ${updatedRequest.dish_name},
-            'vegetation',
-            ${updatedRequest.description + ' (Plat personnalisé)'},
-            true,
-            '["toutes"]'::jsonb
-          )
-          RETURNING id
-        `
-
-        const newDishId = dishResult.rows[0].id
-
-        // Créer une variante par défaut "Classique" pour ce plat
+        // Trouver le plat correspondant et le désactiver
         await sql`
-          INSERT INTO dish_variants (dish_id, name, dietary_tags, is_default, active)
-          VALUES (
-            ${newDishId},
-            'Classique',
-            '[]'::jsonb,
-            true,
-            true
-          )
+          UPDATE dishes
+          SET active = false
+          WHERE name = ${updatedRequest.dish_name}
+          AND description LIKE '%Plat personnalisé%'
         `
 
-        console.log(`Plat personnalisé créé avec ID ${newDishId} pour la demande ${id}`)
+        console.log(`Plat personnalisé "${updatedRequest.dish_name}" désactivé suite au rejet`)
       } catch (dishError) {
-        console.error('Erreur création plat dans catalogue:', dishError)
-        // Ne pas bloquer l'approbation si la création du plat échoue
-        // L'admin pourra créer le plat manuellement
+        console.error('Erreur désactivation plat dans catalogue:', dishError)
+        // Ne pas bloquer le rejet si la désactivation échoue
       }
     }
 
-    // Envoyer notification à l'utilisateur si statut changé (approved/rejected)
-    if (status === 'approved' || status === 'rejected') {
+    // Envoyer notification à l'utilisateur si demande rejetée
+    if (status === 'rejected') {
       try {
         // Récupérer les infos de l'utilisateur
         const userResult = await sql`

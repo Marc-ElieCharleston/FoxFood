@@ -1205,7 +1205,7 @@ export default function SettingsPage() {
         <div className="border-b pb-6">
           <h2 className="text-lg font-bold mb-4">✨ Mes demandes de plats personnalisés</h2>
           <p className="text-sm text-gray-600 mb-4">
-            Retrouvez ici toutes vos demandes de plats personnalisés et leur statut.
+            Vos demandes sont validées automatiquement. Elles apparaissent dans le catalogue dès leur création.
           </p>
 
           {loadingCustomDishes ? (
@@ -1236,25 +1236,22 @@ export default function SettingsPage() {
                         )}
                       </div>
                       <span className={`inline-block text-xs px-2 py-1 rounded-full font-medium ${
-                        request.status === 'pending'
-                          ? 'bg-yellow-100 text-yellow-700'
-                          : request.status === 'approved'
+                        request.status === 'approved'
                           ? 'bg-green-100 text-green-700'
                           : 'bg-red-100 text-red-700'
                       }`}>
-                        {request.status === 'pending' && '⏳ En attente'}
-                        {request.status === 'approved' && '✅ Approuvée'}
-                        {request.status === 'rejected' && '❌ Refusée'}
+                        {request.status === 'approved' && '✅ Validée'}
+                        {request.status === 'rejected' && '❌ Refusée par Emeric'}
                       </span>
                     </div>
-                    {request.status === 'pending' && (
+                    {request.status === 'approved' && (
                       <button
                         type="button"
                         onClick={() => handleCancelRequest(request.id)}
                         disabled={cancelingRequest === request.id}
-                        className="text-red-600 text-sm hover:text-red-700 px-2 py-1 hover:bg-red-50 rounded disabled:opacity-50"
+                        className="text-gray-600 text-sm hover:text-gray-700 px-2 py-1 hover:bg-gray-100 rounded disabled:opacity-50"
                       >
-                        {cancelingRequest === request.id ? '...' : 'Annuler'}
+                        {cancelingRequest === request.id ? '...' : 'Supprimer'}
                       </button>
                     )}
                   </div>

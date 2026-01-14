@@ -77,7 +77,7 @@ export async function POST(request) {
       )
     }
 
-    // Créer la demande
+    // Créer la demande (approuvée par défaut - Emeric validera en vérifiant ses emails)
     const result = await sql`
       INSERT INTO custom_dish_requests (
         user_id,
@@ -93,10 +93,44 @@ export async function POST(request) {
         ${description.trim()},
         ${JSON.stringify(suggested_ingredients || [])},
         ${is_detailed || false},
-        'pending'
+        'approved'
       )
       RETURNING *
     `
+
+    // Créer automatiquement le plat dans le catalogue
+    try {
+      const dishResult = await sql`
+        INSERT INTO dishes (name, category, description, active, seasons)
+        VALUES (
+          ${dish_name.trim()},
+          'vegetation',
+          ${description.trim() + ' (Plat personnalisé)'},
+          true,
+          '["toutes"]'::jsonb
+        )
+        RETURNING id
+      `
+
+      const newDishId = dishResult.rows[0].id
+
+      // Créer une variante par défaut "Classique"
+      await sql`
+        INSERT INTO dish_variants (dish_id, name, dietary_tags, is_default, active)
+        VALUES (
+          ${newDishId},
+          'Classique',
+          '[]'::jsonb,
+          true,
+          true
+        )
+      `
+
+      console.log(`Plat personnalisé créé automatiquement avec ID ${newDishId}`)
+    } catch (dishError) {
+      console.error('Erreur création plat automatique:', dishError)
+      // Ne pas bloquer la création de la demande
+    }
 
     // Envoyer notification à l'admin
     try {
@@ -173,7 +207,7 @@ export async function DELETE(request) {
 
     const userId = parseInt(session.user.id)
 
-    // Vérifier que la demande appartient à l'utilisateur et est en pending
+    // Vérifier que la demande appartient à l'utilisateur et n'est pas rejetée
     const checkResult = await sql`
       SELECT id, status FROM custom_dish_requests
       WHERE id = ${parseInt(id)} AND user_id = ${userId}
@@ -186,9 +220,9 @@ export async function DELETE(request) {
       )
     }
 
-    if (checkResult.rows[0].status !== 'pending') {
+    if (checkResult.rows[0].status === 'rejected') {
       return NextResponse.json(
-        { error: 'Seules les demandes en attente peuvent être annulées' },
+        { error: 'Les demandes refusées ne peuvent pas être annulées' },
         { status: 403 }
       )
     }
