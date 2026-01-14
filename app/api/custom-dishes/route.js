@@ -149,3 +149,64 @@ export async function POST(request) {
     )
   }
 }
+
+// DELETE - Annuler une demande (uniquement si status = pending)
+export async function DELETE(request) {
+  try {
+    const session = await getServerSession(authOptions)
+    if (!session) {
+      return NextResponse.json(
+        { error: 'Non authentifié' },
+        { status: 401 }
+      )
+    }
+
+    const { searchParams } = new URL(request.url)
+    const id = searchParams.get('id')
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'ID de demande requis' },
+        { status: 400 }
+      )
+    }
+
+    const userId = parseInt(session.user.id)
+
+    // Vérifier que la demande appartient à l'utilisateur et est en pending
+    const checkResult = await sql`
+      SELECT id, status FROM custom_dish_requests
+      WHERE id = ${parseInt(id)} AND user_id = ${userId}
+    `
+
+    if (checkResult.rows.length === 0) {
+      return NextResponse.json(
+        { error: 'Demande non trouvée' },
+        { status: 404 }
+      )
+    }
+
+    if (checkResult.rows[0].status !== 'pending') {
+      return NextResponse.json(
+        { error: 'Seules les demandes en attente peuvent être annulées' },
+        { status: 403 }
+      )
+    }
+
+    // Supprimer la demande
+    await sql`
+      DELETE FROM custom_dish_requests
+      WHERE id = ${parseInt(id)} AND user_id = ${userId}
+    `
+
+    return NextResponse.json({
+      message: 'Demande annulée avec succès'
+    })
+  } catch (error) {
+    console.error('Erreur lors de l\'annulation de la demande:', error)
+    return NextResponse.json(
+      { error: 'Erreur lors de l\'annulation de la demande' },
+      { status: 500 }
+    )
+  }
+}

@@ -46,6 +46,11 @@ export default function SettingsPage() {
   const [selectedReplacementIngredient, setSelectedReplacementIngredient] = useState(null)
   const [addingReplacement, setAddingReplacement] = useState(false)
 
+  // États pour les demandes de plats personnalisés
+  const [customDishRequests, setCustomDishRequests] = useState([])
+  const [loadingCustomDishes, setLoadingCustomDishes] = useState(false)
+  const [cancelingRequest, setCancelingRequest] = useState(null)
+
   // Rappels multiples: 5, 3, et 1 jours avant
   const [reminders, setReminders] = useState({
     day5: { enabled: false, email: false, sms: false },
@@ -66,6 +71,7 @@ export default function SettingsPage() {
       fetchDietaryTags()
       fetchAllIngredients()
       fetchReplacements()
+      fetchCustomDishRequests()
     }
   }, [status])
 
@@ -160,6 +166,47 @@ export default function SettingsPage() {
     } catch (error) {
       console.error('Erreur:', error)
       toast.error('Erreur lors de la suppression')
+    }
+  }
+
+  const fetchCustomDishRequests = async () => {
+    try {
+      setLoadingCustomDishes(true)
+      const response = await fetch('/api/custom-dishes')
+      if (response.ok) {
+        const data = await response.json()
+        setCustomDishRequests(data)
+      }
+    } catch (error) {
+      console.error('Erreur chargement demandes:', error)
+    } finally {
+      setLoadingCustomDishes(false)
+    }
+  }
+
+  const handleCancelRequest = async (requestId) => {
+    if (!confirm('Voulez-vous vraiment annuler cette demande ?')) {
+      return
+    }
+
+    try {
+      setCancelingRequest(requestId)
+      const response = await fetch(`/api/custom-dishes?id=${requestId}`, {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        toast.success('Demande annulée')
+        fetchCustomDishRequests()
+      } else {
+        const data = await response.json()
+        toast.error(data.error || 'Erreur lors de l\'annulation')
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de l\'annulation')
+    } finally {
+      setCancelingRequest(null)
     }
   }
 
@@ -1154,7 +1201,102 @@ export default function SettingsPage() {
           </div>
         </div>
 
-        {/* Section 6: Notifications */}
+        {/* Section 6: Mes demandes de plats personnalisés */}
+        <div className="border-b pb-6">
+          <h2 className="text-lg font-bold mb-4">✨ Mes demandes de plats personnalisés</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Retrouvez ici toutes vos demandes de plats personnalisés et leur statut.
+          </p>
+
+          {loadingCustomDishes ? (
+            <div className="text-center py-4 text-gray-500">Chargement...</div>
+          ) : customDishRequests.length === 0 ? (
+            <div className="text-center py-6 bg-gray-50 rounded-lg">
+              <p className="text-4xl mb-2">🍽️</p>
+              <p className="text-gray-600">Aucune demande de plat personnalisé</p>
+              <p className="text-sm text-gray-500 mt-1">
+                Rendez-vous sur la page d'accueil pour en créer une !
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {customDishRequests.map((request) => (
+                <div
+                  key={request.id}
+                  className="border rounded-lg p-4 bg-gray-50"
+                >
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-semibold text-gray-800">{request.dish_name}</h3>
+                        {request.is_detailed && (
+                          <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
+                            Détaillée
+                          </span>
+                        )}
+                      </div>
+                      <span className={`inline-block text-xs px-2 py-1 rounded-full font-medium ${
+                        request.status === 'pending'
+                          ? 'bg-yellow-100 text-yellow-700'
+                          : request.status === 'approved'
+                          ? 'bg-green-100 text-green-700'
+                          : 'bg-red-100 text-red-700'
+                      }`}>
+                        {request.status === 'pending' && '⏳ En attente'}
+                        {request.status === 'approved' && '✅ Approuvée'}
+                        {request.status === 'rejected' && '❌ Refusée'}
+                      </span>
+                    </div>
+                    {request.status === 'pending' && (
+                      <button
+                        type="button"
+                        onClick={() => handleCancelRequest(request.id)}
+                        disabled={cancelingRequest === request.id}
+                        className="text-red-600 text-sm hover:text-red-700 px-2 py-1 hover:bg-red-50 rounded disabled:opacity-50"
+                      >
+                        {cancelingRequest === request.id ? '...' : 'Annuler'}
+                      </button>
+                    )}
+                  </div>
+
+                  <p className="text-sm text-gray-600 mb-2">{request.description}</p>
+
+                  {request.is_detailed && request.suggested_ingredients && request.suggested_ingredients.length > 0 && (
+                    <div className="mb-2">
+                      <p className="text-xs text-gray-500 mb-1">Ingrédients suggérés :</p>
+                      <div className="flex flex-wrap gap-1">
+                        {request.suggested_ingredients.map((ing, idx) => (
+                          <span key={idx} className="text-xs bg-gray-200 text-gray-700 px-2 py-0.5 rounded">
+                            {ing}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+
+                  {request.admin_notes && (
+                    <div className="mt-3 pt-3 border-t border-gray-200">
+                      <p className="text-xs font-medium text-gray-700 mb-1">
+                        💬 Message d'Emeric :
+                      </p>
+                      <p className="text-sm text-gray-600 italic">"{request.admin_notes}"</p>
+                    </div>
+                  )}
+
+                  <p className="text-xs text-gray-400 mt-2">
+                    Demandé le {new Date(request.created_at).toLocaleDateString('fr-FR', {
+                      day: 'numeric',
+                      month: 'long',
+                      year: 'numeric'
+                    })}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Section 7: Notifications */}
         <div>
           <h2 className="text-lg font-bold mb-4">📬 Notifications d'Emeric</h2>
 
