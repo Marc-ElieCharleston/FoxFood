@@ -1325,6 +1325,11 @@ export default function Home() {
                       <h3 className="font-medium text-sm leading-tight">
                         {dish.name}
                       </h3>
+                      {dish.description?.includes('(Plat personnalisé)') && (
+                        <span className="text-xs bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded font-medium">
+                          ✨ Personnalisé
+                        </span>
+                      )}
                       {isSelected && selectedVariant && selectedVariant.name !== 'Classique' && (
                         <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded">
                           {selectedVariant.name}
@@ -1364,7 +1369,7 @@ export default function Home() {
                     )}
                     {dish.description && (
                       <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">
-                        {dish.description}
+                        {dish.description.replace(' (Plat personnalisé)', '')}
                       </p>
                     )}
                     {getIngredients(dish.ingredients).length > 0 && (

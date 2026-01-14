@@ -53,6 +53,44 @@ export async function PUT(request, { params }) {
 
     const updatedRequest = result.rows[0]
 
+    // Si le statut passe à "approved", créer automatiquement le plat dans le catalogue
+    if (status === 'approved') {
+      try {
+        // Créer le plat dans la table dishes
+        const dishResult = await sql`
+          INSERT INTO dishes (name, category, description, active, seasons)
+          VALUES (
+            ${updatedRequest.dish_name},
+            'vegetation',
+            ${updatedRequest.description + ' (Plat personnalisé)'},
+            true,
+            '["toutes"]'::jsonb
+          )
+          RETURNING id
+        `
+
+        const newDishId = dishResult.rows[0].id
+
+        // Créer une variante par défaut "Classique" pour ce plat
+        await sql`
+          INSERT INTO dish_variants (dish_id, name, dietary_tags, is_default, active)
+          VALUES (
+            ${newDishId},
+            'Classique',
+            '[]'::jsonb,
+            true,
+            true
+          )
+        `
+
+        console.log(`Plat personnalisé créé avec ID ${newDishId} pour la demande ${id}`)
+      } catch (dishError) {
+        console.error('Erreur création plat dans catalogue:', dishError)
+        // Ne pas bloquer l'approbation si la création du plat échoue
+        // L'admin pourra créer le plat manuellement
+      }
+    }
+
     // Envoyer notification à l'utilisateur si statut changé (approved/rejected)
     if (status === 'approved' || status === 'rejected') {
       try {
