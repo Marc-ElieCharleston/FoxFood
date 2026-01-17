@@ -713,19 +713,22 @@ export default function SettingsPage() {
                 </div>
               </div>
 
-              {/* Quitter le foyer (si pas le créateur) */}
-              {household.createdBy !== parseInt(session?.user?.id) && (
-                <div className="border-t pt-4">
-                  <button
-                    type="button"
-                    onClick={handleLeaveHousehold}
-                    disabled={leavingHousehold}
-                    className="w-full py-2 px-4 text-red-600 border border-red-200 rounded-lg text-sm font-medium hover:bg-red-50 disabled:opacity-50"
-                  >
-                    {leavingHousehold ? 'Sortie en cours...' : '🚪 Quitter ce foyer'}
-                  </button>
-                </div>
-              )}
+              {/* Quitter le foyer */}
+              <div className="border-t pt-4">
+                {household.createdBy === parseInt(session?.user?.id) && (
+                  <p className="text-xs text-amber-600 mb-3">
+                    ⚠️ En quittant ce foyer que vous avez créé, il sera supprimé si vous êtes le dernier membre.
+                  </p>
+                )}
+                <button
+                  type="button"
+                  onClick={handleLeaveHousehold}
+                  disabled={leavingHousehold}
+                  className="w-full py-2 px-4 text-red-600 border border-red-200 rounded-lg text-sm font-medium hover:bg-red-50 disabled:opacity-50"
+                >
+                  {leavingHousehold ? 'Sortie en cours...' : '🚪 Quitter ce foyer'}
+                </button>
+              </div>
             </div>
           ) : (
             <div className="text-center py-6 bg-gray-50 rounded-lg">
