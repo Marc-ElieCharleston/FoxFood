@@ -954,7 +954,8 @@ export default function Home() {
                 let weekLabel = `Semaine ${weekIndex + 1}`
                 if (weekDate) {
                   const date = new Date(weekDate)
-                  weekLabel = `Semaine du ${date.getDate()}/${date.getMonth() + 1}`
+                  const monthNames = ['janvier', 'février', 'mars', 'avril', 'mai', 'juin', 'juillet', 'août', 'septembre', 'octobre', 'novembre', 'décembre']
+                  weekLabel = `Semaine du ${date.getDate()} ${monthNames[date.getMonth()]}`
                 }
 
                 if (weekDishes.length === 0) return null
@@ -1170,7 +1171,8 @@ export default function Home() {
             let label = `Sem ${weekIndex + 1}`
             if (weekDate) {
               const date = new Date(weekDate)
-              label = `${date.getDate()}/${date.getMonth() + 1}`
+              const monthNames = ['jan', 'fév', 'mar', 'avr', 'mai', 'juin', 'juil', 'août', 'sept', 'oct', 'nov', 'déc']
+              label = `${date.getDate()} ${monthNames[date.getMonth()]}`
             }
 
             return (

@@ -16,7 +16,7 @@ export async function GET(request) {
 
     const userId = parseInt(session.user.id)
 
-    // Calculer les 5 prochains lundis (à partir du prochain lundi si on est après lundi)
+    // Calculer les 5 prochaines semaines (à partir du lundi de la semaine actuelle)
     const weeks = []
     const today = new Date()
     const dayOfWeek = today.getDay() // 0=Dimanche, 1=Lundi, ..., 6=Samedi
@@ -25,14 +25,14 @@ export async function GET(request) {
     firstMonday.setHours(0, 0, 0, 0)
 
     if (dayOfWeek === 0) {
-      // Dimanche -> lundi suivant (demain)
-      firstMonday.setDate(today.getDate() + 1)
+      // Dimanche -> lundi de cette semaine (6 jours en arrière)
+      firstMonday.setDate(today.getDate() - 6)
     } else if (dayOfWeek === 1) {
       // Lundi -> aujourd'hui
       // firstMonday reste à today
     } else {
-      // Mardi-Samedi -> lundi suivant
-      firstMonday.setDate(today.getDate() + (8 - dayOfWeek))
+      // Mardi-Samedi -> revenir au lundi de cette semaine
+      firstMonday.setDate(today.getDate() - (dayOfWeek - 1))
     }
 
     for (let i = 0; i < 5; i++) {
@@ -132,7 +132,7 @@ export async function POST(request) {
       }
     }
 
-    // Calculer les dates des 5 prochains lundis (à partir du prochain lundi si on est après lundi)
+    // Calculer les dates des 5 prochaines semaines (à partir du lundi de la semaine actuelle)
     const today = new Date()
     const dayOfWeek = today.getDay() // 0=Dimanche, 1=Lundi, ..., 6=Samedi
 
@@ -140,13 +140,13 @@ export async function POST(request) {
     firstMonday.setHours(0, 0, 0, 0)
 
     if (dayOfWeek === 0) {
-      // Dimanche -> lundi suivant
-      firstMonday.setDate(today.getDate() + 1)
+      // Dimanche -> lundi de cette semaine (6 jours en arrière)
+      firstMonday.setDate(today.getDate() - 6)
     } else if (dayOfWeek === 1) {
       // Lundi -> aujourd'hui
     } else {
-      // Mardi-Samedi -> lundi suivant
-      firstMonday.setDate(today.getDate() + (8 - dayOfWeek))
+      // Mardi-Samedi -> revenir au lundi de cette semaine
+      firstMonday.setDate(today.getDate() - (dayOfWeek - 1))
     }
 
     const weekDates = []

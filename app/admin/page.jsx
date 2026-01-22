@@ -51,6 +51,16 @@ export default function AdminPage() {
   const [newIngredientQty, setNewIngredientQty] = useState(100)
   const [newIngredientUnit, setNewIngredientUnit] = useState('g')
 
+  // States pour ajout direct d'ingrédients dans la modal
+  const [modalIngredientSearch, setModalIngredientSearch] = useState('')
+  const [modalShowSearch, setModalShowSearch] = useState(false)
+  const [modalNewQty, setModalNewQty] = useState(100)
+  const [modalNewUnit, setModalNewUnit] = useState('g')
+  const [addingIngredient, setAddingIngredient] = useState(false)
+  const [showCreateIngredient, setShowCreateIngredient] = useState(false)
+  const [newIngredientName, setNewIngredientName] = useState('')
+  const [newIngredientCategory, setNewIngredientCategory] = useState('legume')
+
   const [formData, setFormData] = useState({
     name: '',
     category: 'viandes',
@@ -365,6 +375,166 @@ export default function AdminPage() {
     ing.name.toLowerCase().includes(ingredientSearch.toLowerCase()) &&
     !variantLinkedIngredients.some(li => li.ingredient_id === ing.id)
   ).slice(0, 10)
+
+  // Filtrer les ingrédients pour la recherche dans la modal
+  const filteredModalIngredients = allIngredients.filter(ing => {
+    if (!modalIngredientSearch) return false
+    const matchesSearch = ing.name.toLowerCase().includes(modalIngredientSearch.toLowerCase())
+    // Exclure les ingrédients déjà liés à la variante par défaut
+    const defaultVariant = selectedDishIngredients?.variantIngredients?.find(v => v.is_default)
+    const alreadyLinked = defaultVariant?.linkedIngredients?.some(li => li.ingredient_id === ing.id)
+    return matchesSearch && !alreadyLinked
+  }).slice(0, 8)
+
+  // Ajouter un ingrédient directement depuis la modal (à la variante par défaut)
+  const handleAddIngredientFromModal = async (ingredient) => {
+    if (addingIngredient) return
+    setAddingIngredient(true)
+
+    try {
+      // Trouver la variante par défaut du plat
+      let defaultVariant = selectedDishIngredients?.variantIngredients?.find(v => v.is_default)
+
+      // Si pas de variante par défaut, en créer une
+      if (!defaultVariant) {
+        const createResponse = await fetch('/api/variants', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            dishId: selectedDishIngredients.id,
+            name: 'Classique',
+            ingredients: [],
+            tags: [],
+            isDefault: true
+          })
+        })
+        if (!createResponse.ok) throw new Error('Erreur création variante')
+        defaultVariant = await createResponse.json()
+      }
+
+      // Ajouter l'ingrédient à la variante
+      const response = await fetch('/api/variant-ingredients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          variantId: defaultVariant.id,
+          ingredientId: ingredient.id,
+          quantity: modalNewQty,
+          unit: modalNewUnit || ingredient.default_unit
+        })
+      })
+
+      if (response.ok) {
+        toast.success(`${ingredient.name} ajouté!`)
+        // Rafraîchir les données
+        await refreshIngredientsModal()
+        setModalIngredientSearch('')
+        setModalShowSearch(false)
+        setModalNewQty(100)
+        setModalNewUnit('g')
+      } else {
+        const data = await response.json()
+        toast.error(data.error || 'Erreur')
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de l\'ajout')
+    } finally {
+      setAddingIngredient(false)
+    }
+  }
+
+  // Créer un nouvel ingrédient et l'ajouter
+  const handleCreateAndAddIngredient = async () => {
+    if (!newIngredientName.trim()) {
+      toast.error('Nom requis')
+      return
+    }
+    setAddingIngredient(true)
+
+    try {
+      // Créer l'ingrédient
+      const createResponse = await fetch('/api/ingredients', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: newIngredientName.trim(),
+          default_unit: modalNewUnit,
+          category: newIngredientCategory,
+          dietary_tags: []
+        })
+      })
+
+      if (!createResponse.ok) {
+        const data = await createResponse.json()
+        toast.error(data.error || 'Erreur création')
+        return
+      }
+
+      const newIngredient = await createResponse.json()
+      toast.success(`Ingrédient "${newIngredient.name}" créé!`)
+
+      // Rafraîchir la liste des ingrédients
+      await fetchAllIngredients()
+
+      // Ajouter au plat
+      await handleAddIngredientFromModal(newIngredient)
+
+      // Reset
+      setShowCreateIngredient(false)
+      setNewIngredientName('')
+      setNewIngredientCategory('legume')
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de la création')
+    } finally {
+      setAddingIngredient(false)
+    }
+  }
+
+  // Rafraîchir les données de la modal ingrédients
+  const refreshIngredientsModal = async () => {
+    if (!selectedDishIngredients) return
+    try {
+      const response = await fetch(`/api/variants?dishId=${selectedDishIngredients.id}`)
+      const variantsData = await response.json()
+
+      const variantsWithIngredients = await Promise.all(
+        (Array.isArray(variantsData) ? variantsData : []).map(async (variant) => {
+          try {
+            const ingResponse = await fetch(`/api/variant-ingredients?variantId=${variant.id}`)
+            const ingData = await ingResponse.json()
+            return { ...variant, linkedIngredients: Array.isArray(ingData) ? ingData : [] }
+          } catch {
+            return { ...variant, linkedIngredients: [] }
+          }
+        })
+      )
+
+      setSelectedDishIngredients(prev => ({
+        ...prev,
+        variantIngredients: variantsWithIngredients
+      }))
+    } catch (error) {
+      console.error('Erreur refresh:', error)
+    }
+  }
+
+  // Supprimer un ingrédient depuis la modal
+  const handleRemoveIngredientFromModal = async (ingredientLinkId) => {
+    try {
+      const response = await fetch(`/api/variant-ingredients?id=${ingredientLinkId}`, {
+        method: 'DELETE'
+      })
+      if (response.ok) {
+        toast.success('Ingrédient retiré')
+        await refreshIngredientsModal()
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de la suppression')
+    }
+  }
 
   // Ajouter un ingredient a la variante
   const handleAddVariantIngredient = () => {
@@ -1756,7 +1926,7 @@ export default function AdminPage() {
       {showIngredientsModal && selectedDishIngredients && (
         <div className="fixed inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
+            <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center z-10">
               <div>
                 <h2 className="text-lg font-bold">🥕 Ingrédients</h2>
                 <p className="text-sm text-gray-600">{selectedDishIngredients.name}</p>
@@ -1765,6 +1935,9 @@ export default function AdminPage() {
                 onClick={() => {
                   setShowIngredientsModal(false)
                   setSelectedDishIngredients(null)
+                  setModalIngredientSearch('')
+                  setModalShowSearch(false)
+                  setShowCreateIngredient(false)
                 }}
                 className="text-gray-500 hover:text-gray-700 text-2xl"
               >
@@ -1775,64 +1948,201 @@ export default function AdminPage() {
             <div className="p-6">
               {selectedDishIngredients.loadingIngredients ? (
                 <div className="text-center py-8 text-gray-500">Chargement...</div>
-              ) : selectedDishIngredients.variantIngredients?.length === 0 ? (
-                <div className="text-center py-8">
-                  <p className="text-gray-500 mb-3">Aucune variante avec ingrédients</p>
-                  <button
-                    onClick={() => {
-                      setShowIngredientsModal(false)
-                      openVariantsModal(selectedDishIngredients)
-                    }}
-                    className="px-4 py-2 bg-purple-600 text-white rounded-lg text-sm font-medium hover:bg-purple-700"
-                  >
-                    🏷️ Gérer les variantes
-                  </button>
-                </div>
               ) : (
                 <div className="space-y-4">
-                  <p className="text-xs text-gray-500 bg-amber-50 border border-amber-200 rounded-lg p-3">
-                    💡 Quantités affichées <strong>pour 1 personne</strong>. Les quantités seront multipliées par le nombre de personnes du foyer.
+                  {/* Section Ajouter un ingrédient */}
+                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                    <h3 className="font-semibold text-sm text-green-800 mb-3">➕ Ajouter un ingrédient</h3>
+
+                    {!showCreateIngredient ? (
+                      <div className="relative">
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={modalIngredientSearch}
+                            onChange={(e) => {
+                              setModalIngredientSearch(e.target.value)
+                              setModalShowSearch(e.target.value.length > 0)
+                            }}
+                            onFocus={() => setModalShowSearch(modalIngredientSearch.length > 0)}
+                            placeholder="Rechercher un ingrédient..."
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 text-sm"
+                          />
+                          <input
+                            type="number"
+                            value={modalNewQty}
+                            onChange={(e) => setModalNewQty(parseFloat(e.target.value) || 0)}
+                            className="w-16 px-2 py-2 border border-gray-300 rounded-lg text-sm text-center"
+                            placeholder="Qte"
+                          />
+                          <select
+                            value={modalNewUnit}
+                            onChange={(e) => setModalNewUnit(e.target.value)}
+                            className="w-16 px-1 py-2 border border-gray-300 rounded-lg text-sm"
+                          >
+                            <option value="g">g</option>
+                            <option value="kg">kg</option>
+                            <option value="ml">ml</option>
+                            <option value="L">L</option>
+                            <option value="pc">pc</option>
+                            <option value="c.a.s">c.a.s</option>
+                          </select>
+                        </div>
+
+                        {/* Liste de recherche */}
+                        {modalShowSearch && (
+                          <div className="absolute z-20 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                            {filteredModalIngredients.length > 0 ? (
+                              filteredModalIngredients.map(ing => (
+                                <button
+                                  key={ing.id}
+                                  type="button"
+                                  onClick={() => handleAddIngredientFromModal(ing)}
+                                  disabled={addingIngredient}
+                                  className="w-full px-3 py-2 text-left hover:bg-green-50 flex items-center justify-between text-sm disabled:opacity-50"
+                                >
+                                  <span>{ing.name}</span>
+                                  <span className="text-xs text-gray-400">{ing.category}</span>
+                                </button>
+                              ))
+                            ) : modalIngredientSearch.length > 0 ? (
+                              <div className="p-3 text-center">
+                                <p className="text-sm text-gray-500 mb-2">Aucun résultat</p>
+                                <button
+                                  onClick={() => {
+                                    setNewIngredientName(modalIngredientSearch)
+                                    setShowCreateIngredient(true)
+                                    setModalShowSearch(false)
+                                  }}
+                                  className="text-sm text-green-600 hover:text-green-800 font-medium"
+                                >
+                                  ➕ Créer "{modalIngredientSearch}"
+                                </button>
+                              </div>
+                            ) : null}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      /* Formulaire création ingrédient */
+                      <div className="space-y-3 bg-white p-3 rounded-lg border">
+                        <p className="text-sm font-medium text-gray-700">Créer un nouvel ingrédient</p>
+                        <input
+                          type="text"
+                          value={newIngredientName}
+                          onChange={(e) => setNewIngredientName(e.target.value)}
+                          placeholder="Nom de l'ingrédient"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                        />
+                        <div className="flex gap-2">
+                          <select
+                            value={newIngredientCategory}
+                            onChange={(e) => setNewIngredientCategory(e.target.value)}
+                            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                          >
+                            <option value="viande">🥩 Viande</option>
+                            <option value="poisson">🐟 Poisson</option>
+                            <option value="produit_laitier">🥛 Produit laitier</option>
+                            <option value="feculent">🍞 Féculent</option>
+                            <option value="legume">🥕 Légume</option>
+                            <option value="fruit">🍎 Fruit</option>
+                            <option value="epice">🌶️ Épice</option>
+                            <option value="condiment">🫒 Condiment</option>
+                            <option value="autre">📦 Autre</option>
+                          </select>
+                          <select
+                            value={modalNewUnit}
+                            onChange={(e) => setModalNewUnit(e.target.value)}
+                            className="w-20 px-2 py-2 border border-gray-300 rounded-lg text-sm"
+                          >
+                            <option value="g">g</option>
+                            <option value="kg">kg</option>
+                            <option value="ml">ml</option>
+                            <option value="pc">pc</option>
+                          </select>
+                        </div>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={handleCreateAndAddIngredient}
+                            disabled={addingIngredient}
+                            className="flex-1 px-3 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 disabled:opacity-50"
+                          >
+                            {addingIngredient ? 'Création...' : 'Créer et ajouter'}
+                          </button>
+                          <button
+                            onClick={() => {
+                              setShowCreateIngredient(false)
+                              setNewIngredientName('')
+                            }}
+                            className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm"
+                          >
+                            Annuler
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Info quantités */}
+                  <p className="text-xs text-gray-500 bg-amber-50 border border-amber-200 rounded-lg p-2">
+                    💡 Quantités <strong>par personne</strong>
                   </p>
 
-                  {selectedDishIngredients.variantIngredients?.map(variant => {
-                    if (!variant.linkedIngredients || variant.linkedIngredients.length === 0) return null
+                  {/* Liste des ingrédients actuels */}
+                  {(() => {
+                    const defaultVariant = selectedDishIngredients.variantIngredients?.find(v => v.is_default)
+                    const ingredients = defaultVariant?.linkedIngredients || []
+
+                    if (ingredients.length === 0) {
+                      return (
+                        <div className="text-center py-6 text-gray-500">
+                          <p className="text-sm">Aucun ingrédient</p>
+                          <p className="text-xs mt-1">Recherchez ci-dessus pour en ajouter</p>
+                        </div>
+                      )
+                    }
 
                     return (
-                      <div key={variant.id} className="border rounded-lg overflow-hidden">
-                        <div className={`px-4 py-2 font-medium text-sm flex items-center gap-2 ${
-                          variant.is_default ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-700'
-                        }`}>
-                          <span>{variant.name}</span>
-                          {variant.is_default && (
-                            <span className="text-xs bg-purple-200 px-2 py-0.5 rounded-full">Par défaut</span>
-                          )}
+                      <div className="border rounded-lg overflow-hidden">
+                        <div className="bg-purple-100 px-4 py-2 font-medium text-sm text-purple-800">
+                          Ingrédients ({ingredients.length})
                         </div>
                         <div className="divide-y">
-                          {variant.linkedIngredients.map((ing, idx) => (
-                            <div key={idx} className="px-4 py-2 flex justify-between items-center text-sm">
+                          {ingredients.map((ing, idx) => (
+                            <div key={idx} className="px-4 py-2 flex justify-between items-center text-sm group">
                               <span className="text-gray-700">{ing.ingredient_name}</span>
-                              <span className="text-gray-500 font-medium">
-                                {ing.quantity === 0 ? (
-                                  <span className="text-amber-600 italic">qsp</span>
-                                ) : (
-                                  <>{ing.quantity % 1 === 0 ? ing.quantity : ing.quantity.toFixed(1)} {ing.unit}</>
-                                )}
-                              </span>
+                              <div className="flex items-center gap-2">
+                                <span className="text-gray-500 font-medium">
+                                  {ing.quantity === 0 ? (
+                                    <span className="text-amber-600 italic">qsp</span>
+                                  ) : (
+                                    <>{ing.quantity % 1 === 0 ? ing.quantity : ing.quantity.toFixed(1)} {ing.unit}</>
+                                  )}
+                                </span>
+                                <button
+                                  onClick={() => handleRemoveIngredientFromModal(ing.id)}
+                                  className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                                  title="Retirer"
+                                >
+                                  ✕
+                                </button>
+                              </div>
                             </div>
                           ))}
                         </div>
                       </div>
                     )
-                  })}
+                  })()}
 
+                  {/* Lien vers variantes avancées */}
                   <button
                     onClick={() => {
                       setShowIngredientsModal(false)
                       openVariantsModal(selectedDishIngredients)
                     }}
-                    className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-200"
+                    className="w-full px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-xs hover:bg-gray-200"
                   >
-                    ✏️ Modifier les ingrédients
+                    🏷️ Gérer les variantes (Halal, Végétarien, etc.)
                   </button>
                 </div>
               )}

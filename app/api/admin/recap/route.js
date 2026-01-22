@@ -32,7 +32,7 @@ export async function GET(request) {
       SELECT
         ws.id,
         ws.user_id,
-        ws.week_start,
+        ws.week_start_date,
         ws.selected_dishes,
         ws.selected_variants,
         u.name as user_name,
@@ -42,7 +42,7 @@ export async function GET(request) {
         u.household_size
       FROM weekly_selections ws
       JOIN users u ON ws.user_id = u.id
-      WHERE ws.week_start = ${weekStart}
+      WHERE ws.week_start_date = ${weekStart}
       ORDER BY u.name
     `
 
