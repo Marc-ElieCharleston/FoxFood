@@ -52,6 +52,12 @@ export default function Home() {
   const [showIngredientsSummary, setShowIngredientsSummary] = useState(false)
   const [showHistoryModal, setShowHistoryModal] = useState(false)
   const [resendingRecap, setResendingRecap] = useState(false)
+  const [showIngredientsModal, setShowIngredientsModal] = useState(false)
+  const [selectedDishForIngredients, setSelectedDishForIngredients] = useState(null)
+  const [resettingSelections, setResettingSelections] = useState(false)
+
+  // Version de l'app pour détecter les mises à jour
+  const APP_VERSION = '2024-01-28-v2'
 
   const MAX_DISHES_PER_WEEK = 5
   const MAX_WEEKS = 4
@@ -201,6 +207,22 @@ export default function Home() {
     if (!Array.isArray(ingredientArray)) return []
     return ingredientArray
   }
+
+  // Vérifier la version de l'app au chargement
+  useEffect(() => {
+    const storedVersion = localStorage.getItem('app_version')
+    if (storedVersion && storedVersion !== APP_VERSION) {
+      toast.info('Nouvelle version disponible ! La page va se rafraîchir...', {
+        duration: 3000
+      })
+      setTimeout(() => {
+        localStorage.setItem('app_version', APP_VERSION)
+        window.location.reload()
+      }, 3000)
+    } else if (!storedVersion) {
+      localStorage.setItem('app_version', APP_VERSION)
+    }
+  }, [])
 
   // Charger les plats et la sélection existante
   useEffect(() => {
@@ -765,13 +787,22 @@ export default function Home() {
     return grouped
   }
 
-  // Collecter les ingrédients PAR SEMAINE
+  // Collecter les ingrédients PAR SEMAINE (seulement semaines futures)
   const getIngredientsByWeek = () => {
     const byWeek = []
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
 
     for (let i = 0; i < MAX_WEEKS; i++) {
       const weekDishes = weeklySelections[`week${i}`]?.dishes || []
       if (weekDishes.length === 0) continue
+
+      // Filtrer les semaines passées
+      const weekDate = weekDates[i]
+      if (weekDate) {
+        const weekDateObj = new Date(weekDate)
+        if (weekDateObj < today) continue
+      }
 
       const weekIngredients = getIngredientsForWeek(i)
       if (Object.keys(weekIngredients).length > 0) {
@@ -836,6 +867,86 @@ export default function Home() {
       toast.error('Erreur lors de l\'envoi du récapitulatif')
     } finally {
       setResendingRecap(false)
+    }
+  }
+
+  // Annuler les sélections (accessible depuis la page principale)
+  const handleCancelSelections = async () => {
+    const confirmed = confirm(
+      '⚠️ Annuler vos sélections ?\n\n' +
+      'Cela supprimera tous vos plats sélectionnés pour les semaines à venir.\n' +
+      'Vous pourrez ensuite refaire votre sélection.\n\n' +
+      'Cette action est irréversible.'
+    )
+
+    if (!confirmed) return
+
+    setResettingSelections(true)
+    try {
+      const response = await fetch('/api/selections/reset', {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        toast.success('Sélections annulées ! Vous pouvez maintenant refaire votre choix.')
+        // Réinitialiser l'état local
+        setWeeklySelections({
+          week0: { dishes: [], variants: {} },
+          week1: { dishes: [], variants: {} },
+          week2: { dishes: [], variants: {} },
+          week3: { dishes: [], variants: {} }
+        })
+        // Recharger les sélections
+        fetchCurrentSelection()
+      } else {
+        const error = await response.json()
+        toast.error(error.error || 'Erreur lors de l\'annulation')
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de l\'annulation')
+    } finally {
+      setResettingSelections(false)
+    }
+  }
+
+  // Réinitialiser toutes les sélections (depuis le modal panier)
+  const handleResetSelections = async () => {
+    const confirmed = confirm(
+      '⚠️ Êtes-vous sûr(e) de vouloir réinitialiser toutes vos sélections ?\n\n' +
+      'Cela supprimera tous vos plats sélectionnés pour les semaines à venir.\n' +
+      'Cette action est irréversible.'
+    )
+
+    if (!confirmed) return
+
+    setResettingSelections(true)
+    try {
+      const response = await fetch('/api/selections/reset', {
+        method: 'DELETE'
+      })
+
+      if (response.ok) {
+        toast.success('Toutes les sélections ont été réinitialisées')
+        // Réinitialiser l'état local
+        setWeeklySelections({
+          week0: { dishes: [], variants: {} },
+          week1: { dishes: [], variants: {} },
+          week2: { dishes: [], variants: {} },
+          week3: { dishes: [], variants: {} }
+        })
+        setShowSummary(false)
+        // Recharger les sélections
+        fetchCurrentSelection()
+      } else {
+        const error = await response.json()
+        toast.error(error.error || 'Erreur lors de la réinitialisation')
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de la réinitialisation')
+    } finally {
+      setResettingSelections(false)
     }
   }
 
@@ -932,7 +1043,17 @@ export default function Home() {
         <div className="fixed inset-0 bg-white/30 backdrop-blur-sm z-40 flex items-end md:items-center justify-center p-4">
           <div className="bg-white rounded-t-2xl md:rounded-2xl p-6 w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-xl">
             <div className="flex justify-between items-start mb-4">
-              <h3 className="text-xl font-bold">Ma sélection ({getTotalDishesCount()} plats)</h3>
+              <div className="flex-1">
+                <h3 className="text-xl font-bold mb-2">Ma sélection ({getTotalDishesCount()} plats)</h3>
+                <button
+                  onClick={handleResetSelections}
+                  disabled={resettingSelections}
+                  className="text-xs text-red-600 hover:text-red-700 font-medium flex items-center gap-1 disabled:opacity-50"
+                >
+                  <span>🗑️</span>
+                  {resettingSelections ? 'Réinitialisation...' : 'Réinitialiser toutes les sélections'}
+                </button>
+              </div>
               <button
                 onClick={() => setShowSummary(false)}
                 className="text-gray-500 hover:text-gray-700 text-2xl"
@@ -951,6 +1072,16 @@ export default function Home() {
 
                 // Formater la date de la semaine
                 const weekDate = weekDates[weekIndex]
+
+                // Filtrer les semaines passées : ne montrer que les semaines >= aujourd'hui
+                if (weekDate) {
+                  const weekDateObj = new Date(weekDate)
+                  const today = new Date()
+                  today.setHours(0, 0, 0, 0)
+                  // Si la semaine est passée (date < aujourd'hui), ne pas l'afficher
+                  if (weekDateObj < today) return null
+                }
+
                 let weekLabel = `Semaine ${weekIndex + 1}`
                 if (weekDate) {
                   const date = new Date(weekDate)
@@ -1106,6 +1237,16 @@ export default function Home() {
             Bonjour {session.user.name}!
           </h1>
           <div className="flex items-center gap-2">
+            {/* Bouton Annuler la sélection - toujours visible */}
+            <button
+              onClick={handleCancelSelections}
+              disabled={resettingSelections}
+              className="flex items-center gap-1.5 px-3 py-2 bg-red-100 hover:bg-red-200 rounded-lg text-sm font-medium text-red-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Annuler mes sélections validées"
+            >
+              <span>🗑️</span>
+              <span className="hidden sm:inline">{resettingSelections ? 'Annulation...' : 'Annuler la sélection'}</span>
+            </button>
             <button
               onClick={handleResendRecap}
               disabled={resendingRecap}
@@ -1308,17 +1449,33 @@ export default function Home() {
                 }`}
               >
                 {/* Bouton favori */}
-                <button
-                  onClick={(e) => toggleFavorite(dish.id, e)}
-                  className={`absolute top-1/2 -translate-y-1/2 right-2 w-8 h-8 flex items-center justify-center text-xl transition-transform hover:scale-110 ${
-                    isFavorite(dish.id) ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-400'
-                  }`}
-                  title={isFavorite(dish.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-                >
-                  {isFavorite(dish.id) ? '⭐' : '☆'}
-                </button>
+                {/* Boutons en haut à droite */}
+                <div className="absolute top-1/2 -translate-y-1/2 right-2 flex items-center gap-1">
+                  {/* Bouton ingrédients */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setSelectedDishForIngredients(dish)
+                      setShowIngredientsModal(true)
+                    }}
+                    className="w-8 h-8 flex items-center justify-center text-lg transition-transform hover:scale-110 text-amber-600 hover:text-amber-700"
+                    title="Voir les ingrédients"
+                  >
+                    🥕
+                  </button>
+                  {/* Bouton favori */}
+                  <button
+                    onClick={(e) => toggleFavorite(dish.id, e)}
+                    className={`w-8 h-8 flex items-center justify-center text-xl transition-transform hover:scale-110 ${
+                      isFavorite(dish.id) ? 'text-yellow-500' : 'text-gray-300 hover:text-yellow-400'
+                    }`}
+                    title={isFavorite(dish.id) ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                  >
+                    {isFavorite(dish.id) ? '⭐' : '☆'}
+                  </button>
+                </div>
 
-                <div className="flex items-center gap-2.5 pr-10">
+                <div className="flex items-center gap-2.5 pr-20">
                   <div className={`w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0 text-xs ${
                     isSelected ? 'bg-primary-600 text-white' : 'bg-gray-200'
                   }`}>
@@ -1496,6 +1653,158 @@ export default function Home() {
               >
                 Non merci
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal d'affichage des ingrédients */}
+      {showIngredientsModal && selectedDishForIngredients && (
+        <div className="fixed inset-0 bg-white/30 backdrop-blur-sm z-50 flex items-end md:items-center justify-center p-4">
+          <div className="bg-white rounded-t-2xl md:rounded-2xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto shadow-xl">
+            <div className="flex justify-between items-start mb-4">
+              <div>
+                <h3 className="text-lg font-bold flex items-center gap-2">
+                  <span>🥕</span>
+                  {selectedDishForIngredients.name}
+                </h3>
+                <p className="text-sm text-gray-500">Ingrédients du plat</p>
+              </div>
+              <button
+                onClick={() => {
+                  setShowIngredientsModal(false)
+                  setSelectedDishForIngredients(null)
+                }}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Affichage des variantes et leurs ingrédients */}
+            <div className="space-y-4">
+              {selectedDishForIngredients.variants && selectedDishForIngredients.variants.length > 0 ? (
+                selectedDishForIngredients.variants.filter(v => v.active !== false).map((variant, idx) => {
+                  // Si le plat n'a qu'une variante, ne pas afficher l'en-tête de variante
+                  const showVariantHeader = selectedDishForIngredients.variants.filter(v => v.active !== false).length > 1
+
+                  return (
+                    <div key={variant.id} className={idx > 0 ? 'border-t pt-4' : ''}>
+                      {showVariantHeader && (
+                        <div className="mb-2">
+                          <h4 className="font-semibold text-sm flex items-center gap-2">
+                            <span className="text-purple-600">{variant.name}</span>
+                            {variant.is_default && (
+                              <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
+                                Recommandé
+                              </span>
+                            )}
+                          </h4>
+                          {/* Tags diététiques de la variante */}
+                          {variant.tags && (() => {
+                            let tags = variant.tags
+                            if (typeof tags === 'string') {
+                              try {
+                                tags = JSON.parse(tags)
+                              } catch {
+                                tags = []
+                              }
+                            }
+                            if (Array.isArray(tags) && tags.length > 0) {
+                              return (
+                                <div className="flex flex-wrap gap-1 mt-1">
+                                  {tags.map(tagName => {
+                                    const tagInfo = getTagInfo(tagName)
+                                    return (
+                                      <span
+                                        key={tagName}
+                                        className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs"
+                                      >
+                                        {tagInfo.emoji} {tagInfo.name}
+                                      </span>
+                                    )
+                                  })}
+                                </div>
+                              )
+                            }
+                            return null
+                          })()}
+                        </div>
+                      )}
+
+                      {/* Liste des ingrédients */}
+                      {variant.linked_ingredients && variant.linked_ingredients.length > 0 ? (
+                        <div className="bg-gray-50 rounded-lg p-3">
+                          <ul className="space-y-2">
+                            {variant.linked_ingredients.map((ing) => (
+                              <li key={ing.ingredient_id} className="flex items-start justify-between gap-2">
+                                <div className="flex-1">
+                                  <span className="text-sm font-medium text-gray-800">
+                                    {ing.ingredient_name || ing.name}
+                                  </span>
+                                  {/* Tags diététiques de l'ingrédient */}
+                                  {ing.dietary_tags && (() => {
+                                    let dietaryTags = ing.dietary_tags
+                                    if (typeof dietaryTags === 'string') {
+                                      try {
+                                        dietaryTags = JSON.parse(dietaryTags)
+                                      } catch {
+                                        dietaryTags = []
+                                      }
+                                    }
+                                    if (Array.isArray(dietaryTags) && dietaryTags.length > 0) {
+                                      return (
+                                        <div className="flex flex-wrap gap-0.5 mt-0.5">
+                                          {dietaryTags.map(tagName => {
+                                            const tagInfo = getTagInfo(tagName)
+                                            return (
+                                              <span
+                                                key={tagName}
+                                                className="text-[10px] bg-blue-50 text-blue-600 px-1 py-0.5 rounded"
+                                                title={tagInfo.name}
+                                              >
+                                                {tagInfo.emoji}
+                                              </span>
+                                            )
+                                          })}
+                                        </div>
+                                      )
+                                    }
+                                    return null
+                                  })()}
+                                </div>
+                                {ing.quantity && (
+                                  <span className="text-sm text-gray-600 whitespace-nowrap">
+                                    {ing.quantity} {ing.unit || ''}
+                                  </span>
+                                )}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500 italic bg-gray-50 rounded-lg p-3">
+                          Aucun ingrédient spécifié pour cette variante
+                        </p>
+                      )}
+                    </div>
+                  )
+                })
+              ) : (
+                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                  <p className="text-sm text-yellow-800">
+                    Les ingrédients de ce plat ne sont pas encore détaillés.
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Note pour le nombre de personnes */}
+            <div className="mt-4 pt-4 border-t">
+              <p className="text-xs text-gray-500 flex items-center gap-1">
+                <span>ℹ️</span>
+                Les quantités affichées sont pour 1 personne. Les quantités finales seront ajustées selon le nombre de personnes de votre foyer ({userHouseholdSize} pers.).
+              </p>
             </div>
           </div>
         </div>

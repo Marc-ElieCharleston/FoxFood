@@ -20,7 +20,8 @@ export async function POST(request) {
     const shoppingData = await getShoppingListData({
       selectedDishes: dishes,
       selectedVariants: variants || {},
-      householdSize
+      householdSize,
+      userId: session.user.id
     })
 
     if (!shoppingData) {

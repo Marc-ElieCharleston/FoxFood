@@ -16,23 +16,23 @@ export async function GET(request) {
 
     const userId = parseInt(session.user.id)
 
-    // Calculer les 5 prochaines semaines (à partir du lundi de la semaine actuelle)
+    // Calculer les 5 prochaines semaines (à partir du lundi suivant ou actuel si on est lundi)
     const weeks = []
     const today = new Date()
+    today.setHours(0, 0, 0, 0)
     const dayOfWeek = today.getDay() // 0=Dimanche, 1=Lundi, ..., 6=Samedi
 
     let firstMonday = new Date(today)
-    firstMonday.setHours(0, 0, 0, 0)
 
     if (dayOfWeek === 0) {
-      // Dimanche -> lundi de cette semaine (6 jours en arrière)
-      firstMonday.setDate(today.getDate() - 6)
+      // Dimanche -> lundi suivant (demain)
+      firstMonday.setDate(today.getDate() + 1)
     } else if (dayOfWeek === 1) {
-      // Lundi -> aujourd'hui
+      // Lundi -> aujourd'hui (cette semaine)
       // firstMonday reste à today
     } else {
-      // Mardi-Samedi -> revenir au lundi de cette semaine
-      firstMonday.setDate(today.getDate() - (dayOfWeek - 1))
+      // Mardi-Samedi -> lundi prochain (semaine suivante)
+      firstMonday.setDate(today.getDate() + (8 - dayOfWeek))
     }
 
     for (let i = 0; i < 5; i++) {
@@ -132,21 +132,22 @@ export async function POST(request) {
       }
     }
 
-    // Calculer les dates des 5 prochaines semaines (à partir du lundi de la semaine actuelle)
+    // Calculer les dates des 5 prochaines semaines (à partir du lundi suivant ou actuel si on est lundi)
     const today = new Date()
+    today.setHours(0, 0, 0, 0)
     const dayOfWeek = today.getDay() // 0=Dimanche, 1=Lundi, ..., 6=Samedi
 
     let firstMonday = new Date(today)
-    firstMonday.setHours(0, 0, 0, 0)
 
     if (dayOfWeek === 0) {
-      // Dimanche -> lundi de cette semaine (6 jours en arrière)
-      firstMonday.setDate(today.getDate() - 6)
+      // Dimanche -> lundi suivant (demain)
+      firstMonday.setDate(today.getDate() + 1)
     } else if (dayOfWeek === 1) {
-      // Lundi -> aujourd'hui
+      // Lundi -> aujourd'hui (cette semaine)
+      // firstMonday reste à today
     } else {
-      // Mardi-Samedi -> revenir au lundi de cette semaine
-      firstMonday.setDate(today.getDate() - (dayOfWeek - 1))
+      // Mardi-Samedi -> lundi prochain (semaine suivante)
+      firstMonday.setDate(today.getDate() + (8 - dayOfWeek))
     }
 
     const weekDates = []
@@ -237,6 +238,8 @@ export async function POST(request) {
 
       // Préparer les données des semaines avec plats ET listes de courses
       const weeksWithData = {}
+      const weeksWithDishes = Object.entries(weeklySelections).filter(([k, v]) => v?.dishes?.length > 0).map(([k]) => k)
+      console.log(`📊 Préparation email: ${weeksWithDishes.length} semaine(s) avec plats (${weeksWithDishes.join(', ')})`)
 
       for (let i = 0; i < 5; i++) {
         const weekKey = `week${i}`
@@ -279,7 +282,8 @@ export async function POST(request) {
             const shoppingData = await getShoppingListData({
               selectedDishes: weekData.dishes,
               selectedVariants: weekData.variants || {},
-              householdSize
+              householdSize,
+              userId
             })
             if (shoppingData) {
               shoppingListHtml = generateShoppingListHtml(shoppingData)
@@ -297,6 +301,7 @@ export async function POST(request) {
       }
 
       if (Object.keys(weeksWithData).length > 0) {
+        console.log(`📧 Envoi email à ${session.user.name} pour ${Object.keys(weeksWithData).length} semaine(s)`)
         await sendUserSelectionSummary({
           userId,
           userName: session.user.name,
@@ -304,10 +309,12 @@ export async function POST(request) {
           householdSize,
           weeklyData: weeksWithData
         })
-        console.log('Email récapitulatif envoyé au client')
+        console.log('✅ Email récapitulatif envoyé au client')
+      } else {
+        console.log('⚠️ Aucune semaine avec plats à envoyer par email')
       }
     } catch (shoppingListError) {
-      console.error('Erreur envoi email client:', shoppingListError)
+      console.error('❌ Erreur envoi email client:', shoppingListError)
       // Ne pas bloquer la sauvegarde si l'envoi échoue
     }
 
@@ -376,7 +383,8 @@ export async function POST(request) {
               const shoppingData = await getShoppingListData({
                 selectedDishes: weekData.dishes,
                 selectedVariants: weekData.variants || {},
-                householdSize
+                householdSize,
+                userId
               })
               if (shoppingData) {
                 shoppingListHtml = generateShoppingListHtml(shoppingData)

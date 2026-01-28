@@ -16,6 +16,27 @@ export async function POST(request) {
       return NextResponse.json({})
     }
 
+    // Récupérer les remplacements d'ingrédients de l'utilisateur
+    const replacementsResult = await sql`
+      SELECT
+        r.original_ingredient_id,
+        r.replacement_ingredient_id,
+        ri.name as replacement_name,
+        ri.category as replacement_category
+      FROM user_ingredient_replacements r
+      JOIN ingredients ri ON r.replacement_ingredient_id = ri.id
+      WHERE r.user_id = ${session.user.id}
+    `
+
+    const userReplacements = new Map()
+    replacementsResult.rows.forEach(r => {
+      userReplacements.set(r.original_ingredient_id, {
+        replacementId: r.replacement_ingredient_id,
+        replacementName: r.replacement_name,
+        replacementCategory: r.replacement_category
+      })
+    })
+
     // Pour chaque plat, récupérer la variante par défaut si aucune n'est sélectionnée
     const variantIds = []
 
@@ -54,11 +75,23 @@ export async function POST(request) {
       AND i.active = true
     `
 
-    // Grouper et additionner les quantités par ingrédient
+    // Grouper et additionner les quantités par ingrédient en appliquant les remplacements
     const ingredientMap = {}
 
     for (const ing of ingredientsResult.rows) {
-      const key = ing.ingredient_id
+      // Appliquer le remplacement si configuré
+      let ingredientId = ing.ingredient_id
+      let ingredientName = ing.name
+      let ingredientCategory = ing.category || 'autre'
+
+      if (userReplacements.has(ing.ingredient_id)) {
+        const replacement = userReplacements.get(ing.ingredient_id)
+        ingredientId = replacement.replacementId
+        ingredientName = replacement.replacementName
+        ingredientCategory = replacement.replacementCategory || 'autre'
+      }
+
+      const key = ingredientId
       const quantity = parseFloat(ing.quantity) || 0
       const scaledQuantity = quantity * householdSize
 
@@ -66,9 +99,9 @@ export async function POST(request) {
         ingredientMap[key].quantity += scaledQuantity
       } else {
         ingredientMap[key] = {
-          id: ing.ingredient_id,
-          name: ing.name,
-          category: ing.category || 'autre',
+          id: ingredientId,
+          name: ingredientName,
+          category: ingredientCategory,
           quantity: scaledQuantity,
           unit: ing.unit || ing.default_unit || 'g'
         }

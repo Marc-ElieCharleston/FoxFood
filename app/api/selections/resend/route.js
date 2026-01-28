@@ -99,7 +99,8 @@ export async function POST(request) {
         const shoppingData = await getShoppingListData({
           selectedDishes: weekSelection.selected_dishes,
           selectedVariants: weekSelection.selected_variants || {},
-          householdSize
+          householdSize,
+          userId
         })
         if (shoppingData) {
           shoppingListHtml = generateShoppingListHtml(shoppingData)
