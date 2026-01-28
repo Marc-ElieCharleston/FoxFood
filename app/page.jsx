@@ -55,6 +55,8 @@ export default function Home() {
   const [showIngredientsModal, setShowIngredientsModal] = useState(false)
   const [selectedDishForIngredients, setSelectedDishForIngredients] = useState(null)
   const [resettingSelections, setResettingSelections] = useState(false)
+  const [showCancelConfirmModal, setShowCancelConfirmModal] = useState(false)
+  const [showResetConfirmModal, setShowResetConfirmModal] = useState(false)
 
   // Version de l'app pour détecter les mises à jour
   const APP_VERSION = '2024-01-28-v2'
@@ -870,25 +872,23 @@ export default function Home() {
     }
   }
 
-  // Annuler les sélections (accessible depuis la page principale)
-  const handleCancelSelections = async () => {
-    const confirmed = confirm(
-      '⚠️ Annuler vos sélections ?\n\n' +
-      'Cela supprimera tous vos plats sélectionnés pour les semaines à venir.\n' +
-      'Vous pourrez ensuite refaire votre sélection.\n\n' +
-      'Cette action est irréversible.'
-    )
+  // Ouvrir le modal de confirmation d'annulation
+  const handleCancelSelections = () => {
+    setShowCancelConfirmModal(true)
+  }
 
-    if (!confirmed) return
-
+  // Confirmer l'annulation des sélections
+  const confirmCancelSelections = async () => {
+    setShowCancelConfirmModal(false)
     setResettingSelections(true)
+
     try {
       const response = await fetch('/api/selections/reset', {
         method: 'DELETE'
       })
 
       if (response.ok) {
-        toast.success('Sélections annulées ! Vous pouvez maintenant refaire votre choix.')
+        toast.success('✅ Sélections annulées ! Vous pouvez maintenant refaire votre choix.')
         // Réinitialiser l'état local
         setWeeklySelections({
           week0: { dishes: [], variants: {} },
@@ -910,24 +910,23 @@ export default function Home() {
     }
   }
 
-  // Réinitialiser toutes les sélections (depuis le modal panier)
-  const handleResetSelections = async () => {
-    const confirmed = confirm(
-      '⚠️ Êtes-vous sûr(e) de vouloir réinitialiser toutes vos sélections ?\n\n' +
-      'Cela supprimera tous vos plats sélectionnés pour les semaines à venir.\n' +
-      'Cette action est irréversible.'
-    )
+  // Ouvrir le modal de confirmation de réinitialisation (depuis le panier)
+  const handleResetSelections = () => {
+    setShowResetConfirmModal(true)
+  }
 
-    if (!confirmed) return
-
+  // Confirmer la réinitialisation
+  const confirmResetSelections = async () => {
+    setShowResetConfirmModal(false)
     setResettingSelections(true)
+
     try {
       const response = await fetch('/api/selections/reset', {
         method: 'DELETE'
       })
 
       if (response.ok) {
-        toast.success('Toutes les sélections ont été réinitialisées')
+        toast.success('✅ Toutes les sélections ont été réinitialisées')
         // Réinitialiser l'état local
         setWeeklySelections({
           week0: { dishes: [], variants: {} },
@@ -1036,6 +1035,51 @@ export default function Home() {
           <span className="text-xl">🛒</span>
           <span>{getTotalDishesCount()} plat{getTotalDishesCount() > 1 ? 's' : ''}</span>
         </button>
+      )}
+
+      {/* Modal de confirmation de réinitialisation (depuis le panier) */}
+      {showResetConfirmModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end md:items-center justify-center p-4">
+          <div className="bg-white rounded-t-2xl md:rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            <div className="text-center mb-4">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">🗑️</span>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Réinitialiser vos sélections ?
+              </h3>
+              <p className="text-gray-600 text-sm">
+                Tous vos plats sélectionnés seront supprimés.
+              </p>
+            </div>
+
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+              <div className="flex items-start gap-3">
+                <span className="text-xl flex-shrink-0">⚠️</span>
+                <div className="text-sm text-red-800">
+                  <p className="font-medium">Cette action est irréversible</p>
+                  <p className="text-xs mt-1">Vous devrez refaire votre sélection depuis le début.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowResetConfirmModal(false)}
+                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={confirmResetSelections}
+                disabled={resettingSelections}
+                className="flex-1 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              >
+                {resettingSelections ? 'Suppression...' : 'Réinitialiser'}
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* Modal de résumé multi-semaines */}
@@ -1652,6 +1696,58 @@ export default function Home() {
                 className="flex-1 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300"
               >
                 Non merci
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de confirmation d'annulation */}
+      {showCancelConfirmModal && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-end md:items-center justify-center p-4">
+          <div className="bg-white rounded-t-2xl md:rounded-2xl p-6 w-full max-w-md shadow-2xl">
+            {/* Icône et titre */}
+            <div className="text-center mb-4">
+              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                <span className="text-3xl">🗑️</span>
+              </div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                Annuler vos sélections ?
+              </h3>
+              <p className="text-gray-600 text-sm">
+                Cette action supprimera tous vos plats sélectionnés pour les semaines à venir.
+              </p>
+            </div>
+
+            {/* Informations */}
+            <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 mb-6">
+              <div className="flex items-start gap-3">
+                <span className="text-xl flex-shrink-0">💡</span>
+                <div className="text-sm text-amber-800">
+                  <p className="font-medium mb-1">Que se passe-t-il ensuite ?</p>
+                  <ul className="space-y-1 text-xs">
+                    <li>✓ Vos sélections actuelles seront effacées</li>
+                    <li>✓ Vous pourrez refaire votre choix</li>
+                    <li>✓ Un email récapitulatif sera envoyé après validation</li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+
+            {/* Boutons d'action */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => setShowCancelConfirmModal(false)}
+                className="flex-1 py-3 bg-gray-100 text-gray-700 rounded-xl font-semibold hover:bg-gray-200 transition"
+              >
+                Annuler
+              </button>
+              <button
+                onClick={confirmCancelSelections}
+                disabled={resettingSelections}
+                className="flex-1 py-3 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+              >
+                {resettingSelections ? 'Annulation...' : 'Confirmer'}
               </button>
             </div>
           </div>
