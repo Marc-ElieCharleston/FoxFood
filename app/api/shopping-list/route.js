@@ -37,6 +37,11 @@ export async function POST(request) {
       })
     })
 
+    // Log pour debug
+    if (userReplacements.size > 0) {
+      console.log(`🔄 [Historique - User ${session.user.id}] ${userReplacements.size} remplacement(s) actif(s)`)
+    }
+
     // Pour chaque plat, récupérer la variante par défaut si aucune n'est sélectionnée
     const variantIds = []
 
@@ -86,6 +91,7 @@ export async function POST(request) {
 
       if (userReplacements.has(ing.ingredient_id)) {
         const replacement = userReplacements.get(ing.ingredient_id)
+        console.log(`   ✓ [Historique] Remplacement: "${ing.name}" → "${replacement.replacementName}"`)
         ingredientId = replacement.replacementId
         ingredientName = replacement.replacementName
         ingredientCategory = replacement.replacementCategory || 'autre'
