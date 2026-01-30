@@ -8,6 +8,7 @@ const adminTabs = [
   { path: '/admin/recap', label: 'Récap' },
   { path: '/admin/plats-personnalises', label: 'Plats perso' },
   { path: '/admin/utilisateurs', label: 'Utilisateurs' },
+  { path: '/admin/popup', label: 'Popup' },
   { path: '/admin/parametres', label: 'Paramètres' },
   { path: '/admin/test', label: 'Test' },
 ]

@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { toast } from 'sonner'
 import OnboardingModal from '@/components/OnboardingModal'
 import HistoryModal from '@/components/HistoryModal'
+import PopupMessage from '@/components/PopupMessage'
 import { generateOrderRecapPDF } from '@/lib/pdf-generator'
 
 export default function Home() {
@@ -996,6 +997,9 @@ export default function Home() {
         onClose={() => setShowHistoryModal(false)}
         userHouseholdSize={userHouseholdSize}
       />
+
+      {/* Popup message de parrainage */}
+      <PopupMessage />
 
       {/* Banner de configuration des paramètres */}
       {showSettingsBanner && (
