@@ -17,22 +17,34 @@ export default function PopupMessage() {
       return
     }
 
-    // Vérifier si le popup a déjà été affiché dans cette session
-    const popupShown = sessionStorage.getItem('foxfood_popup_shown')
-    if (popupShown) {
+    try {
+      // Vérifier si le popup a déjà été affiché dans cette session
+      const popupShown = sessionStorage.getItem('foxfood_popup_shown')
+      if (popupShown) {
+        setLoading(false)
+        return
+      }
+    } catch {
+      // sessionStorage peut être indisponible (navigation privée, etc.)
       setLoading(false)
       return
     }
 
     // Charger les paramètres du popup
     fetch('/api/admin/popup-settings')
-      .then(res => res.json())
+      .then(res => {
+        if (!res.ok) throw new Error('API error')
+        return res.json()
+      })
       .then(data => {
-        if (data.is_active && data.message) {
+        if (data && data.is_active && data.message) {
           setPopupSettings(data)
           setShowPopup(true)
-          // Marquer comme affiché pour cette session
-          sessionStorage.setItem('foxfood_popup_shown', 'true')
+          try {
+            sessionStorage.setItem('foxfood_popup_shown', 'true')
+          } catch {
+            // Ignorer si sessionStorage indisponible
+          }
         }
         setLoading(false)
       })
