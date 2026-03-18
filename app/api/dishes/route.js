@@ -121,7 +121,7 @@ export async function POST(request) {
       )
     }
 
-    const { name, category, description, ingredients, seasons } = await request.json()
+    const { name, category, description, ingredients, seasons, kids_food } = await request.json()
 
     if (!name || !category) {
       return NextResponse.json(
@@ -134,8 +134,8 @@ export async function POST(request) {
     const dishSeasons = seasons && seasons.length > 0 ? seasons : ['toutes']
 
     const result = await sql`
-      INSERT INTO dishes (name, category, description, ingredients, seasons, active)
-      VALUES (${name}, ${category}, ${description || ''}, ${JSON.stringify(ingredients || [])}, ${JSON.stringify(dishSeasons)}, true)
+      INSERT INTO dishes (name, category, description, ingredients, seasons, active, kids_food)
+      VALUES (${name}, ${category}, ${description || ''}, ${JSON.stringify(ingredients || [])}, ${JSON.stringify(dishSeasons)}, true, ${kids_food || false})
       RETURNING *
     `
 
@@ -160,7 +160,7 @@ export async function PUT(request) {
       )
     }
 
-    const { id, name, category, description, ingredients, seasons, active } = await request.json()
+    const { id, name, category, description, ingredients, seasons, active, kids_food } = await request.json()
 
     if (!id || !name || !category) {
       return NextResponse.json(
@@ -180,6 +180,7 @@ export async function PUT(request) {
           ingredients = ${JSON.stringify(ingredients || [])},
           seasons = ${JSON.stringify(dishSeasons)},
           active = ${active !== undefined ? active : true},
+          kids_food = ${kids_food || false},
           updated_at = CURRENT_TIMESTAMP
       WHERE id = ${id}
       RETURNING *

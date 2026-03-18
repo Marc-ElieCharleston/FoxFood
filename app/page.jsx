@@ -41,7 +41,7 @@ export default function Home() {
   })
   const [newIngredient, setNewIngredient] = useState('')
   const [submittingCustomDish, setSubmittingCustomDish] = useState(false)
-  const [selectedSeasons, setSelectedSeasons] = useState(['hiver']) // Actuellement uniquement Hiver disponible
+  const [selectedSeasons, setSelectedSeasons] = useState(['printemps']) // Sera mis à jour par l'API active-season
   const [dietaryTags, setDietaryTags] = useState([])
   const [showVariantModal, setShowVariantModal] = useState(false)
   const [selectedDishForVariant, setSelectedDishForVariant] = useState(null)
@@ -239,6 +239,7 @@ export default function Home() {
       if (session?.user?.onboarding_completed === false) {
         setShowOnboardingModal(true)
       } else {
+        fetchActiveSeason()
         fetchDishes()
         fetchCurrentSelection()
         checkSettings()
@@ -286,6 +287,20 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Erreur lors de la vérification des paramètres:', error)
+    }
+  }
+
+  const fetchActiveSeason = async () => {
+    try {
+      const response = await fetch('/api/active-season')
+      if (response.ok) {
+        const data = await response.json()
+        if (data.active_season) {
+          setSelectedSeasons([data.active_season])
+        }
+      }
+    } catch (error) {
+      console.error('Erreur lors du chargement de la saison active:', error)
     }
   }
 
@@ -709,7 +724,8 @@ export default function Home() {
   const categoryLabels = {
     viandes: { name: 'Viandes', emoji: '🥩', color: 'bg-red-500' },
     poissons: { name: 'Poissons', emoji: '🐟', color: 'bg-blue-500' },
-    vegetation: { name: 'Végétarien', emoji: '🥗', color: 'bg-green-500' }
+    vegetation: { name: 'Végétarien', emoji: '🥗', color: 'bg-green-500' },
+    desserts: { name: 'Desserts', emoji: '🍰', color: 'bg-amber-500' }
   }
 
   // 4 catégories simplifiées pour la liste de courses
@@ -1430,14 +1446,18 @@ export default function Home() {
         </button>
       </div>
 
-      {/* Filtre de saison - Actuellement uniquement Hiver */}
+      {/* Saison active */}
       <div className="mb-4">
         <div className="flex items-center gap-2 flex-wrap">
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-primary-600 text-white">
-            <span>❄️</span>
-            <span>Hiver</span>
+            <span>{seasonEmojis[selectedSeasons[0]] || '📅'}</span>
+            <span>{
+              selectedSeasons[0] === 'printemps' ? 'Printemps' :
+              selectedSeasons[0] === 'ete' ? 'Été' :
+              selectedSeasons[0] === 'automne' ? 'Automne' :
+              selectedSeasons[0] === 'hiver' ? 'Hiver' : 'Toutes saisons'
+            }</span>
           </div>
-          <span className="text-xs text-gray-400 italic">Autres saisons bientôt disponibles</span>
         </div>
       </div>
 
@@ -1534,6 +1554,11 @@ export default function Home() {
                       <h3 className="font-medium text-sm leading-tight">
                         {dish.name}
                       </h3>
+                      {dish.kids_food && (
+                        <span className="text-xs bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded font-medium" title="Kids Food">
+                          👶
+                        </span>
+                      )}
                       {dish.description?.includes('(Plat personnalisé)') && (
                         <span className="text-xs bg-pink-100 text-pink-700 px-1.5 py-0.5 rounded font-medium">
                           ✨ Personnalisé

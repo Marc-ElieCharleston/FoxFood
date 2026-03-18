@@ -67,7 +67,8 @@ export default function AdminPage() {
     description: '',
     seasons: ['toutes'],
     ingredients: [],
-    active: true
+    active: true,
+    kids_food: false
   })
 
   // Fonctions pour gérer les ingrédients
@@ -878,7 +879,8 @@ export default function AdminPage() {
       description: dish.description || '',
       seasons: dishSeasons,
       ingredients: dishIngredients,
-      active: dish.active
+      active: dish.active,
+      kids_food: dish.kids_food || false
     })
     setNewIngredient('')
     setShowForm(true)
@@ -935,7 +937,8 @@ export default function AdminPage() {
   const categoryLabels = {
     viandes: 'Viandes',
     poissons: 'Poissons',
-    vegetation: 'Végétarien'
+    vegetation: 'Végétarien',
+    desserts: 'Desserts'
   }
 
   if (status === 'loading' || !session) {
@@ -958,7 +961,7 @@ export default function AdminPage() {
           <button
             onClick={() => {
               setEditingDish(null)
-              setFormData({ name: '', category: 'viandes', description: '', seasons: ['toutes'], ingredients: [], active: true })
+              setFormData({ name: '', category: 'viandes', description: '', seasons: ['toutes'], ingredients: [], active: true, kids_food: false })
               setNewIngredient('')
               setShowForm(true)
             }}
@@ -1000,7 +1003,7 @@ export default function AdminPage() {
             <span className="hidden sm:inline">Tous ({dishes.length})</span>
             <span className="sm:hidden">Tous {dishes.length}</span>
           </button>
-          {['viandes', 'poissons', 'vegetation'].map(cat => (
+          {['viandes', 'poissons', 'vegetation', 'desserts'].map(cat => (
             <button
               key={cat}
               onClick={() => setFilter(cat)}
@@ -1084,6 +1087,7 @@ export default function AdminPage() {
                   <option value="viandes">Viandes</option>
                   <option value="poissons">Poissons</option>
                   <option value="vegetation">Végétarien</option>
+                  <option value="desserts">Desserts</option>
                 </select>
               </div>
             </div>
@@ -1124,6 +1128,19 @@ export default function AdminPage() {
               <p className="text-xs text-gray-500 mt-1">
                 Selectionnez les saisons ou le plat est disponible
               </p>
+            </div>
+
+            <div className="mb-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={formData.kids_food || false}
+                  onChange={(e) => setFormData({ ...formData, kids_food: e.target.checked })}
+                  className="w-4 h-4 text-pink-600 border-gray-300 rounded focus:ring-pink-500"
+                />
+                <span className="text-sm font-medium text-gray-700">👶 Kids Food</span>
+                <span className="text-xs text-gray-500">(plat adapté aux enfants)</span>
+              </label>
             </div>
 
             <div className="mb-4">
@@ -1202,7 +1219,7 @@ export default function AdminPage() {
                 onClick={() => {
                   setShowForm(false)
                   setEditingDish(null)
-                  setFormData({ name: '', category: 'viandes', description: '', seasons: ['toutes'], ingredients: [], active: true })
+                  setFormData({ name: '', category: 'viandes', description: '', seasons: ['toutes'], ingredients: [], active: true, kids_food: false })
                   setNewIngredient('')
                 }}
                 className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 font-semibold"
@@ -1237,10 +1254,16 @@ export default function AdminPage() {
                       <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${
                         dish.category === 'viandes' ? 'bg-red-100 text-red-800' :
                         dish.category === 'poissons' ? 'bg-blue-100 text-blue-800' :
+                        dish.category === 'desserts' ? 'bg-amber-100 text-amber-800' :
                         'bg-green-100 text-green-800'
                       }`}>
                         {categoryLabels[dish.category]}
                       </span>
+                      {dish.kids_food && (
+                        <span className="inline-block px-1.5 py-0.5 rounded text-xs font-semibold bg-pink-100 text-pink-700" title="Kids Food">
+                          👶
+                        </span>
+                      )}
                       <span className="text-sm" title="Saisons">
                         {getSeasonEmojis(dish.seasons)}
                       </span>
@@ -1332,10 +1355,16 @@ export default function AdminPage() {
                       <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${
                         dish.category === 'viandes' ? 'bg-red-100 text-red-700' :
                         dish.category === 'poissons' ? 'bg-blue-100 text-blue-700' :
+                        dish.category === 'desserts' ? 'bg-amber-100 text-amber-700' :
                         'bg-green-100 text-green-700'
                       }`}>
                         {categoryLabels[dish.category]}
                       </span>
+                      {dish.kids_food && (
+                        <span className="inline-flex items-center px-1.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-700" title="Kids Food">
+                          👶
+                        </span>
+                      )}
                     </td>
                     <td className="px-2 py-3 text-center">
                       <span className="text-base" title="Saisons disponibles">

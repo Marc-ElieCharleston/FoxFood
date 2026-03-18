@@ -35,7 +35,8 @@ export async function GET(request) {
         notify_on_missing_selection,
         notify_on_custom_dish,
         daily_summary,
-        auto_reminder_days_before
+        auto_reminder_days_before,
+        active_season
       FROM admin_settings
       WHERE user_id = ${userId}
       LIMIT 1
@@ -53,7 +54,8 @@ export async function GET(request) {
         notify_on_missing_selection: true,
         notify_on_custom_dish: true,
         daily_summary: false,
-        auto_reminder_days_before: 2
+        auto_reminder_days_before: 2,
+        active_season: 'printemps'
       })
     }
 
@@ -96,7 +98,8 @@ export async function POST(request) {
       notify_on_missing_selection,
       notify_on_custom_dish,
       daily_summary,
-      auto_reminder_days_before
+      auto_reminder_days_before,
+      active_season
     } = await request.json()
 
     const userId = parseInt(session.user.id)
@@ -143,7 +146,8 @@ export async function POST(request) {
         notify_on_missing_selection,
         notify_on_custom_dish,
         daily_summary,
-        auto_reminder_days_before
+        auto_reminder_days_before,
+        active_season
       )
       VALUES (
         ${userId},
@@ -156,7 +160,8 @@ export async function POST(request) {
         ${notify_on_missing_selection !== false},
         ${notify_on_custom_dish !== false},
         ${daily_summary === true},
-        ${auto_reminder_days_before || 2}
+        ${auto_reminder_days_before || 2},
+        ${active_season || 'printemps'}
       )
       ON CONFLICT (user_id)
       DO UPDATE SET
@@ -170,6 +175,7 @@ export async function POST(request) {
         notify_on_custom_dish = EXCLUDED.notify_on_custom_dish,
         daily_summary = EXCLUDED.daily_summary,
         auto_reminder_days_before = EXCLUDED.auto_reminder_days_before,
+        active_season = EXCLUDED.active_season,
         updated_at = CURRENT_TIMESTAMP
       RETURNING *
     `

@@ -22,7 +22,8 @@ export default function AdminSettingsPage() {
     notify_on_missing_selection: true,
     notify_on_custom_dish: true,
     daily_summary: false,
-    auto_reminder_days_before: 2
+    auto_reminder_days_before: 2,
+    active_season: 'printemps'
   })
   const [runningMigrations, setRunningMigrations] = useState(false)
 
@@ -146,6 +147,36 @@ export default function AdminSettingsPage() {
       <AdminNav />
 
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 space-y-6 max-w-2xl">
+        {/* Section 0: Saison active */}
+        <div className="border-b pb-6">
+          <h2 className="text-lg font-bold mb-4">Saison active du catalogue</h2>
+          <p className="text-sm text-gray-600 mb-4">
+            Choisissez la saison affichée aux clients pour la sélection des plats.
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { value: 'printemps', label: 'Printemps', emoji: '🌸' },
+              { value: 'ete', label: 'Été', emoji: '☀️' },
+              { value: 'automne', label: 'Automne', emoji: '🍂' },
+              { value: 'hiver', label: 'Hiver', emoji: '❄️' }
+            ].map(option => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => setSettings({ ...settings, active_season: option.value })}
+                className={`px-4 py-2 rounded-lg text-sm font-semibold transition flex items-center gap-2 ${
+                  settings.active_season === option.value
+                    ? 'bg-primary-600 text-white ring-2 ring-primary-300'
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
+              >
+                <span className="text-lg">{option.emoji}</span>
+                <span>{option.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+
         {/* Section 1: Coordonnées de notification */}
         <div className="border-b pb-6">
           <h2 className="text-lg font-bold mb-4">Coordonnées de notification</h2>
