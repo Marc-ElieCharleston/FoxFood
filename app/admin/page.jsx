@@ -2123,6 +2123,33 @@ export default function AdminPage() {
                     const ingredients = defaultVariant?.linkedIngredients || []
 
                     if (ingredients.length === 0) {
+                      // Fallback: afficher les ingrédients depuis la colonne JSONB
+                      let rawIngredients = selectedDishIngredients.ingredients
+                      if (typeof rawIngredients === 'string') {
+                        try { rawIngredients = JSON.parse(rawIngredients) } catch { rawIngredients = [] }
+                      }
+                      if (Array.isArray(rawIngredients) && rawIngredients.length > 0) {
+                        return (
+                          <div className="space-y-2">
+                            <div className="border rounded-lg overflow-hidden">
+                              <div className="bg-amber-100 px-4 py-2 font-medium text-sm text-amber-800">
+                                Ingrédients bruts ({rawIngredients.length})
+                              </div>
+                              <div className="divide-y">
+                                {rawIngredients.map((ing, idx) => (
+                                  <div key={idx} className="px-4 py-2 text-sm text-gray-700">
+                                    {ing}
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                            <p className="text-xs text-amber-600 italic">
+                              Ces ingrédients ne sont pas encore liés au système de variantes.
+                              Utilisez la recherche ci-dessus pour les ajouter proprement.
+                            </p>
+                          </div>
+                        )
+                      }
                       return (
                         <div className="text-center py-6 text-gray-500">
                           <p className="text-sm">Aucun ingrédient</p>

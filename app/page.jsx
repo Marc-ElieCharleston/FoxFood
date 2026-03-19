@@ -1915,13 +1915,34 @@ export default function Home() {
                     </div>
                   )
                 })
-              ) : (
-                <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                  <p className="text-sm text-yellow-800">
-                    Les ingrédients de ce plat ne sont pas encore détaillés.
-                  </p>
-                </div>
-              )}
+              ) : (() => {
+                // Fallback: afficher les ingrédients depuis la colonne JSONB
+                let rawIngredients = selectedDishForIngredients.ingredients
+                if (typeof rawIngredients === 'string') {
+                  try { rawIngredients = JSON.parse(rawIngredients) } catch { rawIngredients = [] }
+                }
+                if (Array.isArray(rawIngredients) && rawIngredients.length > 0) {
+                  return (
+                    <div className="bg-gray-50 rounded-lg p-3">
+                      <ul className="space-y-1.5">
+                        {rawIngredients.map((ing, idx) => (
+                          <li key={idx} className="text-sm text-gray-700 flex items-center gap-2">
+                            <span className="w-1.5 h-1.5 rounded-full bg-primary-400 flex-shrink-0"></span>
+                            {ing}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )
+                }
+                return (
+                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                    <p className="text-sm text-yellow-800">
+                      Les ingrédients de ce plat ne sont pas encore détaillés.
+                    </p>
+                  </div>
+                )
+              })()}
             </div>
 
             {/* Note pour le nombre de personnes */}
