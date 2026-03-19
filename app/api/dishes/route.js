@@ -20,7 +20,7 @@ export async function GET(request) {
     const activeOnly = searchParams.get('active') === 'true'
     const season = searchParams.get('season')
 
-    const includeVariants = searchParams.get('includeVariants') === 'true'
+    const includeIngredients = searchParams.get('includeIngredients') === 'true' || searchParams.get('includeVariants') === 'true'
 
     let result
     if (category && activeOnly && season) {
@@ -65,39 +65,23 @@ export async function GET(request) {
       `
     }
 
-    // Si demandé, inclure les variantes pour chaque plat
-    if (includeVariants) {
-      const dishesWithVariants = await Promise.all(
+    // Si demandé, inclure les ingrédients pour chaque plat
+    if (includeIngredients) {
+      const dishesWithIngredients = await Promise.all(
         result.rows.map(async (dish) => {
-          const variants = await sql`
-            SELECT * FROM dish_variants
-            WHERE dish_id = ${dish.id} AND active = true
-            ORDER BY is_default DESC, name ASC
+          const ingredients = await sql`
+            SELECT di.*, i.name as ingredient_name, i.dietary_tags
+            FROM dish_ingredients di
+            JOIN ingredients i ON i.id = di.ingredient_id
+            WHERE di.dish_id = ${dish.id}
           `
-
-          // Pour chaque variante, récupérer ses ingrédients liés
-          const variantsWithIngredients = await Promise.all(
-            variants.rows.map(async (variant) => {
-              const ingredients = await sql`
-                SELECT vi.*, i.name as ingredient_name, i.dietary_tags
-                FROM variant_ingredients vi
-                JOIN ingredients i ON i.id = vi.ingredient_id
-                WHERE vi.variant_id = ${variant.id}
-              `
-              return {
-                ...variant,
-                linked_ingredients: ingredients.rows
-              }
-            })
-          )
-
           return {
             ...dish,
-            variants: variantsWithIngredients
+            linked_ingredients: ingredients.rows
           }
         })
       )
-      return NextResponse.json(dishesWithVariants)
+      return NextResponse.json(dishesWithIngredients)
     }
 
     return NextResponse.json(result.rows)
@@ -121,7 +105,7 @@ export async function POST(request) {
       )
     }
 
-    const { name, category, description, ingredients, seasons, kids_food } = await request.json()
+    const { name, category, description, ingredients, seasons, kids_food, dietary_tags } = await request.json()
 
     if (!name || !category) {
       return NextResponse.json(
@@ -134,8 +118,8 @@ export async function POST(request) {
     const dishSeasons = seasons && seasons.length > 0 ? seasons : ['toutes']
 
     const result = await sql`
-      INSERT INTO dishes (name, category, description, ingredients, seasons, active, kids_food)
-      VALUES (${name}, ${category}, ${description || ''}, ${JSON.stringify(ingredients || [])}, ${JSON.stringify(dishSeasons)}, true, ${kids_food || false})
+      INSERT INTO dishes (name, category, description, ingredients, seasons, active, kids_food, dietary_tags)
+      VALUES (${name}, ${category}, ${description || ''}, ${JSON.stringify(ingredients || [])}, ${JSON.stringify(dishSeasons)}, true, ${kids_food || false}, ${JSON.stringify(dietary_tags || [])}::jsonb)
       RETURNING *
     `
 
@@ -160,7 +144,7 @@ export async function PUT(request) {
       )
     }
 
-    const { id, name, category, description, ingredients, seasons, active, kids_food } = await request.json()
+    const { id, name, category, description, ingredients, seasons, active, kids_food, dietary_tags } = await request.json()
 
     if (!id || !name || !category) {
       return NextResponse.json(
@@ -181,6 +165,7 @@ export async function PUT(request) {
           seasons = ${JSON.stringify(dishSeasons)},
           active = ${active !== undefined ? active : true},
           kids_food = ${kids_food || false},
+          dietary_tags = ${JSON.stringify(dietary_tags || [])}::jsonb,
           updated_at = CURRENT_TIMESTAMP
       WHERE id = ${id}
       RETURNING *

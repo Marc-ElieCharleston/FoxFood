@@ -34,7 +34,6 @@ export async function GET(request) {
         ws.user_id,
         ws.week_start_date,
         ws.selected_dishes,
-        ws.selected_variants,
         u.name as user_name,
         u.email as user_email,
         u.delivery_day,
@@ -46,23 +45,20 @@ export async function GET(request) {
       ORDER BY u.name
     `
 
-    // Récupérer tous les plats avec leurs variantes et ingrédients
+    // Récupérer tous les plats avec leurs ingrédients
     const dishesResult = await sql`
       SELECT
         d.id as dish_id,
         d.name as dish_name,
         d.category,
-        dv.id as variant_id,
-        dv.name as variant_name,
-        vi.ingredient_id,
-        vi.quantity,
-        vi.unit,
+        di.ingredient_id,
+        di.quantity,
+        di.unit,
         i.name as ingredient_name,
         i.category as ingredient_category
       FROM dishes d
-      LEFT JOIN dish_variants dv ON d.id = dv.dish_id AND dv.active = true
-      LEFT JOIN variant_ingredients vi ON dv.id = vi.variant_id
-      LEFT JOIN ingredients i ON vi.ingredient_id = i.id
+      LEFT JOIN dish_ingredients di ON d.id = di.dish_id
+      LEFT JOIN ingredients i ON di.ingredient_id = i.id
       WHERE d.active = true
     `
 
@@ -74,18 +70,11 @@ export async function GET(request) {
           id: row.dish_id,
           name: row.dish_name,
           category: row.category,
-          variants: {}
-        }
-      }
-      if (row.variant_id && !dishesMap[row.dish_id].variants[row.variant_id]) {
-        dishesMap[row.dish_id].variants[row.variant_id] = {
-          id: row.variant_id,
-          name: row.variant_name,
           ingredients: []
         }
       }
-      if (row.variant_id && row.ingredient_id) {
-        dishesMap[row.dish_id].variants[row.variant_id].ingredients.push({
+      if (row.ingredient_id) {
+        dishesMap[row.dish_id].ingredients.push({
           id: row.ingredient_id,
           name: row.ingredient_name,
           category: row.ingredient_category || 'autre',
@@ -103,14 +92,6 @@ export async function GET(request) {
 
     selectionsResult.rows.forEach(selection => {
       const selectedDishes = selection.selected_dishes || []
-      let selectedVariants = selection.selected_variants || {}
-      if (typeof selectedVariants === 'string') {
-        try {
-          selectedVariants = JSON.parse(selectedVariants)
-        } catch {
-          selectedVariants = {}
-        }
-      }
 
       const householdSize = selection.household_size || 1
       totalPersons += householdSize
@@ -123,19 +104,14 @@ export async function GET(request) {
 
         totalDishes++
 
-        const variantId = selectedVariants[dishId]
-        const variant = dish.variants[variantId] || Object.values(dish.variants)[0]
-
         clientDishes.push({
           id: dish.id,
-          name: dish.name,
-          variantName: variant?.name || null
+          name: dish.name
         })
 
         // Ajouter les ingrédients au total
-        if (variant?.ingredients) {
-          variant.ingredients.forEach(ing => {
-            const key = `${ing.id}`
+        if (dish.ingredients) {
+          dish.ingredients.forEach(ing => {
             const quantity = ing.quantity * householdSize
 
             if (ingredientsTotal[ing.category]) {

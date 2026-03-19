@@ -112,21 +112,7 @@ export async function POST(request) {
         RETURNING id
       `
 
-      const newDishId = dishResult.rows[0].id
-
-      // Créer une variante par défaut "Classique"
-      await sql`
-        INSERT INTO dish_variants (dish_id, name, dietary_tags, is_default, active)
-        VALUES (
-          ${newDishId},
-          'Classique',
-          '[]'::jsonb,
-          true,
-          true
-        )
-      `
-
-      console.log(`Plat personnalisé créé automatiquement avec ID ${newDishId}`)
+      console.log(`Plat personnalisé créé automatiquement avec ID ${dishResult.rows[0].id}`)
     } catch (dishError) {
       console.error('Erreur création plat automatique:', dishError)
       // Ne pas bloquer la création de la demande

@@ -144,9 +144,9 @@ export async function DELETE(request) {
       return NextResponse.json({ error: 'ID requis' }, { status: 400 })
     }
 
-    // Vérifier si l'ingrédient est utilisé dans des variantes
+    // Vérifier si l'ingrédient est utilisé dans des plats
     const usageCheck = await sql`
-      SELECT COUNT(*) as count FROM variant_ingredients WHERE ingredient_id = ${id}
+      SELECT COUNT(*) as count FROM dish_ingredients WHERE ingredient_id = ${id}
     `
     if (parseInt(usageCheck.rows[0].count) > 0) {
       return NextResponse.json(

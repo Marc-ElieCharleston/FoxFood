@@ -103,7 +103,7 @@ export async function POST(request) {
     const userId = parseInt(session.user.id)
     const { weeklySelections } = await request.json()
 
-    // weeklySelections est un objet: { week0: { dishes: [...], variants: {...} }, week1: {...}, ... }
+    // weeklySelections est un objet: { week0: { dishes: [...] }, week1: {...}, ... }
     if (!weeklySelections || typeof weeklySelections !== 'object') {
       return NextResponse.json(
         { error: 'Format de sélection invalide' },
@@ -194,21 +194,18 @@ export async function POST(request) {
       }
 
       const selectedDishes = weekData.dishes
-      const selectedVariants = weekData.variants || {}
-      const variantsJson = JSON.stringify(selectedVariants)
 
       let result
       if (householdId) {
         // Upsert par household_id (sélection partagée par le foyer)
         result = await sql`
-          INSERT INTO weekly_selections (user_id, household_id, week_start_date, delivery_day, delivery_time_slot, selected_dishes, selected_variants, status, last_modified_by)
-          VALUES (${userId}, ${householdId}, ${weekStartDate}, ${deliveryDay}, ${deliveryTimeSlot}, ${JSON.stringify(selectedDishes)}, ${variantsJson}, 'pending', ${userId})
+          INSERT INTO weekly_selections (user_id, household_id, week_start_date, delivery_day, delivery_time_slot, selected_dishes, status, last_modified_by)
+          VALUES (${userId}, ${householdId}, ${weekStartDate}, ${deliveryDay}, ${deliveryTimeSlot}, ${JSON.stringify(selectedDishes)}, 'pending', ${userId})
           ON CONFLICT (household_id, week_start_date)
           DO UPDATE SET
             delivery_day = ${deliveryDay},
             delivery_time_slot = ${deliveryTimeSlot},
             selected_dishes = ${JSON.stringify(selectedDishes)},
-            selected_variants = ${variantsJson},
             last_modified_by = ${userId},
             updated_at = CURRENT_TIMESTAMP
           RETURNING *
@@ -216,14 +213,13 @@ export async function POST(request) {
       } else {
         // Upsert par user_id (utilisateur solo sans foyer)
         result = await sql`
-          INSERT INTO weekly_selections (user_id, week_start_date, delivery_day, delivery_time_slot, selected_dishes, selected_variants, status, last_modified_by)
-          VALUES (${userId}, ${weekStartDate}, ${deliveryDay}, ${deliveryTimeSlot}, ${JSON.stringify(selectedDishes)}, ${variantsJson}, 'pending', ${userId})
+          INSERT INTO weekly_selections (user_id, week_start_date, delivery_day, delivery_time_slot, selected_dishes, status, last_modified_by)
+          VALUES (${userId}, ${weekStartDate}, ${deliveryDay}, ${deliveryTimeSlot}, ${JSON.stringify(selectedDishes)}, 'pending', ${userId})
           ON CONFLICT (user_id, week_start_date)
           DO UPDATE SET
             delivery_day = ${deliveryDay},
             delivery_time_slot = ${deliveryTimeSlot},
             selected_dishes = ${JSON.stringify(selectedDishes)},
-            selected_variants = ${variantsJson},
             last_modified_by = ${userId},
             updated_at = CURRENT_TIMESTAMP
           RETURNING *
@@ -252,36 +248,13 @@ export async function POST(request) {
             WHERE d.id = ANY(${weekData.dishes})
           `
 
-          // Récupérer les variantes si sélectionnées
-          const variantIds = Object.values(weekData.variants || {}).filter(id => id)
-          let variantsMap = {}
-          if (variantIds.length > 0) {
-            const variantsResult = await sql`
-              SELECT id, name FROM dish_variants
-              WHERE id = ANY(${variantIds})
-            `
-            variantsMap = variantsResult.rows.reduce((acc, v) => {
-              acc[v.id] = v.name
-              return acc
-            }, {})
-          }
-
-          // Construire la liste avec variantes
-          const dishNames = dishesResult.rows.map(d => {
-            const variantId = weekData.variants?.[d.id]
-            const variantName = variantId ? variantsMap[variantId] : null
-            if (variantName && variantName !== 'Classique') {
-              return `${d.name} (${variantName})`
-            }
-            return d.name
-          })
+          const dishNames = dishesResult.rows.map(d => d.name)
 
           // Générer la liste de courses pour cette semaine
           let shoppingListHtml = ''
           try {
             const shoppingData = await getShoppingListData({
               selectedDishes: weekData.dishes,
-              selectedVariants: weekData.variants || {},
               householdSize,
               userId
             })
@@ -353,36 +326,13 @@ export async function POST(request) {
               WHERE d.id = ANY(${weekData.dishes})
             `
 
-            // Récupérer les variantes si sélectionnées
-            const variantIds = Object.values(weekData.variants || {}).filter(id => id)
-            let variantsMap = {}
-            if (variantIds.length > 0) {
-              const variantsResult = await sql`
-                SELECT id, name FROM dish_variants
-                WHERE id = ANY(${variantIds})
-              `
-              variantsMap = variantsResult.rows.reduce((acc, v) => {
-                acc[v.id] = v.name
-                return acc
-              }, {})
-            }
-
-            // Construire la liste avec variantes
-            const dishNames = dishesResult.rows.map(d => {
-              const variantId = weekData.variants?.[d.id]
-              const variantName = variantId ? variantsMap[variantId] : null
-              if (variantName && variantName !== 'Classique') {
-                return `${d.name} (${variantName})`
-              }
-              return d.name
-            })
+            const dishNames = dishesResult.rows.map(d => d.name)
 
             // Générer la liste de courses pour cette semaine
             let shoppingListHtml = ''
             try {
               const shoppingData = await getShoppingListData({
                 selectedDishes: weekData.dishes,
-                selectedVariants: weekData.variants || {},
                 householdSize,
                 userId
               })

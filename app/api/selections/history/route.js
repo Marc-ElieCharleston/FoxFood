@@ -16,7 +16,6 @@ export async function GET() {
         ws.id,
         ws.week_start_date,
         ws.selected_dishes,
-        ws.selected_variants,
         ws.created_at,
         ws.updated_at
       FROM weekly_selections ws
@@ -34,11 +33,6 @@ export async function GET() {
         dishIds = JSON.parse(dishIds)
       }
 
-      let selectedVariants = selection.selected_variants || {}
-      if (typeof selectedVariants === 'string') {
-        selectedVariants = JSON.parse(selectedVariants)
-      }
-
       if (!dishIds || dishIds.length === 0) continue
 
       // Récupérer les détails des plats
@@ -48,34 +42,10 @@ export async function GET() {
         WHERE id = ANY(${dishIds})
       `
 
-      // Récupérer les noms des variantes si sélectionnées
-      const dishesWithVariants = await Promise.all(
-        dishesResult.rows.map(async (dish) => {
-          let variantName = null
-          const variantId = selectedVariants[dish.id]
-
-          if (variantId) {
-            const variantResult = await sql`
-              SELECT name FROM dish_variants WHERE id = ${variantId}
-            `
-            if (variantResult.rows.length > 0) {
-              variantName = variantResult.rows[0].name
-            }
-          }
-
-          return {
-            ...dish,
-            variant_id: variantId || null,
-            variant_name: variantName
-          }
-        })
-      )
-
       history.push({
         id: selection.id,
         week_start: selection.week_start_date,
-        selected_variants: selectedVariants,
-        dishes: dishesWithVariants,
+        dishes: dishesResult.rows,
         created_at: selection.created_at
       })
     }

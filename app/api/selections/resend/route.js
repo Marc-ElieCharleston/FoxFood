@@ -39,8 +39,7 @@ export async function POST(request) {
     const selectionsResult = await sql`
       SELECT
         ws.week_start_date,
-        ws.selected_dishes,
-        ws.selected_variants
+        ws.selected_dishes
       FROM weekly_selections ws
       WHERE ws.user_id = ${userId}
       AND ws.week_start_date >= CURRENT_DATE
@@ -69,36 +68,13 @@ export async function POST(request) {
         WHERE d.id = ANY(${weekSelection.selected_dishes})
       `
 
-      // Récupérer les variantes si sélectionnées
-      const variantIds = Object.values(weekSelection.selected_variants || {}).filter(id => id)
-      let variantsMap = {}
-      if (variantIds.length > 0) {
-        const variantsResult = await sql`
-          SELECT id, name FROM dish_variants
-          WHERE id = ANY(${variantIds})
-        `
-        variantsMap = variantsResult.rows.reduce((acc, v) => {
-          acc[v.id] = v.name
-          return acc
-        }, {})
-      }
-
-      // Construire la liste avec variantes
-      const dishNames = dishesResult.rows.map(d => {
-        const variantId = weekSelection.selected_variants?.[d.id]
-        const variantName = variantId ? variantsMap[variantId] : null
-        if (variantName && variantName !== 'Classique') {
-          return `${d.name} (${variantName})`
-        }
-        return d.name
-      })
+      const dishNames = dishesResult.rows.map(d => d.name)
 
       // Générer la liste de courses pour cette semaine
       let shoppingListHtml = ''
       try {
         const shoppingData = await getShoppingListData({
           selectedDishes: weekSelection.selected_dishes,
-          selectedVariants: weekSelection.selected_variants || {},
           householdSize,
           userId
         })

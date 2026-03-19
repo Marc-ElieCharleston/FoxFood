@@ -23,25 +23,10 @@ export default function AdminPage() {
   const [importResult, setImportResult] = useState(null)
   const [importLoading, setImportLoading] = useState(false)
 
-  // States pour les variantes
-  const [showVariantsModal, setShowVariantsModal] = useState(false)
-  const [selectedDishForVariants, setSelectedDishForVariants] = useState(null)
-  const [variants, setVariants] = useState([])
   const [dietaryTags, setDietaryTags] = useState([])
-  const [loadingVariants, setLoadingVariants] = useState(false)
-  const [editingVariant, setEditingVariant] = useState(null)
-  const [showVariantForm, setShowVariantForm] = useState(false)
-  const [newVariantIngredient, setNewVariantIngredient] = useState('')
-  const [variantFormData, setVariantFormData] = useState({
-    name: '',
-    ingredients: [], // Ancien format texte
-    tags: [],
-    isDefault: false
-  })
 
   // States pour les ingrédients liés
   const [allIngredients, setAllIngredients] = useState([])
-  const [variantLinkedIngredients, setVariantLinkedIngredients] = useState([])
 
   // State pour la modal des ingrédients d'un plat
   const [showIngredientsModal, setShowIngredientsModal] = useState(false)
@@ -196,31 +181,17 @@ export default function AdminPage() {
 
   // Ouvrir la modal des ingrédients d'un plat
   const openIngredientsModal = async (dish) => {
-    setSelectedDishIngredients({ ...dish, loadingIngredients: true, variantIngredients: [] })
+    setSelectedDishIngredients({ ...dish, loadingIngredients: true, linkedIngredients: [] })
     setShowIngredientsModal(true)
 
     try {
-      // Récupérer les variantes du plat avec leurs ingrédients
-      const response = await fetch(`/api/variants?dishId=${dish.id}`)
-      const variantsData = await response.json()
-
-      // Pour chaque variante, récupérer les ingrédients liés
-      const variantsWithIngredients = await Promise.all(
-        (Array.isArray(variantsData) ? variantsData : []).map(async (variant) => {
-          try {
-            const ingResponse = await fetch(`/api/variant-ingredients?variantId=${variant.id}`)
-            const ingData = await ingResponse.json()
-            return { ...variant, linkedIngredients: Array.isArray(ingData) ? ingData : [] }
-          } catch {
-            return { ...variant, linkedIngredients: [] }
-          }
-        })
-      )
+      const response = await fetch(`/api/dish-ingredients?dishId=${dish.id}`)
+      const ingredientsData = await response.json()
 
       setSelectedDishIngredients(prev => ({
         ...prev,
         loadingIngredients: false,
-        variantIngredients: variantsWithIngredients
+        linkedIngredients: Array.isArray(ingredientsData) ? ingredientsData : []
       }))
     } catch (error) {
       console.error('Erreur:', error)
@@ -228,50 +199,7 @@ export default function AdminPage() {
     }
   }
 
-  // Ouvrir la modal des variantes
-  const openVariantsModal = async (dish) => {
-    setSelectedDishForVariants(dish)
-    setShowVariantsModal(true)
-    setLoadingVariants(true)
-    try {
-      const response = await fetch(`/api/variants?dishId=${dish.id}`)
-      const data = await response.json()
-      // Pour chaque variante, charger les ingrédients liés
-      const variantsWithIngredients = await Promise.all(
-        (Array.isArray(data) ? data : []).map(async (variant) => {
-          try {
-            const ingResponse = await fetch(`/api/variant-ingredients?variantId=${variant.id}`)
-            const ingData = await ingResponse.json()
-            return { ...variant, linkedIngredients: Array.isArray(ingData) ? ingData : [] }
-          } catch {
-            return { ...variant, linkedIngredients: [] }
-          }
-        })
-      )
-      setVariants(variantsWithIngredients)
-    } catch (error) {
-      console.error('Erreur:', error)
-      toast.error('Erreur lors du chargement des variantes')
-    } finally {
-      setLoadingVariants(false)
-    }
-  }
-
-  // Fermer la modal des variantes
-  const closeVariantsModal = () => {
-    setShowVariantsModal(false)
-    setSelectedDishForVariants(null)
-    setVariants([])
-    setEditingVariant(null)
-    setShowVariantForm(false)
-    setVariantFormData({ name: '', ingredients: [], tags: [], isDefault: false })
-    setNewVariantIngredient('')
-    setVariantLinkedIngredients([])
-    setIngredientSearch('')
-    setShowIngredientSearch(false)
-  }
-
-  // Ouvrir le formulaire d'ajout de variante
+  // Placeholder - variant functions removed
   const openAddVariantForm = (copyFrom = null) => {
     setEditingVariant(null)
     setVariantLinkedIngredients([])
@@ -381,44 +309,21 @@ export default function AdminPage() {
   const filteredModalIngredients = allIngredients.filter(ing => {
     if (!modalIngredientSearch) return false
     const matchesSearch = ing.name.toLowerCase().includes(modalIngredientSearch.toLowerCase())
-    // Exclure les ingrédients déjà liés à la variante par défaut
-    const defaultVariant = selectedDishIngredients?.variantIngredients?.find(v => v.is_default)
-    const alreadyLinked = defaultVariant?.linkedIngredients?.some(li => li.ingredient_id === ing.id)
+    const alreadyLinked = selectedDishIngredients?.linkedIngredients?.some(li => li.ingredient_id === ing.id)
     return matchesSearch && !alreadyLinked
   }).slice(0, 8)
 
-  // Ajouter un ingrédient directement depuis la modal (à la variante par défaut)
+  // Ajouter un ingrédient directement au plat
   const handleAddIngredientFromModal = async (ingredient) => {
     if (addingIngredient) return
     setAddingIngredient(true)
 
     try {
-      // Trouver la variante par défaut du plat
-      let defaultVariant = selectedDishIngredients?.variantIngredients?.find(v => v.is_default)
-
-      // Si pas de variante par défaut, en créer une
-      if (!defaultVariant) {
-        const createResponse = await fetch('/api/variants', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            dishId: selectedDishIngredients.id,
-            name: 'Classique',
-            ingredients: [],
-            tags: [],
-            isDefault: true
-          })
-        })
-        if (!createResponse.ok) throw new Error('Erreur création variante')
-        defaultVariant = await createResponse.json()
-      }
-
-      // Ajouter l'ingrédient à la variante
-      const response = await fetch('/api/variant-ingredients', {
+      const response = await fetch('/api/dish-ingredients', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          variantId: defaultVariant.id,
+          dishId: selectedDishIngredients.id,
           ingredientId: ingredient.id,
           quantity: modalNewQty,
           unit: modalNewUnit || ingredient.default_unit
@@ -497,24 +402,12 @@ export default function AdminPage() {
   const refreshIngredientsModal = async () => {
     if (!selectedDishIngredients) return
     try {
-      const response = await fetch(`/api/variants?dishId=${selectedDishIngredients.id}`)
-      const variantsData = await response.json()
-
-      const variantsWithIngredients = await Promise.all(
-        (Array.isArray(variantsData) ? variantsData : []).map(async (variant) => {
-          try {
-            const ingResponse = await fetch(`/api/variant-ingredients?variantId=${variant.id}`)
-            const ingData = await ingResponse.json()
-            return { ...variant, linkedIngredients: Array.isArray(ingData) ? ingData : [] }
-          } catch {
-            return { ...variant, linkedIngredients: [] }
-          }
-        })
-      )
+      const response = await fetch(`/api/dish-ingredients?dishId=${selectedDishIngredients.id}`)
+      const ingredientsData = await response.json()
 
       setSelectedDishIngredients(prev => ({
         ...prev,
-        variantIngredients: variantsWithIngredients
+        linkedIngredients: Array.isArray(ingredientsData) ? ingredientsData : []
       }))
     } catch (error) {
       console.error('Erreur refresh:', error)
@@ -524,7 +417,7 @@ export default function AdminPage() {
   // Supprimer un ingrédient depuis la modal
   const handleRemoveIngredientFromModal = async (ingredientLinkId) => {
     try {
-      const response = await fetch(`/api/variant-ingredients?id=${ingredientLinkId}`, {
+      const response = await fetch(`/api/dish-ingredients?id=${ingredientLinkId}`, {
         method: 'DELETE'
       })
       if (response.ok) {
@@ -1289,12 +1182,6 @@ export default function AdminPage() {
                     🥕 Ingrédients
                   </button>
                   <button
-                    onClick={() => openVariantsModal(dish)}
-                    className="px-3 py-1.5 text-xs bg-purple-600 text-white rounded hover:bg-purple-700 font-semibold"
-                  >
-                    🏷️ Variantes
-                  </button>
-                  <button
                     onClick={() => handleEdit(dish)}
                     className="px-3 py-1.5 text-xs bg-blue-600 text-white rounded hover:bg-blue-700 font-semibold"
                   >
@@ -1397,13 +1284,6 @@ export default function AdminPage() {
                     <td className="px-3 py-3 text-right">
                       <div className="flex items-center justify-end gap-1">
                         <button
-                          onClick={() => openVariantsModal(dish)}
-                          className="px-2 py-1 text-xs font-medium text-purple-600 bg-purple-50 rounded hover:bg-purple-100 transition-colors"
-                          title="Gérer les variantes"
-                        >
-                          🏷️
-                        </button>
-                        <button
                           onClick={() => handleEdit(dish)}
                           className="px-2 py-1 text-xs font-medium text-blue-600 bg-blue-50 rounded hover:bg-blue-100 transition-colors"
                           title="Modifier"
@@ -1427,8 +1307,8 @@ export default function AdminPage() {
         </>
       )}
 
-      {/* Modal de gestion des variantes */}
-      {showVariantsModal && selectedDishForVariants && (
+      {/* Modal de gestion des variantes - SUPPRIMÉ */}
+      {false && (
         <div className="fixed inset-0 bg-white/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center">
@@ -2119,8 +1999,7 @@ export default function AdminPage() {
 
                   {/* Liste des ingrédients actuels */}
                   {(() => {
-                    const defaultVariant = selectedDishIngredients.variantIngredients?.find(v => v.is_default)
-                    const ingredients = defaultVariant?.linkedIngredients || []
+                    const ingredients = selectedDishIngredients.linkedIngredients || []
 
                     if (ingredients.length === 0) {
                       // Fallback: afficher les ingrédients depuis la colonne JSONB
@@ -2190,16 +2069,6 @@ export default function AdminPage() {
                     )
                   })()}
 
-                  {/* Lien vers variantes avancées */}
-                  <button
-                    onClick={() => {
-                      setShowIngredientsModal(false)
-                      openVariantsModal(selectedDishIngredients)
-                    }}
-                    className="w-full px-4 py-2 bg-gray-100 text-gray-600 rounded-lg text-xs hover:bg-gray-200"
-                  >
-                    🏷️ Gérer les variantes (Halal, Végétarien, etc.)
-                  </button>
                 </div>
               )}
             </div>

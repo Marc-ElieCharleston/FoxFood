@@ -10,7 +10,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
     }
 
-    const { dishes, variants, householdSize = 1 } = await request.json()
+    const { dishes, householdSize = 1 } = await request.json()
 
     if (!dishes || dishes.length === 0) {
       return NextResponse.json({})
@@ -42,41 +42,20 @@ export async function POST(request) {
       console.log(`🔄 [Historique - User ${session.user.id}] ${userReplacements.size} remplacement(s) actif(s)`)
     }
 
-    // Pour chaque plat, récupérer la variante par défaut si aucune n'est sélectionnée
-    const variantIds = []
+    const dishIds = dishes
 
-    for (const dishId of dishes) {
-      if (variants && variants[dishId]) {
-        variantIds.push(variants[dishId])
-      } else {
-        // Récupérer la variante par défaut
-        const defaultVariant = await sql`
-          SELECT id FROM dish_variants
-          WHERE dish_id = ${dishId} AND is_default = true AND active = true
-          LIMIT 1
-        `
-        if (defaultVariant.rows.length > 0) {
-          variantIds.push(defaultVariant.rows[0].id)
-        }
-      }
-    }
-
-    if (variantIds.length === 0) {
-      return NextResponse.json({})
-    }
-
-    // Récupérer les ingrédients de toutes les variantes
+    // Récupérer les ingrédients de tous les plats directement
     const ingredientsResult = await sql`
       SELECT
-        vi.quantity,
-        vi.unit,
+        di.quantity,
+        di.unit,
         i.id as ingredient_id,
         i.name,
         i.category,
         i.default_unit
-      FROM variant_ingredients vi
-      JOIN ingredients i ON vi.ingredient_id = i.id
-      WHERE vi.variant_id = ANY(${variantIds})
+      FROM dish_ingredients di
+      JOIN ingredients i ON di.ingredient_id = i.id
+      WHERE di.dish_id = ANY(${dishIds})
       AND i.active = true
     `
 

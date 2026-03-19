@@ -16,10 +16,10 @@ export default function Home() {
   const [loading, setLoading] = useState(true)
   // Multi-semaines: état pour 4 semaines max
   const [weeklySelections, setWeeklySelections] = useState({
-    week0: { dishes: [], variants: {} },
-    week1: { dishes: [], variants: {} },
-    week2: { dishes: [], variants: {} },
-    week3: { dishes: [], variants: {} }
+    week0: { dishes: [] },
+    week1: { dishes: [] },
+    week2: { dishes: [] },
+    week3: { dishes: [] }
   })
   const [weekDates, setWeekDates] = useState([])
   const [activeWeek, setActiveWeek] = useState(0)
@@ -43,8 +43,6 @@ export default function Home() {
   const [submittingCustomDish, setSubmittingCustomDish] = useState(false)
   const [selectedSeasons, setSelectedSeasons] = useState(['printemps']) // Sera mis à jour par l'API active-season
   const [dietaryTags, setDietaryTags] = useState([])
-  const [showVariantModal, setShowVariantModal] = useState(false)
-  const [selectedDishForVariant, setSelectedDishForVariant] = useState(null)
   const [userDietaryPreferences, setUserDietaryPreferences] = useState([])
   const [userAvoidedIngredients, setUserAvoidedIngredients] = useState([])
   const [userHouseholdSize, setUserHouseholdSize] = useState(1)
@@ -67,7 +65,6 @@ export default function Home() {
 
   // Getters pour la semaine active
   const selectedDishes = weeklySelections[`week${activeWeek}`]?.dishes || []
-  const selectedVariants = weeklySelections[`week${activeWeek}`]?.variants || {}
 
   // Compter le total de plats sélectionnés sur toutes les semaines
   const getTotalDishesCount = () => {
@@ -307,7 +304,7 @@ export default function Home() {
   const fetchDishes = async () => {
     try {
       setLoading(true)
-      const response = await fetch('/api/dishes?active=true&includeVariants=true')
+      const response = await fetch('/api/dishes?active=true&includeIngredients=true')
       const data = await response.json()
       // S'assurer que data est bien un array
       setDishes(Array.isArray(data) ? data : [])
@@ -329,10 +326,10 @@ export default function Home() {
 
           // Charger les sélections pour chaque semaine (4 semaines max)
           const newSelections = {
-            week0: { dishes: [], variants: {} },
-            week1: { dishes: [], variants: {} },
-            week2: { dishes: [], variants: {} },
-            week3: { dishes: [], variants: {} }
+            week0: { dishes: [] },
+            week1: { dishes: [] },
+            week2: { dishes: [] },
+            week3: { dishes: [] }
           }
 
           for (let i = 0; i < MAX_WEEKS; i++) {
@@ -340,10 +337,6 @@ export default function Home() {
             const selection = data.selections[weekKey]
             if (selection) {
               newSelections[weekKey].dishes = selection.selected_dishes || []
-              const variants = typeof selection.selected_variants === 'string'
-                ? JSON.parse(selection.selected_variants)
-                : selection.selected_variants
-              newSelections[weekKey].variants = variants || {}
             }
           }
 
@@ -363,14 +356,11 @@ export default function Home() {
     // Si le plat est déjà sélectionné dans cette semaine, le retirer
     if (currentWeekDishes.includes(dishId)) {
       setWeeklySelections(prev => {
-        const weekData = prev[weekKey] || { dishes: [], variants: {} }
-        const variants = { ...weekData.variants }
-        delete variants[dishId]
+        const weekData = prev[weekKey] || { dishes: [] }
         return {
           ...prev,
           [weekKey]: {
-            dishes: weekData.dishes.filter(id => id !== dishId),
-            variants
+            dishes: weekData.dishes.filter(id => id !== dishId)
           }
         }
       })
@@ -388,38 +378,20 @@ export default function Home() {
       return
     }
 
-    // Si le plat a plusieurs variantes, afficher le modal de selection
-    if (dish.variants && dish.variants.length > 1) {
-      setSelectedDishForVariant(dish)
-      setShowVariantModal(true)
-      return
-    }
-
     // Ajouter le plat directement
     addDishToWeek(dish, activeWeek)
   }
 
   // Fonction pour ajouter un plat à une semaine spécifique
-  const addDishToWeek = (dish, weekIndex, variantId = null) => {
+  const addDishToWeek = (dish, weekIndex) => {
     const weekKey = `week${weekIndex}`
 
     setWeeklySelections(prev => {
-      const weekData = prev[weekKey] || { dishes: [], variants: {} }
-      const variants = { ...weekData.variants }
-
-      // Définir la variante
-      if (variantId) {
-        variants[dish.id] = variantId
-      } else if (dish.variants && dish.variants.length > 0) {
-        const defaultVariant = dish.variants.find(v => v.is_default) || dish.variants[0]
-        variants[dish.id] = defaultVariant.id
-      }
-
+      const weekData = prev[weekKey] || { dishes: [] }
       return {
         ...prev,
         [weekKey]: {
-          dishes: [...weekData.dishes, dish.id],
-          variants
+          dishes: [...weekData.dishes, dish.id]
         }
       }
     })
@@ -430,44 +402,14 @@ export default function Home() {
     if (!pendingDishForNextWeek) return
 
     const nextWeek = activeWeek + 1
+    addDishToWeek(pendingDishForNextWeek, nextWeek)
+    setActiveWeek(nextWeek)
+    setShowNextWeekModal(false)
+    setPendingDishForNextWeek(null)
 
-    // Si le plat a plusieurs variantes, afficher le modal de variantes
-    if (pendingDishForNextWeek.variants && pendingDishForNextWeek.variants.length > 1) {
-      setActiveWeek(nextWeek)
-      setSelectedDishForVariant(pendingDishForNextWeek)
-      setShowNextWeekModal(false)
-      setPendingDishForNextWeek(null)
-      setShowVariantModal(true)
-    } else {
-      addDishToWeek(pendingDishForNextWeek, nextWeek)
-      setActiveWeek(nextWeek)
-      setShowNextWeekModal(false)
-      setPendingDishForNextWeek(null)
-
-      const weekDate = weekDates[nextWeek]
-      const dateLabel = weekDate ? new Date(weekDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : `semaine ${nextWeek + 1}`
-      toast.success(`Plat ajouté pour la ${dateLabel}`)
-    }
-  }
-
-  // Selectionner une variante et ajouter le plat
-  const handleSelectVariant = (variantId) => {
-    const dish = selectedDishForVariant
-    if (!dish) return
-
-    addDishToWeek(dish, activeWeek, variantId)
-    setShowVariantModal(false)
-    setSelectedDishForVariant(null)
-  }
-
-  // Obtenir la variante selectionnee pour un plat
-  const getSelectedVariant = (dish) => {
-    if (!dish.variants || dish.variants.length === 0) return null
-    const variantId = selectedVariants[dish.id]
-    if (variantId) {
-      return dish.variants.find(v => v.id === variantId)
-    }
-    return dish.variants.find(v => v.is_default) || dish.variants[0]
+    const weekDate = weekDates[nextWeek]
+    const dateLabel = weekDate ? new Date(weekDate).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long' }) : `semaine ${nextWeek + 1}`
+    toast.success(`Plat ajouté pour la ${dateLabel}`)
   }
 
   // Obtenir l'info d'un tag
@@ -609,68 +551,42 @@ export default function Home() {
     }
   }
 
-  // Vérifier si une variante est compatible avec les préférences
-  const isVariantCompatible = (variant) => {
+  // Vérifier si un plat est compatible avec les préférences alimentaires
+  const isDishCompatible = (dish) => {
     // Vérifier les ingrédients évités spécifiques
     if (userAvoidedIngredients && userAvoidedIngredients.length > 0) {
       const avoidedIds = userAvoidedIngredients.map(a => a.id)
-      // Vérifier les ingrédients liés à la variante
-      if (variant.linked_ingredients && variant.linked_ingredients.length > 0) {
-        const hasAvoidedIngredient = variant.linked_ingredients.some(
+      if (dish.linked_ingredients && dish.linked_ingredients.length > 0) {
+        const hasAvoidedIngredient = dish.linked_ingredients.some(
           ing => avoidedIds.includes(ing.ingredient_id)
         )
-        if (hasAvoidedIngredient) {
-          return false
-        }
+        if (hasAvoidedIngredient) return false
       }
     }
 
-    // Si pas de préférences tags, la variante est compatible
+    // Si pas de préférences tags, le plat est compatible
     if (!userDietaryPreferences || userDietaryPreferences.length === 0) return true
 
-    let variantTags = variant?.tags || []
-    if (typeof variantTags === 'string') {
-      try {
-        variantTags = JSON.parse(variantTags)
-      } catch {
-        variantTags = []
-      }
+    let dishTags = dish?.dietary_tags || []
+    if (typeof dishTags === 'string') {
+      try { dishTags = JSON.parse(dishTags) } catch { dishTags = [] }
     }
 
-    // Tags d'exclusion (l'utilisateur veut eviter ces ingredients)
+    // Tags d'exclusion
     const exclusionTags = ['porc', 'produit_laitier', 'gluten', 'poisson', 'fruits_de_mer', 'fruits_a_coque', 'oeuf']
-
-    // Vérifier les exclusions
     for (const pref of userDietaryPreferences) {
-      if (exclusionTags.includes(pref)) {
-        // Si la variante contient cet ingrédient, elle n'est pas compatible
-        if (variantTags.includes(pref)) {
-          return false
-        }
-      }
+      if (exclusionTags.includes(pref) && dishTags.includes(pref)) return false
     }
 
     // Tags de préférence positive (halal, vegetarien, vegan)
     const positiveTags = ['halal', 'vegetarien', 'vegan']
     const userPositivePrefs = userDietaryPreferences.filter(p => positiveTags.includes(p))
-
-    // Si l'utilisateur a des préférences positives, la variante doit avoir ces tags
     if (userPositivePrefs.length > 0) {
-      // Pour halal: la variante doit avoir le tag halal
-      // Pour vegetarien/vegan: la variante doit avoir ce tag
-      const hasRequiredTag = userPositivePrefs.some(pref => variantTags.includes(pref))
-      if (!hasRequiredTag) {
-        return false
-      }
+      const hasRequiredTag = userPositivePrefs.some(pref => dishTags.includes(pref))
+      if (!hasRequiredTag) return false
     }
 
     return true
-  }
-
-  // Obtenir les variantes compatibles d'un plat
-  const getCompatibleVariants = (dish) => {
-    if (!dish.variants || dish.variants.length === 0) return []
-    return dish.variants.filter(v => v.active !== false && isVariantCompatible(v))
   }
 
   const getFilteredDishes = () => {
@@ -707,10 +623,7 @@ export default function Home() {
                        (userAvoidedIngredients && userAvoidedIngredients.length > 0)
 
     if (hasFilters) {
-      filtered = filtered.filter(dish => {
-        const compatibleVariants = getCompatibleVariants(dish)
-        return compatibleVariants.length > 0
-      })
+      filtered = filtered.filter(dish => isDishCompatible(dish))
     }
 
     // Filtrer par favoris si activé
@@ -760,7 +673,6 @@ export default function Home() {
     const weekKey = `week${weekIndex}`
     const weekData = weeklySelections[weekKey]
     const weekDishIds = weekData?.dishes || []
-    const weekVariants = weekData?.variants || {}
 
     const ingredientsMap = {}
 
@@ -768,11 +680,8 @@ export default function Home() {
       const dish = dishes.find(d => d.id === dishId)
       if (!dish) return
 
-      const variantId = weekVariants[dishId]
-      const variant = dish.variants?.find(v => v.id === variantId) || dish.variants?.[0]
-
-      if (variant?.linked_ingredients) {
-        variant.linked_ingredients.forEach(ing => {
+      if (dish.linked_ingredients) {
+        dish.linked_ingredients.forEach(ing => {
           const key = `${ing.ingredient_id}`
           if (ingredientsMap[key]) {
             // Additionner les quantités si même ingrédient
@@ -1132,7 +1041,6 @@ export default function Home() {
                 const weekKey = `week${weekIndex}`
                 const weekData = weeklySelections[weekKey]
                 const weekDishes = weekData?.dishes || []
-                const weekVariants = weekData?.variants || {}
 
                 // Formater la date de la semaine
                 const weekDate = weekDates[weekIndex]
@@ -1164,32 +1072,21 @@ export default function Home() {
                       {weekDishes.map(dishId => {
                         const dish = dishes.find(d => d.id === dishId)
                         if (!dish) return null
-                        const variantId = weekVariants[dishId]
-                        const variant = dish.variants?.find(v => v.id === variantId)
 
                         return (
                           <li key={`${weekKey}-${dishId}`} className="flex items-center gap-2 text-sm">
                             <span>{categoryLabels[dish.category]?.emoji}</span>
                             <div className="flex-1">
                               <span>{dish.name}</span>
-                              {variant && variant.name !== 'Classique' && (
-                                <span className="ml-1 text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded">
-                                  {variant.name}
-                                </span>
-                              )}
                             </div>
                             <button
                               onClick={() => {
-                                // Supprimer ce plat de cette semaine spécifique
                                 setWeeklySelections(prev => {
                                   const data = prev[weekKey]
-                                  const newVariants = { ...data.variants }
-                                  delete newVariants[dishId]
                                   return {
                                     ...prev,
                                     [weekKey]: {
-                                      dishes: data.dishes.filter(id => id !== dishId),
-                                      variants: newVariants
+                                      dishes: data.dishes.filter(id => id !== dishId)
                                     }
                                   }
                                 })
@@ -1494,17 +1391,6 @@ export default function Home() {
         <div className="space-y-1.5">
           {filteredDishes.map(dish => {
             const isSelected = selectedDishes.includes(dish.id)
-            const selectedVariant = getSelectedVariant(dish)
-            const compatibleVariants = getCompatibleVariants(dish)
-            const hasMultipleCompatibleVariants = compatibleVariants.length > 1
-
-            // Obtenir les tags de la variante selectionnee
-            let variantTags = []
-            if (selectedVariant && selectedVariant.tags) {
-              variantTags = typeof selectedVariant.tags === 'string'
-                ? JSON.parse(selectedVariant.tags)
-                : selectedVariant.tags
-            }
 
             return (
               <div
@@ -1564,43 +1450,12 @@ export default function Home() {
                           ✨ Personnalisé
                         </span>
                       )}
-                      {isSelected && selectedVariant && selectedVariant.name !== 'Classique' && (
-                        <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded">
-                          {selectedVariant.name}
-                        </span>
-                      )}
-                      {hasMultipleCompatibleVariants && !isSelected && (
-                        <span className="text-xs text-purple-500" title={compatibleVariants.map(v => v.name).join(', ')}>
-                          🏷️ {compatibleVariants.map(v => v.name).join(' • ')}
-                        </span>
-                      )}
-                      {compatibleVariants.length === 1 && !isSelected && compatibleVariants[0]?.name !== 'Classique' && (
-                        <span className="text-xs bg-purple-50 text-purple-600 px-1.5 py-0.5 rounded">
-                          {compatibleVariants[0].name}
-                        </span>
-                      )}
                       {getSeasonEmojis(dish.seasons) && (
                         <span className="text-xs flex-shrink-0" title="Saisons">
                           {getSeasonEmojis(dish.seasons)}
                         </span>
                       )}
                     </div>
-                    {/* Tags de la variante */}
-                    {isSelected && variantTags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-1">
-                        {variantTags.map(tagName => {
-                          const tagInfo = getTagInfo(tagName)
-                          return (
-                            <span
-                              key={tagName}
-                              className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs"
-                            >
-                              {tagInfo.emoji} {tagInfo.name}
-                            </span>
-                          )
-                        })}
-                      </div>
-                    )}
                     {dish.description && (
                       <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">
                         {dish.description.replace(' (Plat personnalisé)', '')}
@@ -1618,72 +1473,6 @@ export default function Home() {
               </div>
             )
           })}
-        </div>
-      )}
-
-      {/* Modal de selection de variante */}
-      {showVariantModal && selectedDishForVariant && (
-        <div className="fixed inset-0 bg-white/30 backdrop-blur-sm z-50 flex items-end md:items-center justify-center p-4">
-          <div className="bg-white rounded-t-2xl md:rounded-2xl p-6 w-full max-w-md max-h-[80vh] overflow-y-auto shadow-xl">
-            <div className="flex justify-between items-start mb-4">
-              <div>
-                <h3 className="text-lg font-bold">{selectedDishForVariant.name}</h3>
-                <p className="text-sm text-gray-500">Choisissez votre preference</p>
-              </div>
-              <button
-                onClick={() => {
-                  setShowVariantModal(false)
-                  setSelectedDishForVariant(null)
-                }}
-                className="text-gray-500 hover:text-gray-700 text-2xl"
-              >
-                ×
-              </button>
-            </div>
-
-            <div className="space-y-2">
-              {getCompatibleVariants(selectedDishForVariant).map(variant => {
-                let tags = variant.tags || []
-                if (typeof tags === 'string') tags = JSON.parse(tags)
-
-                return (
-                  <button
-                    key={variant.id}
-                    onClick={() => handleSelectVariant(variant.id)}
-                    className={`w-full p-3 rounded-lg border-2 text-left transition ${
-                      variant.is_default
-                        ? 'border-purple-300 bg-purple-50 hover:bg-purple-100'
-                        : 'border-gray-200 hover:border-primary-300 hover:bg-gray-50'
-                    }`}
-                  >
-                    <div className="flex items-center justify-between">
-                      <span className="font-medium">{variant.name}</span>
-                      {variant.is_default && (
-                        <span className="text-xs bg-purple-200 text-purple-700 px-2 py-0.5 rounded-full">
-                          Recommandé
-                        </span>
-                      )}
-                    </div>
-                    {tags.length > 0 && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {tags.map(tagName => {
-                          const tagInfo = getTagInfo(tagName)
-                          return (
-                            <span
-                              key={tagName}
-                              className="inline-flex items-center gap-0.5 px-2 py-0.5 bg-green-100 text-green-700 rounded text-xs"
-                            >
-                              {tagInfo.emoji} {tagInfo.name}
-                            </span>
-                          )
-                        })}
-                      </div>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
         </div>
       )}
 
@@ -1806,46 +1595,30 @@ export default function Home() {
               </button>
             </div>
 
-            {/* Affichage des variantes et leurs ingrédients */}
+            {/* Affichage des ingrédients du plat */}
             <div className="space-y-4">
-              {selectedDishForIngredients.variants && selectedDishForIngredients.variants.length > 0 ? (
-                selectedDishForIngredients.variants.filter(v => v.active !== false).map((variant, idx) => {
-                  // Si le plat n'a qu'une variante, ne pas afficher l'en-tête de variante
-                  const showVariantHeader = selectedDishForIngredients.variants.filter(v => v.active !== false).length > 1
-
-                  return (
-                    <div key={variant.id} className={idx > 0 ? 'border-t pt-4' : ''}>
-                      {showVariantHeader && (
-                        <div className="mb-2">
-                          <h4 className="font-semibold text-sm flex items-center gap-2">
-                            <span className="text-purple-600">{variant.name}</span>
-                            {variant.is_default && (
-                              <span className="text-xs bg-purple-100 text-purple-700 px-2 py-0.5 rounded-full">
-                                Recommandé
-                              </span>
-                            )}
-                          </h4>
-                          {/* Tags diététiques de la variante */}
-                          {variant.tags && (() => {
-                            let tags = variant.tags
-                            if (typeof tags === 'string') {
-                              try {
-                                tags = JSON.parse(tags)
-                              } catch {
-                                tags = []
-                              }
+              {selectedDishForIngredients.linked_ingredients && selectedDishForIngredients.linked_ingredients.length > 0 ? (
+                <div className="bg-gray-50 rounded-lg p-3">
+                  <ul className="space-y-2">
+                    {selectedDishForIngredients.linked_ingredients.map((ing) => (
+                      <li key={ing.ingredient_id || ing.id} className="flex items-start justify-between gap-2">
+                        <div className="flex-1">
+                          <span className="text-sm font-medium text-gray-800">
+                            {ing.ingredient_name || ing.name}
+                          </span>
+                          {ing.dietary_tags && (() => {
+                            let dietaryTags = ing.dietary_tags
+                            if (typeof dietaryTags === 'string') {
+                              try { dietaryTags = JSON.parse(dietaryTags) } catch { dietaryTags = [] }
                             }
-                            if (Array.isArray(tags) && tags.length > 0) {
+                            if (Array.isArray(dietaryTags) && dietaryTags.length > 0) {
                               return (
-                                <div className="flex flex-wrap gap-1 mt-1">
-                                  {tags.map(tagName => {
+                                <div className="flex flex-wrap gap-0.5 mt-0.5">
+                                  {dietaryTags.map(tagName => {
                                     const tagInfo = getTagInfo(tagName)
                                     return (
-                                      <span
-                                        key={tagName}
-                                        className="inline-flex items-center gap-0.5 px-1.5 py-0.5 bg-green-100 text-green-700 rounded text-xs"
-                                      >
-                                        {tagInfo.emoji} {tagInfo.name}
+                                      <span key={tagName} className="text-[10px] bg-blue-50 text-blue-600 px-1 py-0.5 rounded" title={tagInfo.name}>
+                                        {tagInfo.emoji}
                                       </span>
                                     )
                                   })}
@@ -1855,68 +1628,16 @@ export default function Home() {
                             return null
                           })()}
                         </div>
-                      )}
-
-                      {/* Liste des ingrédients */}
-                      {variant.linked_ingredients && variant.linked_ingredients.length > 0 ? (
-                        <div className="bg-gray-50 rounded-lg p-3">
-                          <ul className="space-y-2">
-                            {variant.linked_ingredients.map((ing) => (
-                              <li key={ing.ingredient_id} className="flex items-start justify-between gap-2">
-                                <div className="flex-1">
-                                  <span className="text-sm font-medium text-gray-800">
-                                    {ing.ingredient_name || ing.name}
-                                  </span>
-                                  {/* Tags diététiques de l'ingrédient */}
-                                  {ing.dietary_tags && (() => {
-                                    let dietaryTags = ing.dietary_tags
-                                    if (typeof dietaryTags === 'string') {
-                                      try {
-                                        dietaryTags = JSON.parse(dietaryTags)
-                                      } catch {
-                                        dietaryTags = []
-                                      }
-                                    }
-                                    if (Array.isArray(dietaryTags) && dietaryTags.length > 0) {
-                                      return (
-                                        <div className="flex flex-wrap gap-0.5 mt-0.5">
-                                          {dietaryTags.map(tagName => {
-                                            const tagInfo = getTagInfo(tagName)
-                                            return (
-                                              <span
-                                                key={tagName}
-                                                className="text-[10px] bg-blue-50 text-blue-600 px-1 py-0.5 rounded"
-                                                title={tagInfo.name}
-                                              >
-                                                {tagInfo.emoji}
-                                              </span>
-                                            )
-                                          })}
-                                        </div>
-                                      )
-                                    }
-                                    return null
-                                  })()}
-                                </div>
-                                {ing.quantity && (
-                                  <span className="text-sm text-gray-600 whitespace-nowrap">
-                                    {ing.quantity} {ing.unit || ''}
-                                  </span>
-                                )}
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ) : (
-                        <p className="text-sm text-gray-500 italic bg-gray-50 rounded-lg p-3">
-                          Aucun ingrédient spécifié pour cette variante
-                        </p>
-                      )}
-                    </div>
-                  )
-                })
+                        {ing.quantity && (
+                          <span className="text-sm text-gray-600 whitespace-nowrap">
+                            {ing.quantity} {ing.unit || ''}
+                          </span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
               ) : (() => {
-                // Fallback: afficher les ingrédients depuis la colonne JSONB
                 let rawIngredients = selectedDishForIngredients.ingredients
                 if (typeof rawIngredients === 'string') {
                   try { rawIngredients = JSON.parse(rawIngredients) } catch { rawIngredients = [] }

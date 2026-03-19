@@ -80,7 +80,6 @@ export default function HistoryModal({ isOpen, onClose, userHouseholdSize = 1 })
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           dishes: weekData.dishes.map(d => d.id),
-          variants: weekData.selected_variants || {},
           householdSize: userHouseholdSize
         })
       })
@@ -107,7 +106,6 @@ export default function HistoryModal({ isOpen, onClose, userHouseholdSize = 1 })
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           dishes: weekData.dishes.map(d => d.id),
-          variants: weekData.selected_variants || {},
           householdSize: userHouseholdSize,
           weekDate: weekData.week_start
         })
@@ -225,9 +223,6 @@ export default function HistoryModal({ isOpen, onClose, userHouseholdSize = 1 })
                       </span>
                       <div>
                         <p className="font-medium text-sm">{dish.name}</p>
-                        {dish.variant_name && (
-                          <p className="text-xs text-gray-500">{dish.variant_name}</p>
-                        )}
                       </div>
                     </div>
                   ))}

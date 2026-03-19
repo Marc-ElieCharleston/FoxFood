@@ -10,7 +10,7 @@ export async function POST(request) {
       return NextResponse.json({ error: 'Non authentifié' }, { status: 401 })
     }
 
-    const { dishes, variants, householdSize = 1, weekDate } = await request.json()
+    const { dishes, householdSize = 1, weekDate } = await request.json()
 
     if (!dishes || dishes.length === 0) {
       return NextResponse.json({ error: 'Aucun plat sélectionné' }, { status: 400 })
@@ -19,7 +19,6 @@ export async function POST(request) {
     // Générer les données de la liste de courses
     const shoppingData = await getShoppingListData({
       selectedDishes: dishes,
-      selectedVariants: variants || {},
       householdSize,
       userId: session.user.id
     })
