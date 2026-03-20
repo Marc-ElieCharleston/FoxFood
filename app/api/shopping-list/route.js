@@ -59,6 +59,24 @@ export async function POST(request) {
       AND i.active = true
     `
 
+    // Fallback JSONB si aucun ingrédient lié dans dish_ingredients
+    if (ingredientsResult.rows.length === 0) {
+      const dishesWithJsonb = await sql`
+        SELECT id, name, ingredients FROM dishes WHERE id = ANY(${dishIds})
+      `
+      const rawGrouped = { 'ingredients': [] }
+      for (const dish of dishesWithJsonb.rows) {
+        let ings = dish.ingredients
+        if (typeof ings === 'string') { try { ings = JSON.parse(ings) } catch { ings = [] } }
+        if (Array.isArray(ings)) {
+          ings.forEach(ing => rawGrouped['ingredients'].push({
+            id: 0, name: ing, category: 'autre', quantity: 0, unit: ''
+          }))
+        }
+      }
+      return NextResponse.json(rawGrouped)
+    }
+
     // Grouper et additionner les quantités par ingrédient en appliquant les remplacements
     const ingredientMap = {}
 
