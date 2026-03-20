@@ -132,25 +132,25 @@ export async function POST(request) {
         JOIN users u ON a.user_id = u.id
         WHERE u.role = 'admin'
         AND a.notify_on_custom_dish = true
-        LIMIT 1
       `
 
       if (adminSettingsResult.rows.length > 0) {
-        const adminSettings = adminSettingsResult.rows[0]
         const { notifyAdminCustomDish } = await import('@/lib/notifications')
 
-        await notifyAdminCustomDish({
-          adminEmail: adminSettings.notification_email || adminSettings.user_email,
-          adminPhone: adminSettings.notification_phone,
-          sendEmail: adminSettings.send_email,
-          sendSMS: adminSettings.send_sms,
-          userName: session.user.name,
-          userEmail: session.user.email,
-          dishName: dish_name.trim(),
-          description: description.trim(),
-          isDetailed: is_detailed || false,
-          ingredients: suggested_ingredients || []
-        })
+        for (const adminSettings of adminSettingsResult.rows) {
+          await notifyAdminCustomDish({
+            adminEmail: adminSettings.notification_email || adminSettings.user_email,
+            adminPhone: adminSettings.notification_phone,
+            sendEmail: adminSettings.send_email,
+            sendSMS: adminSettings.send_sms,
+            userName: session.user.name,
+            userEmail: session.user.email,
+            dishName: dish_name.trim(),
+            description: description.trim(),
+            isDetailed: is_detailed || false,
+            ingredients: suggested_ingredients || []
+          })
+        }
       }
     } catch (notifError) {
       console.error('Erreur notification admin:', notifError)
