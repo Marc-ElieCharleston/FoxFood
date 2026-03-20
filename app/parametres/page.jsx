@@ -10,6 +10,7 @@ export default function SettingsPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
+  const [activeTab, setActiveTab] = useState('livraison')
 
   // États pour le foyer
   const [household, setHousehold] = useState(null)
@@ -537,7 +538,34 @@ export default function SettingsPage() {
         </p>
       </div>
 
+      {/* Onglets */}
+      <div className="flex gap-1 mb-4 overflow-x-auto pb-1">
+        {[
+          { id: 'livraison', label: 'Passage & foyer', emoji: '🏠' },
+          { id: 'gouts', label: 'Mes goûts', emoji: '🥕' },
+          { id: 'rappels', label: 'Rappels', emoji: '🔔' },
+          { id: 'plats', label: 'Mes plats', emoji: '✨' },
+        ].map(tab => (
+          <button
+            key={tab.id}
+            type="button"
+            onClick={() => setActiveTab(tab.id)}
+            className={`flex-shrink-0 px-3 py-2 rounded-lg font-semibold text-sm transition flex items-center gap-1.5 ${
+              activeTab === tab.id
+                ? 'bg-primary-600 text-white'
+                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+            }`}
+          >
+            <span>{tab.emoji}</span>
+            <span className="hidden sm:inline">{tab.label}</span>
+            <span className="sm:hidden">{tab.label.split(' ')[0]}</span>
+          </button>
+        ))}
+      </div>
+
       <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 space-y-6">
+        {/* === ONGLET: Passage & foyer === */}
+        {activeTab === 'livraison' && <>
         {/* Section 1: Créneau de passage */}
         <div className="border-b pb-6">
           <h2 className="text-lg font-bold mb-4">📅 Créneau de passage d'Emeric</h2>
@@ -759,6 +787,10 @@ export default function SettingsPage() {
           )}
         </div>
 
+        </>}
+
+        {/* === ONGLET: Rappels === */}
+        {activeTab === 'rappels' && <>
         {/* Section 3: Rappels multiples */}
         <div className="border-b pb-6">
           <h2 className="text-lg font-bold mb-4">🔔 Rappels avant le passage</h2>
@@ -925,6 +957,10 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        </>}
+
+        {/* === ONGLET: Mes goûts === */}
+        {activeTab === 'gouts' && <>
         {/* Section 4: Préférences alimentaires */}
         <div className="border-b pb-6">
           <h2 className="text-lg font-bold mb-4">🥗 Préférences alimentaires</h2>
@@ -1204,6 +1240,10 @@ export default function SettingsPage() {
           </div>
         </div>
 
+        </>}
+
+        {/* === ONGLET: Mes plats === */}
+        {activeTab === 'plats' && <>
         {/* Section 6: Mes demandes de plats personnalisés */}
         <div className="border-b pb-6">
           <h2 className="text-lg font-bold mb-4">✨ Mes demandes de plats personnalisés</h2>
@@ -1314,6 +1354,10 @@ export default function SettingsPage() {
           )}
         </div>
 
+        </>}
+
+        {/* Section 7: Notifications - visible dans l'onglet Rappels */}
+        {activeTab === 'rappels' && <>
         {/* Section 7: Notifications */}
         <div>
           <h2 className="text-lg font-bold mb-4">📬 Notifications d'Emeric</h2>
@@ -1336,6 +1380,8 @@ export default function SettingsPage() {
             </div>
           </label>
         </div>
+
+        </>}
 
         {/* Boutons d'action */}
         <div className="flex gap-3 pt-4">
