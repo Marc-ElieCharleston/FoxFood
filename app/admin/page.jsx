@@ -2050,7 +2050,7 @@ export default function AdminPage() {
                                   {ing.quantity === 0 ? (
                                     <span className="text-amber-600 italic">qsp</span>
                                   ) : (
-                                    <>{ing.quantity % 1 === 0 ? ing.quantity : ing.quantity.toFixed(1)} {ing.unit}</>
+                                    <>{parseFloat(ing.quantity) % 1 === 0 ? parseFloat(ing.quantity) : parseFloat(ing.quantity).toFixed(1)} {ing.unit}</>
                                   )}
                                 </span>
                                 <button

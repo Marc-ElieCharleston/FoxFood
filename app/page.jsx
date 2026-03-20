@@ -1162,7 +1162,7 @@ export default function Home() {
                                       <span>{ing.name}</span>
                                       {category !== 'epice' && (
                                         <span className="text-gray-500">
-                                          {ing.totalQuantity % 1 === 0 ? ing.totalQuantity : ing.totalQuantity.toFixed(1)}
+                                          {parseFloat(ing.totalQuantity) % 1 === 0 ? parseFloat(ing.totalQuantity) : parseFloat(ing.totalQuantity).toFixed(1)}
                                           {ing.unit && ` ${ing.unit}`}
                                         </span>
                                       )}
