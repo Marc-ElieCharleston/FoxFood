@@ -301,8 +301,7 @@ export default function AdminPage() {
 
   // Filtrer les ingrédients pour la recherche
   const filteredIngredientsForSearch = allIngredients.filter(ing =>
-    ing.name.toLowerCase().includes(ingredientSearch.toLowerCase()) &&
-    !variantLinkedIngredients.some(li => li.ingredient_id === ing.id)
+    ing.name.toLowerCase().includes(ingredientSearch.toLowerCase())
   ).slice(0, 10)
 
   // Filtrer les ingrédients pour la recherche dans la modal
