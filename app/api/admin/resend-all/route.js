@@ -10,9 +10,16 @@ import { sql } from '@/lib/db'
  */
 export async function POST(request) {
   try {
-    const session = await getServerSession(authOptions)
-    if (!session || session.user.role !== 'admin') {
-      return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
+    // Auth: session admin OU CRON_SECRET
+    const authHeader = request.headers.get('authorization')
+    const cronSecret = process.env.CRON_SECRET
+    const isAuthorizedByCron = cronSecret && authHeader === `Bearer ${cronSecret}`
+
+    if (!isAuthorizedByCron) {
+      const session = await getServerSession(authOptions)
+      if (!session || session.user.role !== 'admin') {
+        return NextResponse.json({ error: 'Non autorisé' }, { status: 403 })
+      }
     }
 
     const { userIds } = await request.json()
