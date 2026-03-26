@@ -1302,7 +1302,16 @@ export default function Home() {
       {/* Onglets de catégories - responsive */}
       <div className="flex gap-2 mb-3 justify-center flex-wrap">
         {Object.entries(categoryLabels).map(([category, { name, emoji, color }]) => {
-          const count = dishes.filter(d => d.category === category).length
+          // Compter les plats filtrés par saison active
+          const activeSeasons = selectedSeasons.length > 0 ? selectedSeasons : [getCurrentSeason()]
+          const count = dishes.filter(d => {
+            if (d.category !== category) return false
+            if (!d.seasons) return true
+            let seasonArray = d.seasons
+            if (typeof d.seasons === 'string') { try { seasonArray = JSON.parse(d.seasons) } catch { return true } }
+            if (!Array.isArray(seasonArray)) return true
+            return seasonArray.includes('toutes') || activeSeasons.some(s => seasonArray.includes(s))
+          }).length
           return (
             <button
               key={category}
