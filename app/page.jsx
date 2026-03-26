@@ -1457,7 +1457,7 @@ export default function Home() {
                       )}
                     </div>
                     {dish.description && (
-                      <p className="text-xs text-gray-500 line-clamp-1 mt-0.5">
+                      <p className="text-xs text-gray-500 mt-0.5">
                         {dish.description.replace(' (Plat personnalisé)', '')}
                       </p>
                     )}
@@ -1582,7 +1582,12 @@ export default function Home() {
                   <span>🥕</span>
                   {selectedDishForIngredients.name}
                 </h3>
-                <p className="text-sm text-gray-500">Ingrédients du plat</p>
+                {selectedDishForIngredients.description && (
+                  <p className="text-sm text-gray-500 mt-1">
+                    {selectedDishForIngredients.description.replace(' (Plat personnalisé)', '')}
+                  </p>
+                )}
+                <p className="text-xs text-gray-400 mt-1">Ingrédients du plat</p>
               </div>
               <button
                 onClick={() => {
