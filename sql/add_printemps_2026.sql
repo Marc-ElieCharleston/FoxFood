@@ -154,7 +154,6 @@ WHERE name IN (
   'Chow mein au boeuf',
   'Chow mein au porc',
   'Chow mein au poulet',
-  'Curry de crevettes au lait de coco & riz blanc',
   'Curry de crevettes, patate douce & lait de coco',
   'Chow mein aux légumes',
   'Chow mein aux legumes',

@@ -193,7 +193,6 @@ async function run() {
     'Chow mein au poulet',
     'Chow mein aux légumes',
     'Chow mein aux legumes',
-    'Curry de crevettes au lait de coco & riz blanc',
     'Curry de crevettes, patate douce & lait de coco',
     'Curry de légumes',
     'Curry de legumes',
