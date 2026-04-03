@@ -1160,7 +1160,7 @@ export default function Home() {
                                   {ingredients.map(ing => (
                                     <li key={ing.id} className="text-xs flex justify-between">
                                       <span>{ing.name}</span>
-                                      {category !== 'epice' && (
+                                      {category !== 'epice' && ing.totalQuantity > 0 && (
                                         <span className="text-gray-500">
                                           {parseFloat(ing.totalQuantity) % 1 === 0 ? parseFloat(ing.totalQuantity) : parseFloat(ing.totalQuantity).toFixed(1)}
                                           {ing.unit && ` ${ing.unit}`}

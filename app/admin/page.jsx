@@ -1401,7 +1401,7 @@ export default function AdminPage() {
                                   <div className="text-sm text-gray-600">
                                     <span className="font-medium">Ingredients:</span>{' '}
                                     {variant.linkedIngredients.map(li =>
-                                      `${li.ingredient_name} (${li.quantity}${li.unit})`
+                                      `${li.ingredient_name}${li.quantity > 0 ? ` (${li.quantity}${li.unit})` : ''}`
                                     ).join(', ')}
                                   </div>
                                 )}
@@ -2047,9 +2047,7 @@ export default function AdminPage() {
                               <span className="text-gray-700">{ing.ingredient_name}</span>
                               <div className="flex items-center gap-2">
                                 <span className="text-gray-500 font-medium">
-                                  {ing.quantity === 0 ? (
-                                    <span className="text-amber-600 italic">qsp</span>
-                                  ) : (
+                                  {ing.quantity > 0 && (
                                     <>{parseFloat(ing.quantity) % 1 === 0 ? parseFloat(ing.quantity) : parseFloat(ing.quantity).toFixed(1)} {ing.unit}</>
                                   )}
                                 </span>

@@ -262,10 +262,12 @@ export default function AdminRecapPage() {
                             {items.map((ing, idx) => (
                               <li key={idx} className="text-sm flex justify-between">
                                 <span>{ing.name}</span>
-                                <span className="text-gray-500 font-medium">
-                                  {ing.totalQuantity % 1 === 0 ? ing.totalQuantity : ing.totalQuantity.toFixed(1)}
-                                  {ing.unit && ` ${ing.unit}`}
-                                </span>
+                                {ing.totalQuantity > 0 && (
+                                  <span className="text-gray-500 font-medium">
+                                    {ing.totalQuantity % 1 === 0 ? ing.totalQuantity : ing.totalQuantity.toFixed(1)}
+                                    {ing.unit && ` ${ing.unit}`}
+                                  </span>
+                                )}
                               </li>
                             ))}
                           </ul>
