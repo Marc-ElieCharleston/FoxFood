@@ -65,26 +65,89 @@ export async function GET(request) {
       `
     }
 
+    // Charger les overrides de l'utilisateur (masquage, renommage, substitutions par plat)
+    const overrides = await sql`
+      SELECT * FROM user_dish_overrides WHERE user_id = ${session.user.id}
+    `
+    const overrideMap = new Map()
+    overrides.rows.forEach(o => overrideMap.set(o.dish_id, o))
+
+    // Filtrer les plats masqués (sauf pour admin)
+    let dishes = result.rows
+    if (session.user.role !== 'admin') {
+      dishes = dishes.filter(d => {
+        const ov = overrideMap.get(d.id)
+        return !ov || ov.action !== 'hide'
+      })
+    }
+
     // Si demandé, inclure les ingrédients pour chaque plat
     if (includeIngredients) {
       const dishesWithIngredients = await Promise.all(
-        result.rows.map(async (dish) => {
+        dishes.map(async (dish) => {
           const ingredients = await sql`
             SELECT di.*, i.name as ingredient_name, i.dietary_tags
             FROM dish_ingredients di
             JOIN ingredients i ON i.id = di.ingredient_id
             WHERE di.dish_id = ${dish.id}
           `
+          const override = overrideMap.get(dish.id)
+          let linkedIngredients = ingredients.rows
+
+          if (override && override.action === 'modify') {
+            // Retirer les ingrédients supprimés
+            const removeIds = (override.remove_ingredients || []).map(r => r.ingredient_id)
+            if (removeIds.length > 0) {
+              linkedIngredients = linkedIngredients.filter(ing => !removeIds.includes(ing.ingredient_id))
+            }
+
+            // Appliquer les substitutions
+            const subs = override.substitute_ingredients || []
+            if (subs.length > 0) {
+              // Charger les noms des ingrédients de remplacement
+              const subMap = new Map(subs.map(s => [s.from_ingredient_id, s.to_ingredient_id]))
+              const toIds = subs.map(s => s.to_ingredient_id)
+              if (toIds.length > 0) {
+                const replacements = await sql`
+                  SELECT id, name, dietary_tags FROM ingredients WHERE id = ANY(${toIds})
+                `
+                const replMap = new Map(replacements.rows.map(r => [r.id, r]))
+                linkedIngredients = linkedIngredients.map(ing => {
+                  const toId = subMap.get(ing.ingredient_id)
+                  if (toId) {
+                    const repl = replMap.get(toId)
+                    if (repl) {
+                      return { ...ing, ingredient_id: repl.id, ingredient_name: repl.name, dietary_tags: repl.dietary_tags }
+                    }
+                  }
+                  return ing
+                })
+              }
+            }
+          }
+
           return {
             ...dish,
-            linked_ingredients: ingredients.rows
+            name: (override && override.custom_name) ? override.custom_name : dish.name,
+            original_name: (override && override.custom_name) ? dish.name : undefined,
+            linked_ingredients: linkedIngredients,
+            has_override: !!override
           }
         })
       )
       return NextResponse.json(dishesWithIngredients)
     }
 
-    return NextResponse.json(result.rows)
+    // Sans ingrédients, appliquer juste le renommage
+    const finalDishes = dishes.map(dish => {
+      const override = overrideMap.get(dish.id)
+      if (override && override.custom_name) {
+        return { ...dish, name: override.custom_name, original_name: dish.name, has_override: true }
+      }
+      return dish
+    })
+
+    return NextResponse.json(finalDishes)
   } catch (error) {
     console.error('Erreur lors de la récupération des plats:', error)
     return NextResponse.json(

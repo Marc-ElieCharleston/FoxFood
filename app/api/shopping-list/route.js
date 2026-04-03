@@ -37,16 +37,44 @@ export async function POST(request) {
       })
     })
 
+    // Récupérer les overrides de plats de l'utilisateur
+    const overridesResult = await sql`
+      SELECT dish_id, remove_ingredients, substitute_ingredients
+      FROM user_dish_overrides
+      WHERE user_id = ${session.user.id} AND action = 'modify'
+    `
+    const dishOverrides = new Map()
+    overridesResult.rows.forEach(r => dishOverrides.set(r.dish_id, r))
+
+    // Pré-charger les ingrédients de substitution des overrides
+    const allSubToIds = []
+    for (const ov of dishOverrides.values()) {
+      if (ov.substitute_ingredients) {
+        ov.substitute_ingredients.forEach(s => allSubToIds.push(s.to_ingredient_id))
+      }
+    }
+    let dishSubReplacements = new Map()
+    if (allSubToIds.length > 0) {
+      const subIngResult = await sql`
+        SELECT id, name, category, default_unit FROM ingredients WHERE id = ANY(${allSubToIds})
+      `
+      subIngResult.rows.forEach(r => dishSubReplacements.set(r.id, r))
+    }
+
     // Log pour debug
     if (userReplacements.size > 0) {
       console.log(`🔄 [Historique - User ${session.user.id}] ${userReplacements.size} remplacement(s) actif(s)`)
     }
+    if (dishOverrides.size > 0) {
+      console.log(`🔧 [Historique - User ${session.user.id}] ${dishOverrides.size} override(s) de plat`)
+    }
 
     const dishIds = dishes
 
-    // Récupérer les ingrédients de tous les plats directement
+    // Récupérer les ingrédients de tous les plats directement (avec dish_id pour les overrides)
     const ingredientsResult = await sql`
       SELECT
+        di.dish_id,
         di.quantity,
         di.unit,
         i.id as ingredient_id,
@@ -81,14 +109,37 @@ export async function POST(request) {
     const ingredientMap = {}
 
     for (const ing of ingredientsResult.rows) {
-      // Appliquer le remplacement si configuré
+      const dishOverride = dishOverrides.get(ing.dish_id)
+
+      // 1. Vérifier si l'ingrédient est supprimé pour ce plat (override par plat)
+      if (dishOverride) {
+        const removeIds = (dishOverride.remove_ingredients || []).map(r => r.ingredient_id)
+        if (removeIds.includes(ing.ingredient_id)) continue
+      }
+
       let ingredientId = ing.ingredient_id
       let ingredientName = ing.name
       let ingredientCategory = ing.category || 'autre'
 
-      if (userReplacements.has(ing.ingredient_id)) {
+      // 2. Appliquer les substitutions par plat (priorité sur les remplacements globaux)
+      let substituted = false
+      if (dishOverride) {
+        const subs = dishOverride.substitute_ingredients || []
+        const sub = subs.find(s => s.from_ingredient_id === ing.ingredient_id)
+        if (sub) {
+          const repl = dishSubReplacements.get(sub.to_ingredient_id)
+          if (repl) {
+            ingredientId = repl.id
+            ingredientName = repl.name
+            ingredientCategory = repl.category || 'autre'
+            substituted = true
+          }
+        }
+      }
+
+      // 3. Appliquer les remplacements globaux (si pas déjà substitué)
+      if (!substituted && userReplacements.has(ing.ingredient_id)) {
         const replacement = userReplacements.get(ing.ingredient_id)
-        console.log(`   ✓ [Historique] Remplacement: "${ing.name}" → "${replacement.replacementName}"`)
         ingredientId = replacement.replacementId
         ingredientName = replacement.replacementName
         ingredientCategory = replacement.replacementCategory || 'autre'
