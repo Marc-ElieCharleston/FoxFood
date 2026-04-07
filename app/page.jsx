@@ -1470,13 +1470,20 @@ export default function Home() {
                         {dish.description.replace(' (Plat personnalisé)', '')}
                       </p>
                     )}
-                    {getIngredients(dish.ingredients).length > 0 && (
-                      <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">
-                        <span className="text-amber-600">🥕</span>{' '}
-                        {getIngredients(dish.ingredients).slice(0, 4).join(', ')}
-                        {getIngredients(dish.ingredients).length > 4 && '...'}
-                      </p>
-                    )}
+                    {(() => {
+                      // Préférer les linked_ingredients (qui reflètent les overrides utilisateur)
+                      const previewList = (dish.linked_ingredients && dish.linked_ingredients.length > 0)
+                        ? dish.linked_ingredients.map(ing => ing.ingredient_name || ing.name).filter(Boolean)
+                        : getIngredients(dish.ingredients)
+                      if (previewList.length === 0) return null
+                      return (
+                        <p className="text-xs text-gray-400 mt-0.5 line-clamp-1">
+                          <span className="text-amber-600">🥕</span>{' '}
+                          {previewList.slice(0, 4).join(', ')}
+                          {previewList.length > 4 && '...'}
+                        </p>
+                      )
+                    })()}
                   </div>
                 </div>
               </div>
