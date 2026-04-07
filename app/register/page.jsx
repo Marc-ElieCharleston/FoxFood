@@ -57,7 +57,7 @@ export default function RegisterPage() {
         return
       }
 
-      // Connexion automatique après l'inscription
+      // Compte créé en attente de validation : connexion + redirection vers /en-attente
       const signInResult = await signIn('credentials', {
         email: formData.email,
         password: formData.password,
@@ -65,9 +65,10 @@ export default function RegisterPage() {
       })
 
       if (signInResult?.error) {
-        setError('Compte créé, mais erreur de connexion')
+        setError('Compte créé, mais erreur de connexion. Réessayez après validation.')
       } else {
-        router.push('/')
+        // Le middleware redirigera vers /en-attente automatiquement
+        router.push('/en-attente')
         router.refresh()
       }
     } catch (error) {

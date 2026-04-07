@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 import bcrypt from 'bcryptjs'
-import { createUser, getUserByEmail } from '@/lib/db'
+import crypto from 'crypto'
+import { sql, getUserByEmail } from '@/lib/db'
+import { notifyAdminPendingUser } from '@/lib/notifications'
 
 export async function POST(request) {
   try {
@@ -26,18 +28,26 @@ export async function POST(request) {
     // Hash du mot de passe
     const hashedPassword = await bcrypt.hash(password, 10)
 
-    // Créer l'utilisateur
-    const user = await createUser({
-      email,
-      name,
-      password: hashedPassword,
-      phone,
-      role: 'client'
-    })
+    // Créer l'utilisateur en attente de validation par l'admin
+    const approvalToken = crypto.randomBytes(32).toString('hex')
+    const result = await sql`
+      INSERT INTO users (email, name, password, phone, role, approval_status, approval_token, approval_requested_at)
+      VALUES (${email}, ${name}, ${hashedPassword}, ${phone || null}, 'client', 'pending', ${approvalToken}, NOW())
+      RETURNING id, email, name, phone
+    `
+    const user = result.rows[0]
+
+    // Notifier l'admin (asynchrone, on ne bloque pas si ça échoue)
+    try {
+      await notifyAdminPendingUser({ pendingUser: user, approvalToken })
+    } catch (notifError) {
+      console.error('Erreur notification admin:', notifError)
+    }
 
     return NextResponse.json(
       {
-        message: 'Compte créé avec succès',
+        message: 'Compte créé avec succès. Un administrateur doit valider votre accès avant que vous puissiez vous connecter.',
+        pending: true,
         user: {
           id: user.id,
           email: user.email,

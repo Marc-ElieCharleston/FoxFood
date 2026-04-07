@@ -104,6 +104,27 @@ export default function AdminUsersPage() {
     }
   }
 
+  // Valider ou refuser une demande d'accès
+  const handleApproval = async (userId, action) => {
+    try {
+      const response = await fetch('/api/admin/approve-user', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId, action })
+      })
+      if (response.ok) {
+        toast.success(action === 'approve' ? 'Compte validé' : 'Compte refusé')
+        fetchUsers()
+      } else {
+        const data = await response.json()
+        toast.error(data.error || 'Erreur')
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de la mise à jour')
+    }
+  }
+
   // Toggle actif/inactif
   const toggleUserActive = async (userId, currentActive) => {
     setTogglingUser(userId)
@@ -180,6 +201,47 @@ export default function AdminUsersPage() {
       </div>
 
       <AdminNav />
+
+      {/* Demandes d'accès en attente */}
+      {users.filter(u => u.approval_status === 'pending').length > 0 && (
+        <div className="bg-orange-50 border-2 border-orange-300 rounded-lg p-4 mb-6">
+          <h2 className="text-lg font-bold text-orange-900 mb-3">
+            🔔 Demandes d'accès en attente ({users.filter(u => u.approval_status === 'pending').length})
+          </h2>
+          <div className="space-y-2">
+            {users.filter(u => u.approval_status === 'pending').map(u => (
+              <div key={u.id} className="bg-white rounded-lg p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <div>
+                  <div className="font-semibold text-gray-900">{u.name}</div>
+                  <div className="text-sm text-gray-600">{u.email}</div>
+                  {u.notification_phone && <div className="text-xs text-gray-500">{u.notification_phone}</div>}
+                  {u.approval_requested_at && (
+                    <div className="text-xs text-gray-400">
+                      Demande du {new Date(u.approval_requested_at).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </div>
+                  )}
+                </div>
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => handleApproval(u.id, 'approve')}
+                    className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition"
+                  >
+                    ✅ Valider
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (confirm(`Refuser la demande de ${u.name} ?`)) handleApproval(u.id, 'reject')
+                    }}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-sm font-medium transition"
+                  >
+                    ❌ Refuser
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Stats - Grid mobile-friendly */}
       {stats && (

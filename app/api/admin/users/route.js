@@ -38,11 +38,16 @@ export async function GET(request) {
         u.household_size,
         u.onboarding_completed,
         u.active,
+        u.approval_status,
+        u.approval_requested_at,
         u.created_at,
         u.updated_at
       FROM users u
       WHERE u.role = 'client'
-      ORDER BY u.active DESC, u.name ASC
+      ORDER BY
+        CASE WHEN u.approval_status = 'pending' THEN 0 ELSE 1 END,
+        u.active DESC,
+        u.name ASC
     `
 
     // Pour chaque utilisateur, récupérer sa sélection de la semaine
@@ -99,6 +104,7 @@ export async function GET(request) {
     const usersWithSelection = usersWithSelections.filter(u => u.has_selection).length
     const usersWithoutSelection = totalUsers - usersWithSelection
     const usersWithSettings = usersWithSelections.filter(u => u.settings_completed).length
+    const pendingUsers = usersWithSelections.filter(u => u.approval_status === 'pending').length
 
     // Compter par jour de passage (uniquement utilisateurs actifs)
     const usersByDay = usersWithSelections
@@ -116,6 +122,7 @@ export async function GET(request) {
         total: totalUsers,
         active: activeUsers,
         inactive: inactiveUsers,
+        pending: pendingUsers,
         with_selection: usersWithSelection,
         without_selection: usersWithoutSelection,
         with_settings: usersWithSettings,
