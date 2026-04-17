@@ -1073,22 +1073,33 @@ export default function AdminPage() {
             </div>
 
             {editingDish ? (
-              <div className="mb-4 p-4 bg-amber-50 border-2 border-amber-300 rounded-lg">
-                <p className="text-sm font-semibold text-amber-900 mb-1">
-                  ⚠️ Gérer les ingrédients du plat
-                </p>
-                <p className="text-sm text-amber-800">
-                  Pour <strong>ajouter, modifier ou retirer</strong> un ingrédient (et que les changements soient visibles par les clients),
-                  ferme ce formulaire et clique sur le bouton <strong>🥕 Ingrédients</strong> de la carte du plat.
-                </p>
-                <p className="text-xs text-amber-700 mt-2">
-                  Modifier la liste ci-dessous ne met <u>pas</u> à jour la liste de courses des clients.
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ingrédients
+                </label>
+                <button
+                  type="button"
+                  onClick={() => openIngredientsModal(editingDish)}
+                  className="w-full px-4 py-3 bg-orange-50 hover:bg-orange-100 border-2 border-orange-300 rounded-lg text-left transition"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="font-semibold text-orange-900">🥕 Gérer les ingrédients</div>
+                      <div className="text-sm text-orange-700 mt-1">
+                        Ajouter, modifier la quantité ou retirer des ingrédients du plat
+                      </div>
+                    </div>
+                    <span className="text-orange-600 text-xl">→</span>
+                  </div>
+                </button>
+                <p className="text-xs text-gray-500 mt-1">
+                  Les changements sont pris en compte dans la liste de courses des clients.
                 </p>
               </div>
             ) : (
               <div className="mb-4">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Ingrédients (descriptif)
+                  Ingrédients (descriptif initial)
                 </label>
                 <div className="flex gap-2 mb-2">
                   <input
@@ -1132,7 +1143,7 @@ export default function AdminPage() {
                   </div>
                 )}
                 <p className="text-xs text-gray-500 mt-1">
-                  Une fois le plat créé, utilise le bouton 🥕 sur la carte pour lier les vrais ingrédients (impactent les clients).
+                  Après création, clique sur "Modifier" pour gérer les ingrédients liés aux clients via le bouton 🥕.
                 </p>
               </div>
             )}
