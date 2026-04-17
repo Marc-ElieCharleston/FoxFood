@@ -1072,55 +1072,70 @@ export default function AdminPage() {
               </label>
             </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Ingredients
-              </label>
-              <div className="flex gap-2 mb-2">
-                <input
-                  type="text"
-                  value={newIngredient}
-                  onChange={(e) => setNewIngredient(e.target.value)}
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter') {
-                      e.preventDefault()
-                      handleAddIngredient()
-                    }
-                  }}
-                  placeholder="Ajouter un ingredient..."
-                  className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm"
-                />
-                <button
-                  type="button"
-                  onClick={handleAddIngredient}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-semibold text-sm"
-                >
-                  Ajouter
-                </button>
+            {editingDish ? (
+              <div className="mb-4 p-4 bg-amber-50 border-2 border-amber-300 rounded-lg">
+                <p className="text-sm font-semibold text-amber-900 mb-1">
+                  ⚠️ Gérer les ingrédients du plat
+                </p>
+                <p className="text-sm text-amber-800">
+                  Pour <strong>ajouter, modifier ou retirer</strong> un ingrédient (et que les changements soient visibles par les clients),
+                  ferme ce formulaire et clique sur le bouton <strong>🥕 Ingrédients</strong> de la carte du plat.
+                </p>
+                <p className="text-xs text-amber-700 mt-2">
+                  Modifier la liste ci-dessous ne met <u>pas</u> à jour la liste de courses des clients.
+                </p>
               </div>
-              {formData.ingredients && formData.ingredients.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {formData.ingredients.map((ingredient, index) => (
-                    <span
-                      key={index}
-                      className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
-                    >
-                      {ingredient}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveIngredient(index)}
-                        className="text-gray-500 hover:text-red-600 ml-0.5"
-                      >
-                        ✕
-                      </button>
-                    </span>
-                  ))}
+            ) : (
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Ingrédients (descriptif)
+                </label>
+                <div className="flex gap-2 mb-2">
+                  <input
+                    type="text"
+                    value={newIngredient}
+                    onChange={(e) => setNewIngredient(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault()
+                        handleAddIngredient()
+                      }
+                    }}
+                    placeholder="Ajouter un ingrédient..."
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500 text-sm"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddIngredient}
+                    className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 font-semibold text-sm"
+                  >
+                    Ajouter
+                  </button>
                 </div>
-              )}
-              <p className="text-xs text-gray-500 mt-1">
-                Appuyez sur Entree ou cliquez Ajouter pour chaque ingredient
-              </p>
-            </div>
+                {formData.ingredients && formData.ingredients.length > 0 && (
+                  <div className="flex flex-wrap gap-2">
+                    {formData.ingredients.map((ingredient, index) => (
+                      <span
+                        key={index}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 bg-gray-100 text-gray-700 rounded-full text-sm"
+                      >
+                        {ingredient}
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveIngredient(index)}
+                          className="text-gray-500 hover:text-red-600 ml-0.5"
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <p className="text-xs text-gray-500 mt-1">
+                  Une fois le plat créé, utilise le bouton 🥕 sur la carte pour lier les vrais ingrédients (impactent les clients).
+                </p>
+              </div>
+            )}
 
             <div className="mb-4">
               <label className="flex items-center">
