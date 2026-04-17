@@ -71,7 +71,12 @@ export async function POST(request) {
         const weeksWithData = {}
         for (let i = 0; i < selections.length; i++) {
           const sel = selections[i]
-          const dishesResult = await sql`SELECT name FROM dishes WHERE id = ANY(${sel.selected_dishes})`
+          const dishesResult = await sql`
+            SELECT d.name, udo.custom_name
+            FROM dishes d
+            LEFT JOIN user_dish_overrides udo ON udo.dish_id = d.id AND udo.user_id = ${userId}
+            WHERE d.id = ANY(${sel.selected_dishes})
+          `
 
           let shoppingListHtml = ''
           try {
@@ -89,7 +94,7 @@ export async function POST(request) {
 
           weeksWithData[`week${i}`] = {
             date: sel.week_start_date,
-            dishes: dishesResult.rows.map(d => d.name),
+            dishes: dishesResult.rows.map(d => d.custom_name || d.name),
             shoppingListHtml
           }
         }

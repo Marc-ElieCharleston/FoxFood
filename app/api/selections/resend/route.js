@@ -62,13 +62,15 @@ export async function POST(request) {
     for (let i = 0; i < selectionsResult.rows.length; i++) {
       const weekSelection = selectionsResult.rows[i]
 
-      // Récupérer les noms des plats
+      // Récupérer les noms des plats avec overrides utilisateur
       const dishesResult = await sql`
-        SELECT d.id, d.name FROM dishes d
+        SELECT d.id, d.name, udo.custom_name
+        FROM dishes d
+        LEFT JOIN user_dish_overrides udo ON udo.dish_id = d.id AND udo.user_id = ${userId}
         WHERE d.id = ANY(${weekSelection.selected_dishes})
       `
 
-      const dishNames = dishesResult.rows.map(d => d.name)
+      const dishNames = dishesResult.rows.map(d => d.custom_name || d.name)
 
       // Générer la liste de courses pour cette semaine
       let shoppingListHtml = ''
