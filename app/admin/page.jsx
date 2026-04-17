@@ -45,6 +45,10 @@ export default function AdminPage() {
   const [showCreateIngredient, setShowCreateIngredient] = useState(false)
   const [newIngredientName, setNewIngredientName] = useState('')
   const [newIngredientCategory, setNewIngredientCategory] = useState('legume')
+  // Edition inline de la quantité d'un ingrédient déjà lié
+  const [editingIngId, setEditingIngId] = useState(null)
+  const [editingIngQty, setEditingIngQty] = useState('')
+  const [editingIngUnit, setEditingIngUnit] = useState('')
 
   const [formData, setFormData] = useState({
     name: '',
@@ -414,6 +418,39 @@ export default function AdminPage() {
   }
 
   // Supprimer un ingrédient depuis la modal
+  // Mettre à jour la quantité/unité d'un ingrédient déjà lié à un plat
+  const handleUpdateIngredientQuantity = async (ingredientLinkId) => {
+    // Normaliser la saisie (gérer virgule vs point) et valider que c'est un nombre
+    const normalized = String(editingIngQty).replace(',', '.').trim()
+    const qty = parseFloat(normalized)
+    if (normalized === '' || Number.isNaN(qty) || qty < 0) {
+      toast.error('Quantité invalide (nombre positif attendu)')
+      return
+    }
+    try {
+      const response = await fetch('/api/dish-ingredients', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: ingredientLinkId,
+          quantity: qty,
+          unit: editingIngUnit || null
+        })
+      })
+      if (response.ok) {
+        toast.success('Quantité mise à jour')
+        setEditingIngId(null)
+        await refreshIngredientsModal()
+      } else {
+        const data = await response.json()
+        toast.error(data.error || 'Erreur')
+      }
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de la mise à jour')
+    }
+  }
+
   const handleRemoveIngredientFromModal = async (ingredientLinkId) => {
     try {
       const response = await fetch(`/api/dish-ingredients?id=${ingredientLinkId}`, {
@@ -2046,18 +2083,65 @@ export default function AdminPage() {
                             <div key={idx} className="px-4 py-2 flex justify-between items-center text-sm group">
                               <span className="text-gray-700">{ing.ingredient_name}</span>
                               <div className="flex items-center gap-2">
-                                <span className="text-gray-500 font-medium">
-                                  {ing.quantity > 0 && (
-                                    <>{parseFloat(ing.quantity) % 1 === 0 ? parseFloat(ing.quantity) : parseFloat(ing.quantity).toFixed(1)} {ing.unit}</>
-                                  )}
-                                </span>
-                                <button
-                                  onClick={() => handleRemoveIngredientFromModal(ing.id)}
-                                  className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity p-1"
-                                  title="Retirer"
-                                >
-                                  ✕
-                                </button>
+                                {editingIngId === ing.id ? (
+                                  <>
+                                    <input
+                                      type="text"
+                                      inputMode="decimal"
+                                      value={editingIngQty}
+                                      onChange={(e) => setEditingIngQty(e.target.value)}
+                                      className="w-20 px-2 py-1 border border-gray-300 rounded text-sm"
+                                      autoFocus
+                                    />
+                                    <input
+                                      type="text"
+                                      value={editingIngUnit}
+                                      onChange={(e) => setEditingIngUnit(e.target.value)}
+                                      className="w-16 px-2 py-1 border border-gray-300 rounded text-sm"
+                                      placeholder="g"
+                                    />
+                                    <button
+                                      onClick={() => handleUpdateIngredientQuantity(ing.id)}
+                                      className="text-green-600 hover:text-green-800 p-1"
+                                      title="Enregistrer"
+                                    >
+                                      ✓
+                                    </button>
+                                    <button
+                                      onClick={() => setEditingIngId(null)}
+                                      className="text-gray-400 hover:text-gray-600 p-1"
+                                      title="Annuler"
+                                    >
+                                      ✕
+                                    </button>
+                                  </>
+                                ) : (
+                                  <>
+                                    <span className="text-gray-500 font-medium">
+                                      {ing.quantity > 0 && (
+                                        <>{parseFloat(ing.quantity) % 1 === 0 ? parseFloat(ing.quantity) : parseFloat(ing.quantity).toFixed(2)} {ing.unit}</>
+                                      )}
+                                    </span>
+                                    <button
+                                      onClick={() => {
+                                        setEditingIngId(ing.id)
+                                        setEditingIngQty(String(ing.quantity))
+                                        setEditingIngUnit(ing.unit || '')
+                                      }}
+                                      className="text-blue-500 hover:text-blue-700 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                                      title="Modifier la quantité"
+                                    >
+                                      ✏️
+                                    </button>
+                                    <button
+                                      onClick={() => handleRemoveIngredientFromModal(ing.id)}
+                                      className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                                      title="Retirer"
+                                    >
+                                      ✕
+                                    </button>
+                                  </>
+                                )}
                               </div>
                             </div>
                           ))}
