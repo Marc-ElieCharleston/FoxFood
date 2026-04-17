@@ -451,7 +451,11 @@ export default function AdminPage() {
     }
   }
 
-  const handleRemoveIngredientFromModal = async (ingredientLinkId) => {
+  const handleRemoveIngredientFromModal = async (ingredientLinkId, ingredientName) => {
+    const msg = ingredientName
+      ? `Retirer "${ingredientName}" de cette recette ?\n\nLa liste de courses des clients sera mise à jour.`
+      : 'Retirer cet ingrédient de la recette ?'
+    if (!confirm(msg)) return
     try {
       const response = await fetch(`/api/dish-ingredients?id=${ingredientLinkId}`, {
         method: 'DELETE'
@@ -2143,9 +2147,11 @@ export default function AdminPage() {
                                   </>
                                 ) : (
                                   <>
-                                    <span className="text-gray-500 font-medium">
-                                      {ing.quantity > 0 && (
+                                    <span className="text-gray-700 font-medium min-w-[60px] text-right">
+                                      {ing.quantity > 0 ? (
                                         <>{parseFloat(ing.quantity) % 1 === 0 ? parseFloat(ing.quantity) : parseFloat(ing.quantity).toFixed(2)} {ing.unit}</>
+                                      ) : (
+                                        <span className="text-gray-400 italic">qsp</span>
                                       )}
                                     </span>
                                     <button
@@ -2154,17 +2160,17 @@ export default function AdminPage() {
                                         setEditingIngQty(String(ing.quantity))
                                         setEditingIngUnit(ing.unit || '')
                                       }}
-                                      className="text-blue-500 hover:text-blue-700 opacity-0 group-hover:opacity-100 transition-opacity p-1"
+                                      className="px-2 py-1 text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 rounded border border-blue-300 font-medium transition"
                                       title="Modifier la quantité"
                                     >
-                                      ✏️
+                                      ✏️ Modifier
                                     </button>
                                     <button
-                                      onClick={() => handleRemoveIngredientFromModal(ing.id)}
-                                      className="text-red-500 hover:text-red-700 opacity-0 group-hover:opacity-100 transition-opacity p-1"
-                                      title="Retirer"
+                                      onClick={() => handleRemoveIngredientFromModal(ing.id, ing.ingredient_name)}
+                                      className="px-2 py-1 text-xs bg-red-100 hover:bg-red-200 text-red-700 rounded border border-red-300 font-medium transition"
+                                      title="Retirer cet ingrédient"
                                     >
-                                      ✕
+                                      ✕ Retirer
                                     </button>
                                   </>
                                 )}
