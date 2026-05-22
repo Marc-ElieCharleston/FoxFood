@@ -56,7 +56,6 @@ export async function POST(request) {
     const {
       dish_name,
       description,
-      category,
       suggested_ingredients,
       is_detailed
     } = await request.json()
@@ -77,9 +76,6 @@ export async function POST(request) {
         { status: 400 }
       )
     }
-
-    const ALLOWED_CATEGORIES = ['viandes', 'poissons', 'vegetation', 'desserts']
-    const dishCategory = ALLOWED_CATEGORIES.includes(category) ? category : 'viandes'
 
     // Créer la demande (approuvée par défaut - Emeric validera en vérifiant ses emails)
     const result = await sql`
@@ -108,7 +104,7 @@ export async function POST(request) {
         INSERT INTO dishes (name, category, description, active, seasons, created_for_user_id)
         VALUES (
           ${dish_name.trim()},
-          ${dishCategory},
+          'vegetation',
           ${description.trim() + ' (Plat personnalisé)'},
           true,
           '["toutes"]'::jsonb,
