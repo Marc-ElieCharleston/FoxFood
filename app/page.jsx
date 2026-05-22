@@ -37,6 +37,7 @@ export default function Home() {
   const [customDishForm, setCustomDishForm] = useState({
     dish_name: '',
     description: '',
+    category: 'viandes',
     suggested_ingredients: []
   })
   const [newIngredient, setNewIngredient] = useState('')
@@ -523,6 +524,7 @@ export default function Home() {
         body: JSON.stringify({
           dish_name: customDishForm.dish_name,
           description: customDishForm.description,
+          category: customDishForm.category,
           suggested_ingredients: customDishFormType === 'detailed' ? customDishForm.suggested_ingredients : [],
           is_detailed: customDishFormType === 'detailed'
         })
@@ -534,6 +536,7 @@ export default function Home() {
         setCustomDishForm({
           dish_name: '',
           description: '',
+          category: 'viandes',
           suggested_ingredients: []
         })
         setCustomDishFormType('simple')
@@ -1707,7 +1710,7 @@ export default function Home() {
               <button
                 onClick={() => {
                   setShowCustomDishModal(false)
-                  setCustomDishForm({ dish_name: '', description: '', suggested_ingredients: [] })
+                  setCustomDishForm({ dish_name: '', description: '', category: 'viandes', suggested_ingredients: [] })
                   setCustomDishFormType('simple')
                 }}
                 className="text-gray-500 hover:text-gray-700 text-2xl"
@@ -1753,6 +1756,29 @@ export default function Home() {
                   placeholder="Ex: Poulet au curry"
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Catégorie *
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  {Object.entries(categoryLabels).map(([value, { name, emoji }]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setCustomDishForm({ ...customDishForm, category: value })}
+                      className={`px-3 py-2 rounded-lg border-2 font-semibold text-sm transition flex items-center justify-center gap-2 ${
+                        customDishForm.category === value
+                          ? 'border-purple-500 bg-purple-50 text-purple-700'
+                          : 'border-gray-200 bg-white text-gray-700 hover:border-gray-300'
+                      }`}
+                    >
+                      <span>{emoji}</span>
+                      <span>{name}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <div>
@@ -1848,7 +1874,7 @@ export default function Home() {
               <button
                 onClick={() => {
                   setShowCustomDishModal(false)
-                  setCustomDishForm({ dish_name: '', description: '', suggested_ingredients: [] })
+                  setCustomDishForm({ dish_name: '', description: '', category: 'viandes', suggested_ingredients: [] })
                   setCustomDishFormType('simple')
                 }}
                 className="px-6 py-3 bg-gray-200 text-gray-700 rounded-lg font-semibold hover:bg-gray-300"

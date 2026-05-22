@@ -22,6 +22,12 @@ export async function GET(request) {
 
     const includeIngredients = searchParams.get('includeIngredients') === 'true' || searchParams.get('includeVariants') === 'true'
 
+    // Visibilité des plats personnalisés : un non-admin ne voit que les plats publics
+    // (created_for_user_id IS NULL) plus ses propres plats personnalisés.
+    // L'admin voit tout pour pouvoir gérer le catalogue.
+    const userId = parseInt(session.user.id)
+    const isAdmin = session.user.role === 'admin'
+
     let result
     if (category && activeOnly && season) {
       // Filtrer par categorie, actif et saison
@@ -30,12 +36,14 @@ export async function GET(request) {
         WHERE category = ${category}
         AND active = true
         AND (seasons @> ${JSON.stringify([season])}::jsonb OR seasons @> '["toutes"]'::jsonb)
+        AND (${isAdmin} OR created_for_user_id IS NULL OR created_for_user_id = ${userId})
         ORDER BY name
       `
     } else if (category && activeOnly) {
       result = await sql`
         SELECT * FROM dishes
         WHERE category = ${category} AND active = true
+        AND (${isAdmin} OR created_for_user_id IS NULL OR created_for_user_id = ${userId})
         ORDER BY name
       `
     } else if (activeOnly && season) {
@@ -44,23 +52,27 @@ export async function GET(request) {
         SELECT * FROM dishes
         WHERE active = true
         AND (seasons @> ${JSON.stringify([season])}::jsonb OR seasons @> '["toutes"]'::jsonb)
+        AND (${isAdmin} OR created_for_user_id IS NULL OR created_for_user_id = ${userId})
         ORDER BY category, name
       `
     } else if (category) {
       result = await sql`
         SELECT * FROM dishes
         WHERE category = ${category}
+        AND (${isAdmin} OR created_for_user_id IS NULL OR created_for_user_id = ${userId})
         ORDER BY name
       `
     } else if (activeOnly) {
       result = await sql`
         SELECT * FROM dishes
         WHERE active = true
+        AND (${isAdmin} OR created_for_user_id IS NULL OR created_for_user_id = ${userId})
         ORDER BY category, name
       `
     } else {
       result = await sql`
         SELECT * FROM dishes
+        WHERE (${isAdmin} OR created_for_user_id IS NULL OR created_for_user_id = ${userId})
         ORDER BY category, name
       `
     }
