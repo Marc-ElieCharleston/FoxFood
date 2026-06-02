@@ -67,17 +67,17 @@ const SPECIFIC_OVERRIDES = [
   // Courgette farcie pizza: mozza rapée → brebis (déjà global)
   { dishId: 237 },
   // Curry courgette: riz → haricot rouge
-  { dishId: 230, substituteIngredients: [{ from: 23, to: 222 }] },
+  { dishId: 230, customName: 'Curry de courgette au chorizo & haricots rouges', substituteIngredients: [{ from: 23, to: 222 }] },
   // Fideuà: pâte fideua → perles de konjac
   { dishId: 253, substituteIngredients: [{ from: 306, to: 415 }] },
   // Navarin agneau: retirer PDT grenailles
   { dishId: 254, removeIngredients: [89] },
   // Paella végé: riz → quinoa
-  { dishId: 298, substituteIngredients: [{ from: 23, to: 113 }] },
+  { dishId: 298, customName: 'Paella végétarienne au tofu (quinoa)', substituteIngredients: [{ from: 23, to: 113 }] },
   // Salade pâtes: fusilli → tagliatelle konjac
   { dishId: 256, substituteIngredients: [{ from: 374, to: 291 }] },
   // Salade riz thaï: riz → sarrasin
-  { dishId: 248, substituteIngredients: [{ from: 23, to: 414 }] },
+  { dishId: 248, customName: 'Salade de sarrasin thaï au poulet', substituteIngredients: [{ from: 23, to: 414 }] },
   // Spaghetti bolo: spaghetti → tagliatelle konjac
   { dishId: 243, substituteIngredients: [{ from: 278, to: 291 }] },
 
@@ -99,7 +99,7 @@ const SPECIFIC_OVERRIDES = [
   // Salade asiatique: vermicelle chinois → tagliatelle konjac
   { dishId: 263, substituteIngredients: [{ from: 411, to: 291 }] },
   // Salade tahitienne: riz thai → perles de konjac
-  { dishId: 262, substituteIngredients: [{ from: 97, to: 415 }] },
+  { dishId: 262, customName: 'Salade tahitienne au saumon & konjac', substituteIngredients: [{ from: 97, to: 415 }] },
   // Saumon en croûte: PDT→chou-fleur +100g, parmesan→brebis (global)
   { dishId: 261, substituteIngredients: [{ from: 103, to: 220 }] },
   // Boulettes lentilles: retirer patate douce
@@ -119,21 +119,21 @@ const SPECIFIC_OVERRIDES = [
   // Feuilleté chèvre/miel: pâte feuilletée → pain SS gluten
   { dishId: 288, substituteIngredients: [{ from: 225, to: 347 }] },
   // Mafé haricots rouges: riz basmati → sarrasin
-  { dishId: 291, substituteIngredients: [{ from: 405, to: 414 }] },
+  { dishId: 291, customName: 'Mafé aux haricots rouges & sarrasin', substituteIngredients: [{ from: 405, to: 414 }] },
   // Mujadara: riz complet → perles de konjac
-  { dishId: 284, substituteIngredients: [{ from: 331, to: 415 }] },
+  { dishId: 284, customName: 'Mujadara au konjac', substituteIngredients: [{ from: 331, to: 415 }] },
   // Nasi Goreng: riz thai → perles de konjac
-  { dishId: 300, substituteIngredients: [{ from: 97, to: 415 }] },
+  { dishId: 300, customName: 'Nasi Goreng au konjac', substituteIngredients: [{ from: 97, to: 415 }] },
   // Pad thaï tofu: nouille de riz → tagliatelle konjac
   { dishId: 290, substituteIngredients: [{ from: 108, to: 291 }] },
   // Risotto asperges: riz risotto → perles konjac, crème→soja (global), parmesan→brebis (global)
-  { dishId: 295, substituteIngredients: [{ from: 217, to: 415 }] },
+  { dishId: 295, customName: 'Risotto de konjac aux asperges', substituteIngredients: [{ from: 217, to: 415 }] },
   // Risotto milanaise: riz risotto → perles konjac, copeau parmesan→brebis (global), parmesan poudre→brebis (global)
-  { dishId: 299, substituteIngredients: [{ from: 217, to: 415 }] },
+  { dishId: 299, customName: 'Risotto de konjac à la milanaise', substituteIngredients: [{ from: 217, to: 415 }] },
   // Risotto potiron: riz risotto → perles konjac, crème→soja (global), parmesan→brebis (global)
-  { dishId: 175, substituteIngredients: [{ from: 217, to: 415 }] },
+  { dishId: 175, customName: 'Risotto de konjac au potiron', substituteIngredients: [{ from: 217, to: 415 }] },
   // Risotto crevettes: riz risotto → perles konjac, crème→soja (global), parmesan→brebis (global)
-  { dishId: 211, substituteIngredients: [{ from: 217, to: 415 }] },
+  { dishId: 211, customName: 'Risotto de konjac aux crevettes, butternut & champignons', substituteIngredients: [{ from: 217, to: 415 }] },
 ]
 
 // === PLATS À MASQUER ===
