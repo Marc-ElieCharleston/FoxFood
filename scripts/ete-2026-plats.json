@@ -1,0 +1,2917 @@
+{
+  "generatedAt": "2026-06-18T07:57:36.980Z",
+  "recycled": [
+    {
+      "excelRow": 3,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "RISOTTO A LA MILANAISE",
+      "cleanedName": "Risotto à la milanaise",
+      "marker": "RECETTE PRINTEMPS",
+      "matched": {
+        "id": 299,
+        "name": "Risotto à la milanaise",
+        "currentSeasons": [
+          "printemps"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 1,
+      "candidates": [
+        {
+          "id": 299,
+          "name": "Risotto à la milanaise",
+          "score": 1,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 295,
+          "name": "Risotto aux asperges",
+          "score": 0.5,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 63,
+          "name": "Risotto butternut & burrata",
+          "score": 0.33,
+          "seasons": [
+            "automne"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 9,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "CHILI SIN CARNE",
+      "cleanedName": "Chili sin carne",
+      "marker": "RECETTE PRINTEMPS",
+      "matched": {
+        "id": 67,
+        "name": "Chili sin carne",
+        "currentSeasons": [
+          "automne"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 1,
+      "candidates": [
+        {
+          "id": 67,
+          "name": "Chili sin carne",
+          "score": 1,
+          "seasons": [
+            "automne"
+          ]
+        },
+        {
+          "id": 24,
+          "name": "Chili con carne",
+          "score": 0.67,
+          "seasons": [
+            "automne"
+          ]
+        },
+        {
+          "id": 250,
+          "name": "Poke bowls au poulet & sauce tandoori",
+          "score": 0,
+          "seasons": [
+            "printemps"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 13,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "KUKU AUX COURGETTES & SALADE DE CAROTTES AU TOFU",
+      "cleanedName": "Kuku aux courgettes & salade de carottes au tofu",
+      "marker": "RECETTE PRINTEMPS",
+      "matched": {
+        "id": 289,
+        "name": "Kuku aux courgettes & salade de carottes au tofu",
+        "currentSeasons": [
+          "printemps"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 1,
+      "candidates": [
+        {
+          "id": 289,
+          "name": "Kuku aux courgettes & salade de carottes au tofu",
+          "score": 1,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 302,
+          "name": "Galettes de lentilles corail, carottes & compotée de courgettes aux poivrons",
+          "score": 0.29,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 256,
+          "name": "Salade de pâtes à l'italienne",
+          "score": 0.2,
+          "seasons": [
+            "printemps"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 19,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "CHIMICHANGA AUX LEGUMES",
+      "cleanedName": "Chimichanga aux légumes",
+      "marker": "RECETTE HIVER",
+      "matched": {
+        "id": 177,
+        "name": "Chimichanga aux légumes",
+        "currentSeasons": [
+          "hiver"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 1,
+      "candidates": [
+        {
+          "id": 177,
+          "name": "Chimichanga aux légumes",
+          "score": 1,
+          "seasons": [
+            "hiver"
+          ]
+        },
+        {
+          "id": 126,
+          "name": "Chimichanga au boeuf",
+          "score": 0.5,
+          "seasons": [
+            "hiver"
+          ]
+        },
+        {
+          "id": 135,
+          "name": "Chimichanga au poulet",
+          "score": 0.5,
+          "seasons": [
+            "hiver"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 21,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "DHAL DE LENTILLES AUX PATATES DOUCES",
+      "cleanedName": "Dhal de lentilles aux patates douces",
+      "marker": "RECETTE PRINTEMPS",
+      "matched": {
+        "id": 173,
+        "name": "Dhal de lentilles aux patates douces",
+        "currentSeasons": [
+          "hiver",
+          "printemps"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 1,
+      "candidates": [
+        {
+          "id": 173,
+          "name": "Dhal de lentilles aux patates douces",
+          "score": 1,
+          "seasons": [
+            "hiver",
+            "printemps"
+          ]
+        },
+        {
+          "id": 303,
+          "name": "Boulettes de lentilles, patates douces & curry de carottes aux épinards",
+          "score": 0.43,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 10,
+          "name": "Boulettes de porc caramélisées & lentilles mijotées",
+          "score": 0.2,
+          "seasons": [
+            "automne"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 26,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "NASI GORENG",
+      "cleanedName": "Nasi goreng",
+      "marker": "RECETTE PRINTEMPS",
+      "matched": {
+        "id": 300,
+        "name": "Nasi Goreng",
+        "currentSeasons": [
+          "printemps"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 1,
+      "candidates": [
+        {
+          "id": 300,
+          "name": "Nasi Goreng",
+          "score": 1,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 250,
+          "name": "Poke bowls au poulet & sauce tandoori",
+          "score": 0,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 251,
+          "name": "Boeuf Lok Lak",
+          "score": 0,
+          "seasons": [
+            "printemps"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 29,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "OEUF DUR A L'ESPAGNOL",
+      "cleanedName": "Œuf dur à l'espagnol",
+      "marker": "RECETTE HIVER",
+      "matched": {
+        "id": 222,
+        "name": "Œufs à l'espagnole",
+        "currentSeasons": [
+          "hiver"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 0,
+      "candidates": [
+        {
+          "id": 250,
+          "name": "Poke bowls au poulet & sauce tandoori",
+          "score": 0,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 251,
+          "name": "Boeuf Lok Lak",
+          "score": 0,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 252,
+          "name": "Paëlla",
+          "score": 0,
+          "seasons": [
+            "printemps"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 31,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "FALAFEL & HARICOTS VERTS, ECRASEE DE PATATE DOUCE & YAOURT A LA CIBOULETTE",
+      "cleanedName": "Falafel & haricots verts, écrasée de patate douce & yaourt à la ciboulette",
+      "marker": "RECETTE DE PRINTEMPS",
+      "matched": {
+        "id": 287,
+        "name": "Falafel, haricots verts, écrasée de patate douce et yaourt à la ciboulette",
+        "currentSeasons": [
+          "printemps"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 1,
+      "candidates": [
+        {
+          "id": 287,
+          "name": "Falafel, haricots verts, écrasée de patate douce et yaourt à la ciboulette",
+          "score": 1,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 202,
+          "name": "Filet de lieu, sauce vierge & écrasée de patate douce",
+          "score": 0.43,
+          "seasons": [
+            "hiver"
+          ]
+        },
+        {
+          "id": 1,
+          "name": "Parmentier de canard à la patate douce",
+          "score": 0.29,
+          "seasons": [
+            "automne"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 42,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "TARTE SMASH POTATOES",
+      "cleanedName": "Tarte smash potatoes",
+      "marker": "RECETTE PRINTEMPS",
+      "matched": {
+        "id": 278,
+        "name": "Tarte smash potatoes, saumon fumé & roquette",
+        "currentSeasons": [
+          "printemps"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 0.5,
+      "candidates": [
+        {
+          "id": 278,
+          "name": "Tarte smash potatoes, saumon fumé & roquette",
+          "score": 0.5,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 39,
+          "name": "Tarte au brocolis & thon",
+          "score": 0.33,
+          "seasons": [
+            "automne"
+          ]
+        },
+        {
+          "id": 285,
+          "name": "Tarte courgette/feta",
+          "score": 0.33,
+          "seasons": [
+            "printemps"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 57,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "SALADE TAHITIENNE",
+      "cleanedName": "Salade tahitienne",
+      "marker": "RECETTE PRINTEMPS",
+      "matched": {
+        "id": 262,
+        "name": "Salade tahitienne au saumon & riz blanc",
+        "currentSeasons": [
+          "printemps"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 0.5,
+      "candidates": [
+        {
+          "id": 262,
+          "name": "Salade tahitienne au saumon & riz blanc",
+          "score": 0.5,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 256,
+          "name": "Salade de pâtes à l'italienne",
+          "score": 0.33,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 263,
+          "name": "Salade asiatique au hareng",
+          "score": 0.33,
+          "seasons": [
+            "printemps"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 70,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "BAGEL SAUMON FUME & RICOTTA",
+      "cleanedName": "Bagel saumon fumé & ricotta",
+      "marker": "RECETTE PRINTEMPS",
+      "matched": {
+        "id": 258,
+        "name": "Bagel saumon fumé & ricotta",
+        "currentSeasons": [
+          "printemps"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 1,
+      "candidates": [
+        {
+          "id": 258,
+          "name": "Bagel saumon fumé & ricotta",
+          "score": 1,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 272,
+          "name": "Bruschetta au saumon fumé",
+          "score": 0.5,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 190,
+          "name": "Frittata saumon fumé & chèvre frais",
+          "score": 0.4,
+          "seasons": [
+            "hiver"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 71,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "BOULETTES DE SAUMON, SAUCE CREMEUSE A L'AVOCAT, CHOU CHINOIS & CAROTTES",
+      "cleanedName": "Boulettes de saumon, sauce crémeuse à l'avocat, chou chinois & carottes",
+      "marker": "RECETTE PRINTEMPS",
+      "matched": {
+        "id": 266,
+        "name": "Boulettes de saumon, sauce crémeuse à l'avocat, chou chinois & carottes",
+        "currentSeasons": [
+          "printemps"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 1,
+      "candidates": [
+        {
+          "id": 266,
+          "name": "Boulettes de saumon, sauce crémeuse à l'avocat, chou chinois & carottes",
+          "score": 1,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 186,
+          "name": "Filet de saumon poché au lait de coco, mousseline de patate douce & chou chinois",
+          "score": 0.3,
+          "seasons": [
+            "hiver"
+          ]
+        },
+        {
+          "id": 261,
+          "name": "Saumon en croûte de pistache, mousseline de chou-fleur & asperge verte",
+          "score": 0.25,
+          "seasons": [
+            "printemps"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 72,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "BRANDADE DE COLIN",
+      "cleanedName": "Brandade de colin",
+      "marker": "RECETTE PRINTEMPS",
+      "matched": {
+        "id": 194,
+        "name": "Brandade de colin",
+        "currentSeasons": [
+          "hiver",
+          "printemps"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 1,
+      "candidates": [
+        {
+          "id": 194,
+          "name": "Brandade de colin",
+          "score": 1,
+          "seasons": [
+            "hiver",
+            "printemps"
+          ]
+        },
+        {
+          "id": 195,
+          "name": "Brandade de sardines",
+          "score": 0.5,
+          "seasons": [
+            "hiver",
+            "printemps"
+          ]
+        },
+        {
+          "id": 34,
+          "name": "Brandade de poisson à la butternut",
+          "score": 0.33,
+          "seasons": [
+            "automne"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 73,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "BRANDADE DE SARDINES",
+      "cleanedName": "Brandade de sardines",
+      "marker": "RECETTE PRINTEMPS",
+      "matched": {
+        "id": 195,
+        "name": "Brandade de sardines",
+        "currentSeasons": [
+          "hiver",
+          "printemps"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 1,
+      "candidates": [
+        {
+          "id": 195,
+          "name": "Brandade de sardines",
+          "score": 1,
+          "seasons": [
+            "hiver",
+            "printemps"
+          ]
+        },
+        {
+          "id": 194,
+          "name": "Brandade de colin",
+          "score": 0.5,
+          "seasons": [
+            "hiver",
+            "printemps"
+          ]
+        },
+        {
+          "id": 34,
+          "name": "Brandade de poisson à la butternut",
+          "score": 0.33,
+          "seasons": [
+            "automne"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 74,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "BRUSCHETTA AU SAUMON FUME",
+      "cleanedName": "Bruschetta au saumon fumé",
+      "marker": "RECETTE PRINTEMPS",
+      "matched": {
+        "id": 272,
+        "name": "Bruschetta au saumon fumé",
+        "currentSeasons": [
+          "printemps"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 1,
+      "candidates": [
+        {
+          "id": 272,
+          "name": "Bruschetta au saumon fumé",
+          "score": 1,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 258,
+          "name": "Bagel saumon fumé & ricotta",
+          "score": 0.5,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 190,
+          "name": "Frittata saumon fumé & chèvre frais",
+          "score": 0.4,
+          "seasons": [
+            "hiver"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 75,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "FILET DE CABILLAUD ROTI AU PESTO, QUINOA AUX TOMATES SECHEES, OLIVE & COURGETTES",
+      "cleanedName": "Filet de cabillaud rôti au pesto, quinoa aux tomates séchées, olive & courgettes",
+      "marker": "RECETTE PRINTEMPS",
+      "matched": {
+        "id": 264,
+        "name": "Filet de cabillaud rôti au pesto, quinoa aux tomates séchées, olive & courgettes",
+        "currentSeasons": [
+          "printemps"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 1,
+      "candidates": [
+        {
+          "id": 264,
+          "name": "Filet de cabillaud rôti au pesto, quinoa aux tomates séchées, olive & courgettes",
+          "score": 1,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 200,
+          "name": "Filet de truite,sauce yaourt, aneth, citron vert & quinoa aux légumes vert",
+          "score": 0.22,
+          "seasons": [
+            "hiver"
+          ]
+        },
+        {
+          "id": 36,
+          "name": "Filet de cabillaud au lard, purée de carottes & semoule",
+          "score": 0.22,
+          "seasons": [
+            "automne"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 76,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "FLAN DE CAROT'CRABE",
+      "cleanedName": "Flan de carot'crabe",
+      "marker": "RECETTE PRINTEMPS",
+      "matched": {
+        "id": 260,
+        "name": "Flan de carot'crabe",
+        "currentSeasons": [
+          "printemps"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 1,
+      "candidates": [
+        {
+          "id": 260,
+          "name": "Flan de carot'crabe",
+          "score": 1,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 207,
+          "name": "Flan de crabe & mache",
+          "score": 0.67,
+          "seasons": [
+            "hiver"
+          ]
+        },
+        {
+          "id": 54,
+          "name": "Flan de crabe & fromage blanc à l'aneth, haricot beurre",
+          "score": 0.33,
+          "seasons": [
+            "automne"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 84,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "CHIMICHANGA AU BOEUF",
+      "cleanedName": "Chimichanga au boeuf",
+      "marker": "RECETTE HIVER",
+      "matched": {
+        "id": 126,
+        "name": "Chimichanga au boeuf",
+        "currentSeasons": [
+          "hiver"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 1,
+      "candidates": [
+        {
+          "id": 126,
+          "name": "Chimichanga au boeuf",
+          "score": 1,
+          "seasons": [
+            "hiver"
+          ]
+        },
+        {
+          "id": 135,
+          "name": "Chimichanga au poulet",
+          "score": 0.5,
+          "seasons": [
+            "hiver"
+          ]
+        },
+        {
+          "id": 177,
+          "name": "Chimichanga aux légumes",
+          "score": 0.5,
+          "seasons": [
+            "hiver"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 85,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "CHIMICHANGA AU POULET",
+      "cleanedName": "Chimichanga au poulet",
+      "marker": "RECETTE HIVER",
+      "matched": {
+        "id": 135,
+        "name": "Chimichanga au poulet",
+        "currentSeasons": [
+          "hiver"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 1,
+      "candidates": [
+        {
+          "id": 135,
+          "name": "Chimichanga au poulet",
+          "score": 1,
+          "seasons": [
+            "hiver"
+          ]
+        },
+        {
+          "id": 126,
+          "name": "Chimichanga au boeuf",
+          "score": 0.5,
+          "seasons": [
+            "hiver"
+          ]
+        },
+        {
+          "id": 177,
+          "name": "Chimichanga aux légumes",
+          "score": 0.5,
+          "seasons": [
+            "hiver"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 88,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "POULET TIKKA MASSALA",
+      "cleanedName": "Poulet tikka massala",
+      "marker": "RECETTE HIVER",
+      "matched": {
+        "id": 134,
+        "name": "Poulet tikka massala",
+        "currentSeasons": [
+          "hiver"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 1,
+      "candidates": [
+        {
+          "id": 134,
+          "name": "Poulet tikka massala",
+          "score": 1,
+          "seasons": [
+            "hiver"
+          ]
+        },
+        {
+          "id": 231,
+          "name": "Rouleaux de printemps au poulet",
+          "score": 0.33,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 135,
+          "name": "Chimichanga au poulet",
+          "score": 0.33,
+          "seasons": [
+            "hiver"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 91,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "PAELLA",
+      "cleanedName": "Paëlla",
+      "marker": "RECETTE PRINTEMPS",
+      "matched": {
+        "id": 252,
+        "name": "Paëlla",
+        "currentSeasons": [
+          "printemps"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 1,
+      "candidates": [
+        {
+          "id": 252,
+          "name": "Paëlla",
+          "score": 1,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 298,
+          "name": "Paella végétarienne au tofu",
+          "score": 0.33,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 145,
+          "name": "Pilons de poulet façon paëlla",
+          "score": 0.25,
+          "seasons": [
+            "hiver"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 92,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "FIDEUA",
+      "cleanedName": "Fideuà",
+      "marker": "RECETTE PRINTEMPS",
+      "matched": {
+        "id": 253,
+        "name": "Fideuà",
+        "currentSeasons": [
+          "printemps"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 1,
+      "candidates": [
+        {
+          "id": 253,
+          "name": "Fideuà",
+          "score": 1,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 250,
+          "name": "Poke bowls au poulet & sauce tandoori",
+          "score": 0,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 251,
+          "name": "Boeuf Lok Lak",
+          "score": 0,
+          "seasons": [
+            "printemps"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 98,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "WOK DE BOEUF AUX LEGUMES D'ETE",
+      "cleanedName": "Wok de boeuf aux légumes d'été",
+      "marker": "RECETTE PRINTEMPS",
+      "matched": {
+        "id": 246,
+        "name": "Wok de boeuf aux légumes printaniers",
+        "currentSeasons": [
+          "printemps"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 0.75,
+      "candidates": [
+        {
+          "id": 129,
+          "name": "Wok de boeuf aux légumes",
+          "score": 0.75,
+          "seasons": [
+            "hiver"
+          ]
+        },
+        {
+          "id": 246,
+          "name": "Wok de boeuf aux légumes printaniers",
+          "score": 0.75,
+          "seasons": [
+            "printemps"
+          ]
+        },
+        {
+          "id": 70,
+          "name": "Wok de légumes",
+          "score": 0.5,
+          "seasons": [
+            "automne"
+          ]
+        }
+      ]
+    },
+    {
+      "excelRow": 99,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "WOK DE POULET AUX LEGUME D'ETE",
+      "cleanedName": "Wok de poulet aux légumes d'été",
+      "marker": "RECETTE PRINTEMPS",
+      "matched": {
+        "id": 245,
+        "name": "Wok de poulet aux légumes printaniers",
+        "currentSeasons": [
+          "printemps"
+        ],
+        "needsEte": true
+      },
+      "matchScore": 0.75,
+      "candidates": [
+        {
+          "id": 137,
+          "name": "Wok de poulet aux légumes",
+          "score": 0.75,
+          "seasons": [
+            "hiver"
+          ]
+        },
+        {
+          "id": 19,
+          "name": "Wok de poulet aux légumes de saison",
+          "score": 0.75,
+          "seasons": [
+            "automne"
+          ]
+        },
+        {
+          "id": 245,
+          "name": "Wok de poulet aux légumes printaniers",
+          "score": 0.75,
+          "seasons": [
+            "printemps"
+          ]
+        }
+      ]
+    }
+  ],
+  "newDishes": [
+    {
+      "excelRow": 2,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "PEPERONATA & COURGETTE AU FOUR",
+      "cleanedName": "Peperonata & courgette au four",
+      "ingredients": [
+        "POIVRON ROUGE 1/2 PCE",
+        "POIVRON JAUNE 1/2 PCE",
+        "TOMATE CONCASSEE 50 GR",
+        "AIL",
+        "ECHALOTE",
+        "VINAIGRE DE VIN ROUGE 5 CL",
+        "COURGETTE 100 GR",
+        "FETA 25 GR",
+        "MIEL ORIGAN"
+      ],
+      "ingredientsRaw": "POIVRON ROUGE 1/2 PCE, POIVRON JAUNE 1/2 PCE, TOMATE CONCASSEE 50 GR, AIL, ECHALOTE, VINAIGRE DE VIN ROUGE 5 CL, COURGETTE 100 GR, FETA 25 GR, MIEL ORIGAN",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 4,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "RISOTTO VERDE",
+      "cleanedName": "Risotto verde",
+      "ingredients": [
+        "RIZ A RISOTTO 100 GR",
+        "OIGNON",
+        "EPINARD A CUIRE 100 GR",
+        "PETIT POIS EN BOITE 45 GR",
+        "HARICOT VERT 25 GR",
+        "PARMESAN POUDRE 30 GR",
+        "SEMI EPAIS SOJA 12,25 CL",
+        "VIN BLANC CUISINE 5 CL",
+        "PERSIL"
+      ],
+      "ingredientsRaw": "RIZ A RISOTTO 100 GR, OIGNON, EPINARD A CUIRE 100 GR, PETIT POIS EN BOITE 45 GR, HARICOT VERT 25 GR, PARMESAN POUDRE 30 GR, SEMI EPAIS SOJA 12,25 CL, VIN BLANC CUISINE 5 CL, PERSIL",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 5,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "RISOTTO RED",
+      "cleanedName": "Risotto red",
+      "ingredients": [
+        "RIZ A RISOTTO 100 GR",
+        "OIGNON",
+        "VIN BLANC CUISINE 5 CL",
+        "PARMESAN POUDRE 30 GR",
+        "SEMI EPAIS SOJA 12,25 CL",
+        "POIVRON ROUGE 1/2 PCE",
+        "TOMATE SECHEE 20 GR",
+        "PAPRIKA",
+        "HARICOT ROUGE EN BOITE 25 GR"
+      ],
+      "ingredientsRaw": "RIZ A RISOTTO 100 GR, OIGNON, VIN BLANC CUISINE 5 CL, PARMESAN POUDRE 30 GR, SEMI EPAIS SOJA 12,25 CL, POIVRON ROUGE 1/2 PCE, TOMATE SECHEE 20 GR, PAPRIKA, HARICOT ROUGE EN BOITE 25 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 6,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "CURRY DE LENTILLES VERTES",
+      "cleanedName": "Curry de lentilles vertes",
+      "ingredients": [
+        "LENTILLES VERTES 100 GR",
+        "CAROTTE 100 GR",
+        "OIGNON",
+        "CURRY",
+        "CURCUMA",
+        "CORIANDRE",
+        "LAIT DE COCO 50 ML"
+      ],
+      "ingredientsRaw": "LENTILLES VERTES 100 GR, CAROTTE 100 GR, OIGNON, CURRY, CURCUMA, CORIANDRE, LAIT DE COCO 50 ML,",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 7,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "CRUMBLE DE LEGUMES D'ETE",
+      "cleanedName": "Crumble de légumes d'été",
+      "ingredients": [
+        "FARINE 30 GR",
+        "BEURRE 30 GR",
+        "PARMESAN POUDRE 30 GR",
+        "COURGETTE 100 GR",
+        "AUBERGINE 1/2 PCE",
+        "POIVRON ROUGE 1/2 PCE",
+        "TOMATE CONCASSEE 50 GR",
+        "AIL",
+        "OIGNON",
+        "HERBES DE PROVENCE"
+      ],
+      "ingredientsRaw": "FARINE 30 GR, BEURRE 30 GR, PARMESAN POUDRE 30 GR, COURGETTE 100 GR, AUBERGINE 1/2 PCE, POIVRON ROUGE 1/2 PCE, TOMATE CONCASSEE 50 GR, AIL, OIGNON, HERBES DE PROVENCE,",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 10,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "CHAKCHOUKA AUX HARICOTS ROUGES",
+      "cleanedName": "Chakchouka aux haricots rouges",
+      "ingredients": [
+        "TOMATE CONCASSEE 50 GR",
+        "PAPRIKA",
+        "CUMIN",
+        "OEUF 1 PCE",
+        "POIVRON ROUGE 1 PCE",
+        "OIGNON",
+        "AIL",
+        "PERSIL"
+      ],
+      "ingredientsRaw": "TOMATE CONCASSEE 50 GR, PAPRIKA, CUMIN, OEUF 1 PCE, POIVRON ROUGE 1 PCE, OIGNON, AIL,, PERSIL",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 11,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "MOUSSAKA VEGETARIEN",
+      "cleanedName": "Moussaka végétarien",
+      "ingredients": [
+        "AUBERGINE 1 PCE",
+        "TOMATE CONCASSEE 100 GR",
+        "AIL",
+        "OIGNON",
+        "LENTILLE CORAIL 100 GR",
+        "CONCENTRE DE TOMATE 10 GR",
+        "LAIT 250 ML",
+        "FARINE 30 GR",
+        "BEURRE 30 GR",
+        "MOZZARELLA RAPPEE 50 GR"
+      ],
+      "ingredientsRaw": "AUBERGINE 1 PCE, TOMATE CONCASSEE 100 GR, AIL, OIGNON, LENTILLE CORAIL 100 GR, CONCENTRE DE TOMATE 10 GR, LAIT 250 ML, FARINE 30 GR, BEURRE 30 GR, MOZZARELLA RAPPEE 50 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 12,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "KUKU AUX AUBERGINES & CONCOMBRE A LA MENTHE",
+      "cleanedName": "Kuku aux aubergines & concombre à la menthe",
+      "ingredients": [
+        "LEVURE CHIMIQUE",
+        "AIL",
+        "CORIANDRE",
+        "MENTHE",
+        "PERSIL",
+        "FARINE 30 GR",
+        "PIGNON DE PIN",
+        "AUBERGINE 1 PCE",
+        "OEUF 1,5 PCE",
+        "CONCOMBRE 1/4 PCE",
+        "YAOURT GRECQUE 1/2 PCE"
+      ],
+      "ingredientsRaw": "LEVURE CHIMIQUE, AIL, CORIANDRE, MENTHE, PERSIL, FARINE 30 GR, PIGNON DE PIN, AUBERGINE 1 PCE, OEUF 1,5 PCE, CONCOMBRE 1/4 PCE, YAOURT GRECQUE 1/2 PCE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 14,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "GATEAU DE COURGETTES A LA FETA & SALADE DE MACHE AUX TOMATE CERISES",
+      "cleanedName": "Gâteau de courgettes à la feta & salade de mâche aux tomate cerises",
+      "ingredients": [
+        "OEUF 1 PCE",
+        "COURGETTE 1 PCE",
+        "FARINE 50 GR",
+        "LEVURE CHIMIQUE",
+        "HUILE OLIVE",
+        "FETA 50 GR",
+        "PARMESAN POUDRE 25 GR",
+        "EMMENTAL RAPE 15 GR",
+        "LAIT 30 ML",
+        "MACHE 25 GR",
+        "TOMATE CERISE 50 GR"
+      ],
+      "ingredientsRaw": "OEUF 1 PCE, COURGETTE 1 PCE, FARINE 50 GR, LEVURE CHIMIQUE, HUILE OLIVE, FETA 50 GR, PARMESAN POUDRE 25 GR, EMMENTAL RAPE 15 GR, LAIT 30 ML, MACHE 25 GR, TOMATE CERISE 50 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 15,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "FRITTATA DE COURGETTE ET TOMATES",
+      "cleanedName": "Frittata de courgette et tomates",
+      "ingredients": [
+        "CREME FRAICHE 50 GR",
+        "COURGETTE 1 PCE",
+        "TOMATE 1 PCE",
+        "OEUF 1,5 PCE",
+        "PARMESAN POUDRE 10 GR",
+        "PERSIL",
+        "ORIGAN",
+        "CIBOULETTE"
+      ],
+      "ingredientsRaw": "CREME FRAICHE 50 GR, COURGETTE 1 PCE, TOMATE 1 PCE, OEUF 1,5 PCE, PARMESAN POUDRE 10 GR, PERSIL, ORIGAN, CIBOULETTE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 16,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "LASAGNE AUX LEGUMES D'ETE",
+      "cleanedName": "Lasagne aux légumes d'été",
+      "ingredients": [
+        "PATE A LASAGNE FRAICHE 62,5 GR",
+        "LAIT 250 ML",
+        "FARINE 30 GR",
+        "BEURRE 30 GR",
+        "COURGETTE 1 PCE",
+        "AUBERGINES 1/4 PCE",
+        "TOMATE 1 PCE",
+        "THYM",
+        "AIL",
+        "POIVRON 1/2 PCE",
+        "TOMATE CONCASSEE 50 GR"
+      ],
+      "ingredientsRaw": "PATE A LASAGNE FRAICHE 62,5 GR, LAIT 250 ML, FARINE 30 GR, BEURRE 30 GR, COURGETTE 1 PCE, AUBERGINES 1/4 PCE, TOMATE 1 PCE, THYM, AIL, POIVRON 1/2 PCE, TOMATE CONCASSEE 50 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 17,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "CHAKCHOUKA AUX POIVRONS",
+      "cleanedName": "Chakchouka aux poivrons",
+      "ingredients": [
+        "TOMATE 1 PCE",
+        "POIVRON 1/2 PCE",
+        "OEUF 1 PCE",
+        "AIL",
+        "OIGNON",
+        "PARPIKA",
+        "PERSIL"
+      ],
+      "ingredientsRaw": "TOMATE 1 PCE, POIVRON 1/2 PCE, OEUF 1 PCE, AIL, OIGNON, PARPIKA, PERSIL",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 18,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "GASPACHO",
+      "cleanedName": "Gaspacho",
+      "ingredients": [
+        "CONCOMBRE 1/4 PCE",
+        "TOMATE 1,5 PCE",
+        "POIRVON 1/2 PCE",
+        "AIL"
+      ],
+      "ingredientsRaw": "CONCOMBRE 1/4 PCE, TOMATE 1,5 PCE, POIRVON 1/2 PCE, AIL",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 20,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "CHOW MEIN AUX LEGUMES",
+      "cleanedName": "Chow mein aux légumes",
+      "ingredients": [
+        "POUSSE DE SOJA 25 GR",
+        "POIVRON 1/2 PCE",
+        "COURGETTE 1/2 PCE",
+        "AUBERGINE 1/4 PCE",
+        "CAROTTE 100 GR",
+        "GINGEMBRE POUDRE",
+        "AIL",
+        "MIEL",
+        "SAUCE SOJA",
+        "VINAIGRE DE RIZ",
+        "NOUILLE AUX OEUFS 100 GR",
+        "HUILE DE SESAME"
+      ],
+      "ingredientsRaw": "POUSSE DE SOJA 25 GR, POIVRON 1/2 PCE, COURGETTE 1/2 PCE, AUBERGINE 1/4 PCE, CAROTTE 100 GR, GINGEMBRE POUDRE, AIL, MIEL, SAUCE SOJA, VINAIGRE DE RIZ, NOUILLE AUX OEUFS 100 GR, HUILE DE SESAME",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 22,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "GALETTES DE HARICOTS ROUGE & SALADE DE TOMATE",
+      "cleanedName": "Galettes de haricots rouge & salade de tomate",
+      "ingredients": [
+        "HARICOT ROUGE EN BOITE 125 GR",
+        "MAÏZENA",
+        "MOUTARDE",
+        "CHAPELURE",
+        "QUINOA 50 GR",
+        "PAPRIKA",
+        "CURRY",
+        "CUMIN",
+        "TOMATE 1 PCE",
+        "OIGNON ROUGE",
+        "CORIANDRE",
+        "AVOCAT 1/2 PCE"
+      ],
+      "ingredientsRaw": "HARICOT ROUGE EN BOITE 125 GR, MAÏZENA, MOUTARDE, CHAPELURE, QUINOA 50 GR, PAPRIKA, CURRY, CUMIN, TOMATE 1 PCE, OIGNON ROUGE, CORIANDRE, AVOCAT 1/2 PCE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 23,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "GALETTES DE COURGETTE, SALADE D'ARTICHAUTS & CHAMPIGNONS",
+      "cleanedName": "Galettes de courgette, salade d'artichauts & champignons",
+      "ingredients": [
+        "COURGETTE 1 PCE",
+        "QUINOA 50 GR",
+        "FLOCON D'AVOINE 10 GR",
+        "PERSIL",
+        "COEURS D'ARTICHAUT EN BOITE 50 GR",
+        "CHAMPIGNON DE PARIS 25 GR",
+        "ECHALOTE",
+        "OEUF 0,5 PCE"
+      ],
+      "ingredientsRaw": "COURGETTE 1 PCE, QUINOA 50 GR, FLOCON D'AVOINE 10 GR, PERSIL, COEURS D'ARTICHAUT EN BOITE 50 GR, CHAMPIGNON DE PARIS 25 GR, ECHALOTE, OEUF 0,5 PCE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 24,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "GALETTES DE PAPATES DOUCES, SUCRINES AUX POUSSES DE SOJA & CAROTTE",
+      "cleanedName": "Galettes de patates douces, sucrines aux pousses de soja & carotte",
+      "ingredients": [
+        "PATATE DOUCE 100 GR",
+        "FLOCON D'AVOINE 10 GR",
+        "OEUF 0,5 PCE",
+        "CORIANDRE",
+        "SUCRINE 1/2 PCE",
+        "POUSSE DE SOJA 25 GR",
+        "CAROTTE 25 GR",
+        "HUILE DE SESAME",
+        "GRAINES DE SESAME"
+      ],
+      "ingredientsRaw": "PATATE DOUCE 100 GR, FLOCON D'AVOINE 10 GR, OEUF 0,5 PCE, CORIANDRE, SUCRINE 1/2 PCE, POUSSE DE SOJA 25 GR, CAROTTE 25 GR, HUILE DE SESAME, GRAINES DE SESAME",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 25,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "WOK DE LEGUMES D'ETE",
+      "cleanedName": "Wok de légumes d'été",
+      "ingredients": [
+        "POUSSE DE SOJA 25 GR",
+        "CAROTTE 100 GR",
+        "AUBERGINE 1/4 PCE",
+        "COURGETTE 1/2 PCE",
+        "POIVRON 1/2 PCE",
+        "GINGEMBRE POUDRE",
+        "MIEL",
+        "SAUCE SOJA",
+        "HUILE DE SESAME",
+        "CHAMPIGNON DE PARIS 25 GR"
+      ],
+      "ingredientsRaw": "POUSSE DE SOJA 25 GR, CAROTTE 100 GR, AUBERGINE 1/4 PCE, COURGETTE 1/2 PCE, POIVRON 1/2 PCE, GINGEMBRE POUDRE, MIEL, SAUCE SOJA, HUILE DE SESAME, CHAMPIGNON DE PARIS 25 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 27,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "ROUGAIL VEGETARIEN AU TOFU",
+      "cleanedName": "Rougail végétarien au tofu",
+      "ingredients": [
+        "TOFU FERME 100 GR",
+        "TOMATE CONCASSEE 100 GR",
+        "AIL",
+        "GINGENMBRE POUDRE",
+        "OIGNON",
+        "CURCUMA",
+        "CUMIN",
+        "CORIANDRE",
+        "LENTILLES VERTE 40 GR",
+        "RIZ 40 GR"
+      ],
+      "ingredientsRaw": "TOFU FERME 100 GR, TOMATE CONCASSEE 100 GR, AIL, GINGENMBRE POUDRE, OIGNON, CURCUMA, CUMIN, CORIANDRE, LENTILLES VERTE 40 GR, RIZ 40 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 28,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "AUBERGINES A LA PARMIGIANA",
+      "cleanedName": "Aubergines à la parmigiana",
+      "ingredients": [
+        "AUBERGINE 1/2 PCE",
+        "TOMATE CONCASSEE 100 GR",
+        "PARMESAN POUDRE 10 GR",
+        "MOZZARELLA RAPPEE 50 GR",
+        "AIL",
+        "OIGNON",
+        "ORIGAN",
+        "MOZZARELLA BLOC 50 GR"
+      ],
+      "ingredientsRaw": "AUBERGINE 1/2 PCE, TOMATE CONCASSEE 100 GR, PARMESAN POUDRE 10 GR, MOZZARELLA RAPPEE 50 GR, AIL, OIGNON, ORIGAN, MOZZARELLA BLOC 50 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 32,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "SALADE GRECQUE",
+      "cleanedName": "Salade grecque",
+      "ingredients": [
+        "CONCOMBRE 1/4 PCE",
+        "TOMATE 1 PCE",
+        "FETA 50 GR",
+        "POIS CHICHE EN BOITE 50 GR",
+        "OLIVE DENOYAUTEES 20 GR",
+        "POIVRON JAUNE 1/2 PCE",
+        "OIGNON ROUGE"
+      ],
+      "ingredientsRaw": "CONCOMBRE 1/4 PCE, TOMATE 1 PCE, FETA 50 GR, POIS CHICHE EN BOITE 50 GR, OLIVE DENOYAUTEES 20 GR, POIVRON JAUNE 1/2 PCE, OIGNON ROUGE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 33,
+      "section": "vegetation",
+      "category": "vegetation",
+      "rawName": "SALADE D'HARICOTS VERTS, SARRASIN, TOMATE CERISE & TOFU",
+      "cleanedName": "Salade d'haricots verts, sarrasin, tomate cerise & tofu",
+      "ingredients": [
+        "HARICOT VERT 100 GR",
+        "SARRASIN 50 GR",
+        "TOMATE CERISE 25 GR",
+        "TOFU FERME",
+        "ECHALOTE",
+        "ESTRAGON",
+        "PIGNON DE PIN"
+      ],
+      "ingredientsRaw": "HARICOT VERT 100 GR, SARRASIN 50 GR, TOMATE CERISE 25 GR, TOFU FERME, ECHALOTE, ESTRAGON, PIGNON DE PIN",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 41,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "TAGLIATELLES DE KONJAC A LA CREME DE POIVRONS, CHORIZO & CREVETTES",
+      "cleanedName": "Tagliatelles de konjac à la crème de poivrons, chorizo & crevettes",
+      "ingredients": [
+        "TAGLIATELLES DE KONJAC 80 GR",
+        "SEMI EPAIS SOJA 12,25 CL",
+        "CHORIZO 56,25 GR",
+        "CREVETTES DECORTIQUEES 62,5 GR",
+        "ECHALOTE",
+        "POIVRON ROUGE 1/4 PCE",
+        "PERSIL"
+      ],
+      "ingredientsRaw": "TAGLIATELLES DE KONJAC 80 GR, SEMI EPAIS SOJA 12,25 CL, CHORIZO 56,25 GR, CREVETTES DECORTIQUEES 62,5 GR, ECHALOTE, POIVRON ROUGE 1/4 PCE, PERSIL",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 43,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "PAVE DE SAUMON GRILLE, SALSA DE MANGUE & RIZ COCO",
+      "cleanedName": "Pavé de saumon grillé, salsa de mangue & riz coco",
+      "ingredients": [
+        "PAVE DE SAUMON 1 PCE",
+        "MANGUE MURE 1/4 PCE",
+        "TOMATE 1/2 PCE",
+        "CORIANDRE",
+        "PERSIL",
+        "CITRON VERT 1/2 PCE",
+        "POIVRON VERT 1/2 PCE",
+        "AVOCAT 1/2 PCE",
+        "OIGNON ROUGE 1/4 PCE",
+        "RIZ 100 GR",
+        "LAIT DE COCO 100 ML"
+      ],
+      "ingredientsRaw": "PAVE DE SAUMON 1 PCE, MANGUE MURE 1/4 PCE, TOMATE 1/2 PCE, CORIANDRE, PERSIL, CITRON VERT 1/2 PCE, POIVRON VERT 1/2 PCE, AVOCAT 1/2 PCE, OIGNON ROUGE 1/4 PCE, RIZ 100 GR, LAIT DE COCO 100 ML",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 44,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "GALETTES DE PATATES DOUCES AU THON, YAOURT CURCUMA/MIEL & CAROTTES RAPEES AUX SESAME",
+      "cleanedName": "Galettes de patates douces au thon, yaourt curcuma/miel & carottes râpées aux sésame",
+      "ingredients": [
+        "PATATE DOUCE 100 GR",
+        "FLOCON D'AVOINE 50 GR",
+        "PERSIL",
+        "THON EN BOITE 70 GR",
+        "FARINE",
+        "YAOURT 0,5 PCE",
+        "CURCUMA",
+        "MIEL",
+        "CAROTTE 100 GR",
+        "HUILE DE SESAME",
+        "SESAME GRAINE"
+      ],
+      "ingredientsRaw": "PATATE DOUCE 100 GR, FLOCON D'AVOINE 50 GR, PERSIL, THON EN BOITE 70 GR, FARINE, YAOURT 0,5 PCE, CURCUMA, MIEL, CAROTTE 100 GR, HUILE DE SESAME, SESAME GRAINE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 45,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "ZOODLES AUX CREVETTES, PESTO, TOMATES SECHEES & OLIVE",
+      "cleanedName": "Zoodles aux crevettes, pesto, tomates séchées & olive",
+      "ingredients": [
+        "COURGETTES 150 GR",
+        "CREVETTES DECORTIQUEES 62,5 GR",
+        "PESTO",
+        "TOMATES SECHEES 40 GR",
+        "OLIVE DENOYAUTEES 40 GR",
+        "AIL",
+        "PARMESAN BLOC 20 GR"
+      ],
+      "ingredientsRaw": "COURGETTES 150 GR, CREVETTES DECORTIQUEES 62,5 GR, PESTO, TOMATES SECHEES 40 GR, OLIVE DENOYAUTEES 40 GR, AIL, PARMESAN BLOC 20 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 46,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "CLAFOUTI DE COURGETTE & SAUMON",
+      "cleanedName": "Clafouti de courgette & saumon",
+      "ingredients": [
+        "COURGETTE 100 GR",
+        "PAVE DE SAUMON 0,5 PCE",
+        "OEUF 1 PCE",
+        "SAUMON FUME 1 TRANCHE",
+        "CIBOULETTE",
+        "SEMI EPAIS SOJA 12,25 GR",
+        "PARMESAN POUDRE 20 GR"
+      ],
+      "ingredientsRaw": "COURGETTE 100 GR, PAVE DE SAUMON 0,5 PCE, OEUF 1 PCE, SAUMON FUME 1 TRANCHE, CIBOULETTE, SEMI EPAIS SOJA 12,25 GR, PARMESAN POUDRE 20 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 47,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "LASAGNE AUX SAUMON, CREVETTES & COURGETTES",
+      "cleanedName": "Lasagne aux saumon, crevettes & courgettes",
+      "ingredients": [
+        "PATE A LASAGNE FRAICHE 62,5 GR",
+        "LAIT 250 ML",
+        "BEURRE 30 GR",
+        "FARINE",
+        "MOZZARELLA RAPEE 37,5 GR",
+        "CREVETTES DECORTIQUEES 62,5 GR",
+        "COURGETTE 100 GR",
+        "PAVE DE SAUMON 1 PCE",
+        "ANETH"
+      ],
+      "ingredientsRaw": "PATE A LASAGNE FRAICHE 62,5 GR, LAIT 250 ML, BEURRE 30 GR, FARINE, MOZZARELLA RAPEE 37,5 GR, CREVETTES DECORTIQUEES 62,5 GR, COURGETTE 100 GR, PAVE DE SAUMON 1 PCE, ANETH",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 48,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "WOK DE CREVETTES AUX LEGUMES D'ETE",
+      "cleanedName": "Wok de crevettes aux légumes d'été",
+      "ingredients": [
+        "COURGETTE 100 GR",
+        "AUBERGINE 1/4 PCE",
+        "POIVRON ROUGE 1/4 PCE",
+        "CAROTTE 100 GR",
+        "POUSSE SOJA 25 GR",
+        "SAUCE SOJA",
+        "MIEL",
+        "GINGEMBRE POUDRE",
+        "CORIANDRE",
+        "CREVETTES DECORTIQUEES 62,5 GR"
+      ],
+      "ingredientsRaw": "COURGETTE 100 GR, AUBERGINE 1/4 PCE, POIVRON ROUGE 1/4 PCE, CAROTTE 100 GR, POUSSE SOJA 25 GR, SAUCE SOJA, MIEL, GINGEMBRE POUDRE, CORIANDRE, CREVETTES DECORTIQUEES 62,5 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 49,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "CABILLAUD AUX OLIVES, POLENTA AU ROMARIN & TOMATES PROVENCALE",
+      "cleanedName": "Cabillaud aux olives, polenta au romarin & tomates provençale",
+      "ingredients": [
+        "CABILLAUD 1 PCE",
+        "OLIVE DENOYAUTEES 40 GR",
+        "CAPRES 10 GR",
+        "PERSIL",
+        "POLENTA 100 GR",
+        "LAIT 250 ML",
+        "ROMARIN",
+        "CHAPELURE",
+        "AIL",
+        "TOMATE 1 PCE",
+        "POIVRON ROUGE 1/4 PCE"
+      ],
+      "ingredientsRaw": "CABILLAUD 1 PCE, OLIVE DENOYAUTEES 40 GR, CAPRES 10 GR, PERSIL, POLENTA 100 GR, LAIT 250 ML, ROMARIN, CHAPELURE, AIL, TOMATE 1 PCE, POIVRON ROUGE 1/4 PCE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 50,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "MERLU, SAUCE CURCUMA, PUREE DE PATATE DOUCE ET CAROTTES CONFITE A LA PASSION",
+      "cleanedName": "Merlu, sauce curcuma, purée de patate douce et carottes confite à la passion",
+      "ingredients": [
+        "MERLU 1 PCE",
+        "CURCUMA",
+        "SEMI EPAIS SOJA 12,25 GR",
+        "MIEL",
+        "ECHALOTE",
+        "PATATE DOUCE 100 GR",
+        "FRUIT DE LA PASSION 1 PCE",
+        "CAROTTE 100 GR"
+      ],
+      "ingredientsRaw": "MERLU 1 PCE, CURCUMA, SEMI EPAIS SOJA 12,25 GR, MIEL, ECHALOTE, PATATE DOUCE 100 GR, FRUIT DE LA PASSION 1 PCE, CAROTTE 100 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 52,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "SALADE DE QUINOA, CREVETTES, MELON, AVOCAT, AMANDES & SAUCE PASSION",
+      "cleanedName": "Salade de quinoa, crevettes, melon, avocat, amandes & sauce passion",
+      "ingredients": [
+        "QUINOA 100 GR",
+        "CREVETTES 62,5 GR",
+        "MELON 1/4 PCE",
+        "AVOCAT 1/2 PCE",
+        "AMANDES EFFILEES",
+        "OEUF 1 PCE",
+        "MOUTARDE",
+        "HUILE TOURNESOL",
+        "FRUIT DE LA PASSION 1 PCE",
+        "CORIANDRE"
+      ],
+      "ingredientsRaw": "QUINOA 100 GR, CREVETTES 62,5 GR, MELON 1/4 PCE, AVOCAT 1/2 PCE, AMANDES EFFILEES, OEUF 1 PCE, MOUTARDE, HUILE TOURNESOL, FRUIT DE LA PASSION 1 PCE, CORIANDRE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 53,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "BOULETTES DE MERLU A LA PROVENCALE",
+      "cleanedName": "Boulettes de merlu à la provençale",
+      "ingredients": [
+        "MERLU 1 PCE",
+        "OEUF 1 PCE",
+        "BASILIC",
+        "TOMATE CONCASSEE 100 ML",
+        "POIVRON ROUGE 1/4 PCE",
+        "AUBERGINE 1/2 PCE",
+        "COURGETTE 100 GR",
+        "CHAPELURE",
+        "AIL",
+        "OIGNON",
+        "VIN BLANC CUISINE 7,5 CL",
+        "OLIVE DENOYAUTEES 20 GR"
+      ],
+      "ingredientsRaw": "MERLU 1 PCE, OEUF 1 PCE, BASILIC, TOMATE CONCASSEE 100 ML, POIVRON ROUGE 1/4 PCE, AUBERGINE 1/2 PCE, COURGETTE 100 GR, CHAPELURE, AIL, OIGNON, VIN BLANC CUISINE 7,5 CL, OLIVE DENOYAUTEES 20 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 54,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "SAMOSSAS AU THON, FROMAGE FRAIS & SALADE DE BOULGOUR A LA TOMATE",
+      "cleanedName": "Samossas au thon, fromage frais & salade de boulgour à la tomate",
+      "ingredients": [
+        "FEUILLE DE BRICK 1 PCE",
+        "THON EN BOITE 35 GR",
+        "FROMAGE FRAIS 50 GR",
+        "PERSIL",
+        "BOULGOUR 100 GR",
+        "TOMATE 1 PCE",
+        "OIGNON ROUGE 1/4 PCE",
+        "PAPRIKA",
+        "OEUF 0,5 PCE"
+      ],
+      "ingredientsRaw": "FEUILLE DE BRICK 1 PCE, THON EN BOITE 35 GR, FROMAGE FRAIS 50 GR, PERSIL, BOULGOUR 100 GR, TOMATE 1 PCE, OIGNON ROUGE 1/4 PCE, PAPRIKA, OEUF 0,5 PCE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 55,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "TORTILLA AU PATATE DOUCE, EPINARD & SAUMON FUME",
+      "cleanedName": "Tortilla au patate douce, épinard & saumon fumé",
+      "ingredients": [
+        "PATATE DOUCE 75 GR",
+        "EPINARD A CUIRE 100 GR",
+        "OEUF 1,5 PCE",
+        "SEMI EPAIS SOJA 12,25 CL",
+        "SAUMON FUME 1 TRANCHE",
+        "CITRON JAUNE 1/4 PCE"
+      ],
+      "ingredientsRaw": "PATATE DOUCE 75 GR, EPINARD A CUIRE 100 GR, OEUF 1,5 PCE, SEMI EPAIS SOJA 12,25 CL, SAUMON FUME 1 TRANCHE, CITRON JAUNE 1/4 PCE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 56,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "SALADE NICOISE",
+      "cleanedName": "Salade niçoise",
+      "ingredients": [
+        "MESCLUN 37,5 GR",
+        "OEUF 1 PCE",
+        "POIVRON VERT 1/4 PCE",
+        "OIGNON ROUGE 1/4 PCE",
+        "TOMATE 1 PCE",
+        "OLIVE DENOYAUTEES 20 GR",
+        "FEVES 20 GR",
+        "COEUR D'ARTICHAUT 30 GR",
+        "ANCHOIS A L'HUILE 10 GR",
+        "THON EN BOITE 25 GR",
+        "BASILIC"
+      ],
+      "ingredientsRaw": "MESCLUN 37,5 GR, OEUF 1 PCE, POIVRON VERT 1/4 PCE, OIGNON ROUGE 1/4 PCE, TOMATE 1 PCE, OLIVE DENOYAUTEES 20 GR, FEVES 20 GR, COEUR D'ARTICHAUT 30 GR, ANCHOIS A L'HUILE 10 GR, THON EN BOITE 25 GR, BASILIC",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 58,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "PAVE DE SAUMON TERIYAKI, LEGUMES D'ETE POELES & FRAICHEUR DE LENTILLES CORAIL",
+      "cleanedName": "Pavé de saumon teriyaki, légumes d'été poêlés & fraîcheur de lentilles corail",
+      "ingredients": [
+        "PAVE DE SAUMON 1 PCE",
+        "SAUCE SOJA",
+        "MIEL",
+        "GINGEMBRE POUDRE",
+        "SAUCE HUITRE",
+        "MAÏZENA",
+        "COURGETTE 100 GR",
+        "POIVRON JAUNE 1/2 PCE",
+        "AUBERGINE 1/4 PCE",
+        "LENTILLES CORAIL 50 GR",
+        "ROMARIN",
+        "CITRON JAUNE 1/4 PCE",
+        "CORIANDRE"
+      ],
+      "ingredientsRaw": "PAVE DE SAUMON 1 PCE, SAUCE SOJA, MIEL, GINGEMBRE POUDRE, SAUCE HUITRE, MAÏZENA, COURGETTE 100 GR, POIVRON JAUNE 1/2 PCE, AUBERGINE 1/4 PCE, LENTILLES CORAIL 50 GR, ROMARIN, CITRON JAUNE 1/4 PCE, CORIANDRE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 59,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "TARTE SMASH CAROTTES & THON AU CURRY",
+      "cleanedName": "Tarte smash carottes & thon au curry",
+      "ingredients": [
+        "CAROTTE 150 GR",
+        "ROQUETTE 20 GR",
+        "YAOURT GREQUE 1/2 PCE",
+        "CURRY",
+        "THON EN BOITE 40 GR",
+        "CITRON JAUNE 1/4 PCE",
+        "CONCOMBRE 1/4 PCE",
+        "RADIS ROSE 1 PCE",
+        "TOMATE CERISE 2 PCE",
+        "CIBOULETTE"
+      ],
+      "ingredientsRaw": "CAROTTE 150 GR, ROQUETTE 20 GR, YAOURT GREQUE 1/2 PCE, CURRY, THON EN BOITE 40 GR, CITRON JAUNE 1/4 PCE, CONCOMBRE 1/4 PCE, RADIS ROSE 1 PCE, TOMATE CERISE 2 PCE, CIBOULETTE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 60,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "QUICHE AU SAUMON, COURGETTE & BOURSIN",
+      "cleanedName": "Quiche au saumon, courgette & boursin",
+      "ingredients": [
+        "PATE BRISEE",
+        "PAVE DE SAUMON 1/2 PCE",
+        "SAUMON FUME 1 TRANCHE",
+        "BOURSIN 1/4 PCE",
+        "COURGETTE 50 GR",
+        "OEUF 1 PCE",
+        "CREME FRAICHE 12,25 CL",
+        "MOZZARELLA RAPEE 10 GR"
+      ],
+      "ingredientsRaw": "PATE BRISEE, PAVE DE SAUMON 1/2 PCE, SAUMON FUME 1 TRANCHE, BOURSIN 1/4 PCE, COURGETTE 50 GR, OEUF 1 PCE, CREME FRAICHE 12,25 CL, MOZZARELLA RAPEE 10 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 61,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "TOURTE AU THON, EPINARD & FETA",
+      "cleanedName": "Tourte au thon, épinard & feta",
+      "ingredients": [
+        "PATE BRISEE (1 TOURTE = 2 PATE BRISEE)",
+        "OEUF 1,5 PCE",
+        "THON EN BOITE 50 GR",
+        "FETA 50 GR",
+        "EPINARD A CUIRE 100 GR",
+        "SEMI EPAIS SOJA 12,25 CL"
+      ],
+      "ingredientsRaw": "PATE BRISEE (1 TOURTE = 2 PATE BRISEE), OEUF 1,5 PCE, THON EN BOITE 50 GR, FETA 50 GR, EPINARD A CUIRE 100 GR, SEMI EPAIS SOJA 12,25 CL",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 62,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "CURRY DE CREVETTES",
+      "cleanedName": "Curry de crevettes",
+      "ingredients": [
+        "CURRY",
+        "CREVETTES DECORTIQUEES 50 GR",
+        "POIVRON ROUGE 1/4 PCE",
+        "PATATE DOUCE 100 GR",
+        "POIS CHICHE EN BOITE 50 GR",
+        "AIL",
+        "OIGNON",
+        "CAROTTE 25 GR",
+        "LAIT DE COCO 50 ML",
+        "CORIANDRE"
+      ],
+      "ingredientsRaw": "CURRY, CREVETTES DECORTIQUEES 50 GR, POIVRON ROUGE 1/4 PCE, PATATE DOUCE 100 GR, POIS CHICHE EN BOITE 50 GR, AIL, OIGNON, CAROTTE 25 GR, LAIT DE COCO 50 ML, CORIANDRE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 63,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "CURRY DE CABILLAUD",
+      "cleanedName": "Curry de cabillaud",
+      "ingredients": [
+        "CURRY",
+        "CABILLAUD 1 PCE",
+        "POIVRON ROUGE 1/4 PCE",
+        "COURGETTE 100 GR",
+        "CAROTTE 50 GR",
+        "POIS CHICHE EN BOITE 50 GR",
+        "LAIT DE COCO 50 ML",
+        "AIL",
+        "CORIANDRE",
+        "OIGNON",
+        "BROCOLI 1/4 PCE"
+      ],
+      "ingredientsRaw": "CURRY, CABILLAUD 1 PCE, POIVRON ROUGE 1/4 PCE, COURGETTE 100 GR, CAROTTE 50 GR, POIS CHICHE EN BOITE 50 GR,LAIT DE COCO 50 ML, AIL, CORIANDRE, OIGNON, BROCOLI 1/4 PCE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 64,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "POKE BOWLS CREVETTES",
+      "cleanedName": "Poke bowls crevettes",
+      "ingredients": [
+        "QUINOA 50 GR",
+        "CREVETTE DECORTIQUEES 50 GR",
+        "CAROTTE 50 GR",
+        "BETTERAVE CUITE 25 GR",
+        "CONCOMBRE 1/4 PCE",
+        "AVOCAT 1/2 PCE",
+        "YAOURT GRECQUE 1/2 PCE",
+        "TANDOORI",
+        "OIGNON ROUGE",
+        "CIBOULETTE",
+        "MAÏS 30 GR"
+      ],
+      "ingredientsRaw": "QUINOA 50 GR, CREVETTE DECORTIQUEES 50 GR, CAROTTE 50 GR, BETTERAVE CUITE 25 GR, CONCOMBRE 1/4 PCE, AVOCAT 1/2 PCE, YAOURT GRECQUE 1/2 PCE, TANDOORI, OIGNON ROUGE, CIBOULETTE, MAÏS 30 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 65,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "POKE BOWLS SAUMON FUME",
+      "cleanedName": "Poke bowls saumon fumé",
+      "ingredients": [
+        "QUINOA 50 GR",
+        "SAUMON FUME 1 TRANCHE",
+        "CAROTTE 50 GR",
+        "BETTERAVE CUITE 25 GR",
+        "CONCOMBRE 1/4 PCE",
+        "AVOCAT 1/2 PCE",
+        "YAOURT GRECQUE 1/2 PCE",
+        "ANETH",
+        "OIGNON ROUGE",
+        "CITRON VERT 1/4 PCE",
+        "MAÏS 30 GR"
+      ],
+      "ingredientsRaw": "QUINOA 50 GR, SAUMON FUME 1 TRANCHE, CAROTTE 50 GR, BETTERAVE CUITE 25 GR, CONCOMBRE 1/4 PCE, AVOCAT 1/2 PCE, YAOURT GRECQUE 1/2 PCE, ANETH, OIGNON ROUGE, CITRON VERT 1/4 PCE, MAÏS 30 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 66,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "POKE BOWLS LENTILLES & HARENG FUME",
+      "cleanedName": "Poke bowls lentilles & hareng fumé",
+      "ingredients": [
+        "LENTILLES VERTE 50 GR",
+        "CAROTTE 50 GR",
+        "BETTERAVE CUITE 25 GR",
+        "CONCOMBRE 1/4 PCE",
+        "AVOCAT 1/2 PCE",
+        "YAOURT GRECQUE 1/2 PCE",
+        "MAÎS 30 GR",
+        "CITRON VERT 1/4 PCE",
+        "HARENG FUME 50 GR",
+        "OIGNON ROUGE",
+        "CURCUMA",
+        "PERSIL"
+      ],
+      "ingredientsRaw": "LENTILLES VERTE 50 GR, CAROTTE 50 GR, BETTERAVE CUITE 25 GR, CONCOMBRE 1/4 PCE, AVOCAT 1/2 PCE, YAOURT GRECQUE 1/2 PCE, MAÎS 30 GR, CITRON VERT 1/4 PCE, HARENG FUME 50 GR, OIGNON ROUGE, CURCUMA, PERSIL",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 67,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "PARMENTIER DE HADDOCK & CAROTTE FONDANTE",
+      "cleanedName": "Parmentier de haddock & carotte fondante",
+      "ingredients": [
+        "HADDOCK 100 GR",
+        "CAROTTE 100 GR",
+        "PERSIL",
+        "AIL",
+        "POMME DE TERRE 100 GR",
+        "PATATE DOUCE 100 GR",
+        "CHAPELURE"
+      ],
+      "ingredientsRaw": "HADDOCK 100 GR, CAROTTE 100 GR, PERSIL, AIL, POMME DE TERRE 100 GR, PATATE DOUCE 100 GR, CHAPELURE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 68,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "CRUMBLE DE COURGETTES, AUBERGINES, TOMATE & SARDINES",
+      "cleanedName": "Crumble de courgettes, aubergines, tomate & sardines",
+      "ingredients": [
+        "FARINE 15 GR",
+        "BEURRE 15 GR",
+        "PARMESAN POUDRE 15 GR",
+        "SARDINES 100 GR",
+        "AUBERGINE 1/2 PCE",
+        "TOMATE 1 PCE",
+        "THYM",
+        "AIL",
+        "OIGNON",
+        "COURGETTE 100 GR",
+        "COULIS TOMATE 12,25 CL"
+      ],
+      "ingredientsRaw": "FARINE 15 GR, BEURRE 15 GR, PARMESAN POUDRE 15 GR, SARDINES 100 GR, AUBERGINE 1/2 PCE, TOMATE 1 PCE, THYM, AIL, OIGNON, COURGETTE 100 GR, COULIS TOMATE 12,25 CL",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 69,
+      "section": "poisson",
+      "category": "poissons",
+      "rawName": "PISSALADIERE, SALADE DE MACHE, RADIS & BETTERAVE",
+      "cleanedName": "Pissaladière, salade de mâche, radis & betterave",
+      "ingredients": [
+        "OIGNON 2 PCE",
+        "MACHE 50 GR",
+        "RADIS ROSE 4 PCE",
+        "BETTERAVE CUITE 25 GR",
+        "ANCHOIS A L'HUILE 10 GR",
+        "OLIVE DENOYAUTEES 20 GR",
+        "THYM",
+        "PATE BRISEE"
+      ],
+      "ingredientsRaw": "OIGNON 2 PCE, MACHE 50 GR, RADIS ROSE 4 PCE, BETTERAVE CUITE 25 GR, ANCHOIS A L'HUILE 10 GR, OLIVE DENOYAUTEES 20 GR, THYM, PATE BRISEE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 81,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "POIVRONS FARCIES A LA DINDE, WEDGES DE PATATES DOUCES AU TANDOORI",
+      "cleanedName": "Poivrons farcies à la dinde, wedges de patates douces au tandoori",
+      "ingredients": [
+        "POIVRON ROUGE 1 PCE",
+        "DINDE HACHEE 100 GR",
+        "CHAPELURE",
+        "AIL",
+        "PERSIL",
+        "OEUF 0,5 PCE",
+        "PATATE DOUCE 100 GR",
+        "TANDOORI",
+        "MOZZARELLA RAPEE 25 GR"
+      ],
+      "ingredientsRaw": "POIVRON ROUGE 1 PCE, DINDE HACHEE 100 GR, CHAPELURE, AIL, PERSIL, OEUF 0,5 PCE, PATATE DOUCE 100 GR, TANDOORI, MOZZARELLA RAPEE 25 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 82,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "COURGETTES RONDES FARCIES, SALADE DE LENTILLES DE CORAIL & PESTO D'HERBES",
+      "cleanedName": "Courgettes rondes farcies, salade de lentilles de corail & pesto d'herbes",
+      "ingredients": [
+        "COURGETTE RONDE 1 PCE",
+        "PORC HACHE 100 GR",
+        "AIL",
+        "PERSIL",
+        "CHAPELURE",
+        "LENTILLE CORAIL",
+        "CORIANDRE",
+        "MENTHE",
+        "AMANDE POUDRE 10 GR",
+        "MOZZARELLA RAPEE 25 GR"
+      ],
+      "ingredientsRaw": "COURGETTE RONDE 1 PCE, PORC HACHE 100 GR, AIL, PERSIL, CHAPELURE, LENTILLE CORAIL, CORIANDRE, MENTHE, AMANDE POUDRE 10 GR, MOZZARELLA RAPEE 25 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 83,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "POMME DE TERRE FARCIE FACON FOX FOOD",
+      "cleanedName": "Pomme de terre farcie façon Fox food",
+      "ingredients": [
+        "POMME DE TERRE 150 GR",
+        "JAMBON BLANC 1 TRANCHE",
+        "OEUF 1 PCE",
+        "CREME FRAICHE EPAISSE 12,25 CL",
+        "MOZZARELLA RAPEE 25 GR",
+        "BEURRE 10 GR",
+        "PERSIL",
+        "CHAMPIGNON DE PARIS 25 GR"
+      ],
+      "ingredientsRaw": "POMME DE TERRE 150 GR, JAMBON BLANC 1 TRANCHE, OEUF 1 PCE, CREME FRAICHE EPAISSE 12,25 CL, MOZZARELLA RAPEE 25 GR, BEURRE 10 GR, PERSIL, CHAMPIGNON DE PARIS 25 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 86,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "KEFTA DE BOEUF, SALADE DE COURGETTE GRILLEE & QUINOA MENTHE CITRON",
+      "cleanedName": "Kefta de boeuf, salade de courgette grillée & quinoa menthe citron",
+      "ingredients": [
+        "BOEUF HACHE 100 GR",
+        "AIL",
+        "CUMIN",
+        "CURRY",
+        "CORIANDRE",
+        "CHAPELURE",
+        "OEUF 0,5 PCE",
+        "COURGETTE 100 GR",
+        "QUINOA 100 GR",
+        "MENTHE",
+        "CITRON JAUNE 0,5 PCE",
+        "OIGNON"
+      ],
+      "ingredientsRaw": "BOEUF HACHE 100 GR, AIL, CUMIN, CURRY, CORIANDRE, CHAPELURE, OEUF 0,5 PCE, COURGETTE 100 GR, QUINOA 100 GR, MENTHE, CITRON JAUNE 0,5 PCE, OIGNON",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 87,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "KEFTA DE POULET, SALADE DE BLE AUX LEGUMES & YAOURT AU CUMIN",
+      "cleanedName": "Kefta de poulet, salade de blé aux légumes & yaourt au cumin",
+      "ingredients": [
+        "FILET DE POULET 100 GR",
+        "AIL",
+        "CORIANDRE",
+        "CUMIN",
+        "CURRY",
+        "CHAPELURE",
+        "OEUF 0,5 PCE",
+        "BLE PRE CUIT 100 GR",
+        "POIVRON ROUGE 1/2 PCE",
+        "POIS CHICHE EN BOITE 50 GR",
+        "YAOURT GRECQUE 0,5 PCE",
+        "CIBOULETTE",
+        "MIEL"
+      ],
+      "ingredientsRaw": "FILET DE POULET 100 GR, AIL, CORIANDRE, CUMIN, CURRY, CHAPELURE, OEUF 0,5 PCE, BLE PRE CUIT 100 GR, POIVRON ROUGE 1/2 PCE, POIS CHICHE EN BOITE 50 GR, YAOURT GRECQUE 0,5 PCE, CIBOULETTE, MIEL",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 89,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "CUISSE DE POULET A LA TOSACANE, TIAN DE COURGETTE & POMME DE TERRE ROTIE",
+      "cleanedName": "Cuisse de poulet à la toscane, tian de courgette & pomme de terre rôtie",
+      "ingredients": [
+        "CUISSE DE POULET 1 PCE",
+        "AIL",
+        "VIN BLANC CUISINE 5 CL",
+        "PARMESAN POUDRE 15 GR",
+        "CREME FRAICHE 10 CL",
+        "TOMATE SECHEE 20 GR",
+        "EPINARD A CUIRE 50 GR",
+        "COURGETTE 100 GR",
+        "TOMATE CONCASSEE 50 GR",
+        "HERBES DE PROVENCE",
+        "POMME DE TERRE GRENAILLE 100 GR"
+      ],
+      "ingredientsRaw": "CUISSE DE POULET 1 PCE, AIL, VIN BLANC CUISINE 5 CL, PARMESAN POUDRE 15 GR, CREME FRAICHE 10 CL, TOMATE SECHEE 20 GR, EPINARD A CUIRE 50 GR, COURGETTE 100 GR, TOMATE CONCASSEE 50 GR, HERBES DE PROVENCE, POMME DE TERRE GRENAILLE 100 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 90,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "HAUT DE CUISSE DE POULET CITRON/CORIANDRE, SHIRATAKI AUX LEGUMES",
+      "cleanedName": "Haut de cuisse de poulet citron/coriandre, shirataki aux légumes",
+      "ingredients": [
+        "HAUT DE CUISSE DE POULET 1 PCE",
+        "CITRON JAUNE 0,5 PCE",
+        "CORIANDRE",
+        "SHIRATAKI DE KONJAC 80 GR",
+        "COURGETTE 50 GR",
+        "CAROTTE 50 GR",
+        "POUSSE DE SOJA 50 GR",
+        "SAUCE SOJA",
+        "MIEL",
+        "GINGEMBRE POUDRE"
+      ],
+      "ingredientsRaw": "HAUT DE CUISSE DE POULET 1 PCE, CITRON JAUNE 0,5 PCE, CORIANDRE, SHIRATAKI DE KONJAC 80 GR, COURGETTE 50 GR, CAROTTE 50 GR, POUSSE DE SOJA 50 GR, SAUCE SOJA, MIEL, GINGEMBRE POUDRE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 93,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "EMINCE DE VEAU A LA ZURICHOISE & ROSTI DE POMME DE TERRE",
+      "cleanedName": "Émincé de veau à la zurichoise & rösti de pomme de terre",
+      "ingredients": [
+        "ESCALOPE DE VEAU 1 PCE",
+        "AIL",
+        "PERSIL",
+        "CHAMPIGNON DE PARIS 30 GR",
+        "CREME FRAICHE 15 CL",
+        "VIN BLANC CUISINE 5 CL",
+        "POMME DE TERRE 100 GR",
+        "OEUF 0,5 PCE"
+      ],
+      "ingredientsRaw": "ESCALOPE DE VEAU 1 PCE, AIL, PERSIL, CHAMPIGNON DE PARIS 30 GR, CREME FRAICHE 15 CL, VIN BLANC CUISINE 5 CL, POMME DE TERRE 100 GR, OEUF 0,5 PCE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 94,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "PORC AU SUCRE, MIJOTE DE CAROTTE COCO/GINGEMBRE & PATATE DOUCE",
+      "cleanedName": "Porc au sucre, mijoté de carotte coco/gingembre & patate douce",
+      "ingredients": [
+        "ECHINE DE PORC 1 PCE",
+        "SUCRE SEMOULE",
+        "AIL",
+        "SAUCE SOJA",
+        "GINGEMBRE POUDRE",
+        "CAROTTE 100 GR",
+        "PATATE DOUCE 100 GR",
+        "LAIT DE COCO 15 CL",
+        "FOND DE VEAU POUDRE 5 GR",
+        "CORIANDRE",
+        "OIGNON"
+      ],
+      "ingredientsRaw": "ECHINE DE PORC 1 PCE, SUCRE SEMOULE, AIL, SAUCE SOJA, GINGEMBRE POUDRE, CAROTTE 100 GR, PATATE DOUCE 100 GR, LAIT DE COCO 15 CL, FOND DE VEAU POUDRE 5 GR, CORIANDRE,OIGNON",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 95,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "POULET BASQUAISE, BOULGOUR AUX FEVES & PETITS POIS",
+      "cleanedName": "Poulet basquaise, boulgour aux fèves & petits pois",
+      "ingredients": [
+        "HAUT DE CUISSE DE POULET 1 PCE",
+        "POIVRON 1/2 PCE",
+        "TOMATE 1 PCE",
+        "AIL",
+        "OIGNON",
+        "VIN BLANC CUISINE 5 CL",
+        "PIMENT D'ESPELETTE",
+        "THYM",
+        "ROMARIN",
+        "BOULGOUR 100 GR",
+        "FEVE 50 GR",
+        "PETIT POIS 50 GR",
+        "PERSIL"
+      ],
+      "ingredientsRaw": "HAUT DE CUISSE DE POULET 1 PCE, POIVRON 1/2 PCE, TOMATE 1 PCE, AIL, OIGNON, VIN BLANC CUISINE 5 CL, PIMENT D'ESPELETTE, THYM, ROMARIN, BOULGOUR 100 GR, FEVE 50 GR, PETIT POIS 50 GR, PERSIL",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 96,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "MOUSSAKA AU BOEUF",
+      "cleanedName": "Moussaka au boeuf",
+      "ingredients": [
+        "AUBERGINE 1 PCE",
+        "OIGNON",
+        "BOEUF HACHE 100 GR",
+        "TOMATE CONCASSEE 60 GR",
+        "CONCENTRE DE TOMATE 10 GR",
+        "LAIT 250 ML",
+        "BEURRE 30 GR",
+        "FARINE 30 GR",
+        "MOZZARELLA RAPEE 50 GR",
+        "TOMATE 1/2 PCE"
+      ],
+      "ingredientsRaw": "AUBERGINE 1 PCE, OIGNON, BOEUF HACHE 100 GR, TOMATE CONCASSEE 60 GR, CONCENTRE DE TOMATE 10 GR, LAIT 250 ML, BEURRE 30 GR, FARINE 30 GR, MOZZARELLA RAPEE 50 GR, TOMATE 1/2 PCE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 97,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "CROQ MR, COURGETTE & GOUDA",
+      "cleanedName": "CroQ Mr, courgette & gouda",
+      "ingredients": [
+        "GRANDE TRANCHE PAIN DE MIE 2 PCE",
+        "JAMBON BLANC 1 TRANCHE",
+        "GOUDA 1 TRANCHE",
+        "MOZZARELLA RAPEE 50 GR",
+        "LAIT 250 ML",
+        "BEURRE 30 GR",
+        "FARINE 30 GR",
+        "COURGETTE 50 GR",
+        "ORIGAN"
+      ],
+      "ingredientsRaw": "GRANDE TRANCHE PAIN DE MIE 2 PCE, JAMBON BLANC 1 TRANCHE, GOUDA 1 TRANCHE, MOZZARELLA RAPEE 50 GR, LAIT 250 ML, BEURRE 30 GR, FARINE 30 GR, COURGETTE 50 GR, ORIGAN",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 100,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "EMINCE DE DINDE FACON CHILI CON CARNE & RIZ",
+      "cleanedName": "Émincé de dinde façon chili con carne & riz",
+      "ingredients": [
+        "ESCALOPE DE DINDE 1 PCE",
+        "HARICOT ROUGE EN BOITE 100 GR",
+        "MAÏS 35 GR",
+        "POIVRON ROUGE 1/2 PCE",
+        "OIGNON",
+        "AIL",
+        "CUMIN",
+        "CONCENTRE DE TOMATE 10 GR",
+        "CORIANDRE",
+        "RIZ 100 GR",
+        "PAPRIKA",
+        "CURRY",
+        "CURCUMA"
+      ],
+      "ingredientsRaw": "ESCALOPE DE DINDE 1 PCE, HARICOT ROUGE EN BOITE 100 GR, MAÏS 35 GR, POIVRON ROUGE 1/2 PCE, OIGNON, AIL, CUMIN, CONCENTRE DE TOMATE 10 GR, CORIANDRE, RIZ 100 GR, PAPRIKA, CURRY, CURCUMA",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 101,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "ENCHILADAS AU BOEUF",
+      "cleanedName": "Enchiladas au boeuf",
+      "ingredients": [
+        "BOEUF HACHE 100 GR",
+        "CONCENTRE DE TOMATE 10 GR",
+        "EPICES MEXICAINES",
+        "POIVRON ROUGE 1/2 PCE",
+        "OIGNON",
+        "AIL",
+        "CORIANDRE",
+        "TOMATE CONCASSEE 60 GR",
+        "PAPRIKA",
+        "CUMIN",
+        "CHEDDAR RAPPE 50 GR",
+        "TORTILLAS DE MAÏS 1 PCE"
+      ],
+      "ingredientsRaw": "BOEUF HACHE 100 GR, CONCENTRE DE TOMATE 10 GR, EPICES MEXICAINES, POIVRON ROUGE 1/2 PCE, OIGNON, AIL, CORIANDRE, TOMATE CONCASSEE 60 GR, PAPRIKA, CUMIN, CHEDDAR RAPPE 50 GR, TORTILLAS DE MAÏS 1 PCE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 102,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "ENCHILADAS AU POULET",
+      "cleanedName": "Enchiladas au poulet",
+      "ingredients": [
+        "FILET DE POULET 100 GR",
+        "CONCENTRE DE TOMATE 10 GR",
+        "EPICES MEXICAINES",
+        "POIVRON ROUGE 1/2 PCE",
+        "OIGNON",
+        "AIL",
+        "CORIANDRE",
+        "TOMATE CONCASSEE 60 GR",
+        "PAPRIKA",
+        "CUMIN",
+        "CHEDDAR RAPPE 50 GR",
+        "TORTILLAS DE MAÏS 1 PCE"
+      ],
+      "ingredientsRaw": "FILET DE POULET 100 GR, CONCENTRE DE TOMATE 10 GR, EPICES MEXICAINES, POIVRON ROUGE 1/2 PCE, OIGNON, AIL, CORIANDRE, TOMATE CONCASSEE 60 GR, PAPRIKA, CUMIN, CHEDDAR RAPPE 50 GR, TORTILLAS DE MAÏS 1 PCE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 103,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "ALBONDIGAS, TAGLIATELLES DE COURGETTES AUX POIS CHICHE",
+      "cleanedName": "Albondigas, tagliatelles de courgettes aux pois chiche",
+      "ingredients": [
+        "COURGETTE 100 GR",
+        "PERSIL",
+        "POIS CHICHE EN BOITE 50 GR",
+        "CAROTTE 50 GR",
+        "MAÏS EN BOITE 37,5 GR",
+        "OIGNON",
+        "AIL",
+        "CORIANDRE",
+        "EPICES MEXICAINES",
+        "CONCENTRE DE TOMATE 10 GR",
+        "BOEUF HACHE 100 GR",
+        "ORIGAN"
+      ],
+      "ingredientsRaw": "COURGETTE 100 GR, PERSIL, POIS CHICHE EN BOITE 50 GR, CAROTTE 50 GR, MAÏS EN BOITE 37,5 GR, OIGNON, AIL, CORIANDRE, EPICES MEXICAINES, CONCENTRE DE TOMATE 10 GR, BOEUF HACHE 100 GR, ORIGAN",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 104,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "SFOUGATO",
+      "cleanedName": "Sfougato",
+      "ingredients": [
+        "BOEUF HACHE 100 GR",
+        "COURGETTE 100 GR",
+        "PERSIL",
+        "ANETH",
+        "CIBOULETTE",
+        "ORIGAN",
+        "AIL",
+        "OIGNON",
+        "FETA 50 GR",
+        "OEUF 1,5 PCE"
+      ],
+      "ingredientsRaw": "BOEUF HACHE 100 GR, COURGETTE 100 GR, PERSIL, ANETH, CIBOULETTE, ORIGAN, AIL, OIGNON, FETA 50 GR, OEUF 1,5 PCE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 105,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "FILET MIGNON DE PORC ORANGE/GINGEMBRE, CHOU CHINOIS & POUSSE DE SOJA",
+      "cleanedName": "Filet mignon de porc orange/gingembre, chou chinois & pousse de soja",
+      "ingredients": [
+        "FILET MIGNON DE PORC 100 GR",
+        "JUS D'ORANGE 10 CL",
+        "GINGEMBRE POUDRE",
+        "CHOU CHINOIS 1/4 PCE",
+        "POUSSE DE SOJA 50 GR",
+        "CORIANDRE",
+        "MIEL"
+      ],
+      "ingredientsRaw": "FILET MIGNON DE PORC 100 GR, JUS D'ORANGE 10 CL, GINGEMBRE POUDRE, CHOU CHINOIS 1/4 PCE, POUSSE DE SOJA 50 GR, CORIANDRE, MIEL",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 106,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "FILET MIGNON DE PORC MIEL/MOUTARDE, POMME DE TERRE GRENAILLES & CAROTTE VICHY",
+      "cleanedName": "Filet mignon de porc miel/moutarde, pomme de terre grenailles & carotte vichy",
+      "ingredients": [
+        "FILET MIGNON DE PORC 100 GR",
+        "MIEL",
+        "MOUTARDE",
+        "CREME FRAICHE 10 CL",
+        "POMME DE TERRE GRENAILLES 100 GR",
+        "AIL",
+        "ROMARIN",
+        "CAROTTE 100 GR",
+        "PERSIL"
+      ],
+      "ingredientsRaw": "FILET MIGNON DE PORC 100 GR, MIEL, MOUTARDE, CREME FRAICHE 10 CL, POMME DE TERRE GRENAILLES 100 GR, AIL, ROMARIN, CAROTTE 100 GR, PERSIL",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 107,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "AUBERGINES FARCIES & RIZ",
+      "cleanedName": "Aubergines farcies & riz",
+      "ingredients": [
+        "AUBERGINE 1 PCE",
+        "BOEUF HACHE 75 GR",
+        "AIL",
+        "CHAPELURE",
+        "PERSIL",
+        "MOZZARELLA RAPEE 25 GR",
+        "CONCENTRE DE TOMATE 10 GR",
+        "RIZ 100 GR"
+      ],
+      "ingredientsRaw": "AUBERGINE 1 PCE, BOEUF HACHE 75 GR, AIL, CHAPELURE, PERSIL, MOZZARELLA RAPEE 25 GR, CONCENTRE DE TOMATE 10 GR, RIZ 100 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 108,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "LASAGNE AU COURGETTE, RICOTTA & JAMBON",
+      "cleanedName": "Lasagne au courgette, ricotta & jambon",
+      "ingredients": [
+        "PATE A LASAGNE FRAICHE 62,5 GR",
+        "COURGETTE 100 GR",
+        "JAMBON BLANC 1 TRANCHE",
+        "RICOTTA 25 GR",
+        "LAIT 250 ML",
+        "BEURRE 30 GR",
+        "FARINE 30 GR",
+        "MOZZARELLA RAPEE 50 GR",
+        "ORIGAN"
+      ],
+      "ingredientsRaw": "PATE A LASAGNE FRAICHE 62,5 GR, COURGETTE 100 GR, JAMBON BLANC 1 TRANCHE, RICOTTA 25 GR, LAIT 250 ML, BEURRE 30 GR, FARINE 30 GR, MOZZARELLA RAPEE 50 GR, ORIGAN",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 109,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "TOMATE FARCIES FACON BOLOGNAISE & BOULGOUR",
+      "cleanedName": "Tomate farcies façon bolognaise & boulgour",
+      "ingredients": [
+        "GROSSE TOMATE 2 PCE",
+        "BOEUF HACHE 100 GR",
+        "AIL",
+        "PERSIL",
+        "CHAPELURE",
+        "TOMATE CONCASSEE 60 GR",
+        "PESTO",
+        "BOULGOUR 100 GR",
+        "CAROTTE 50 GR",
+        "OIGNON",
+        "ORIGAN"
+      ],
+      "ingredientsRaw": "GROSSE TOMATE 2 PCE, BOEUF HACHE 100 GR, AIL, PERSIL, CHAPELURE, TOMATE CONCASSEE 60 GR, PESTO, BOULGOUR 100 GR, CAROTTE 50 GR, OIGNON, ORIGAN",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 110,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "SALADE CESAR",
+      "cleanedName": "Salade César",
+      "ingredients": [
+        "JEUNES POUSSES 100 GR",
+        "FILET DE POULET 0,5 PCE",
+        "AIL",
+        "PARMESAN BLOC 25 GR",
+        "MOUTARDE",
+        "HUILE DE TOURNESOL",
+        "CITRON JAUNE 0,5 PCE",
+        "LAIT 5 CL",
+        "CAPRES 5 GR",
+        "TOMATE 0,5 PCE",
+        "OEUF 1,5 PCE",
+        "PAIN DE MIE 1 TRANCHE",
+        "LARD EN TRANCHE 1 PCE"
+      ],
+      "ingredientsRaw": "JEUNES POUSSES 100 GR, FILET DE POULET 0,5 PCE, AIL, PARMESAN BLOC 25 GR, MOUTARDE, HUILE DE TOURNESOL, CITRON JAUNE 0,5 PCE, LAIT 5 CL, CAPRES 5 GR, TOMATE 0,5 PCE, OEUF 1,5 PCE, PAIN DE MIE 1 TRANCHE, LARD EN TRANCHE 1 PCE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 111,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "CANELLONI DE COURGETTES",
+      "cleanedName": "Canelloni de courgettes",
+      "ingredients": [
+        "COURGETTE 100 GR",
+        "PERSIL",
+        "CAROTTE 50 GR",
+        "OIGNON",
+        "TOMATE CONCASSEE 50 GR",
+        "BOEUF HACHE 100 GR",
+        "CONCENTRE DE TOMATE 10 GR",
+        "MOZZARELLA RAPEE 50 GR"
+      ],
+      "ingredientsRaw": "COURGETTE 100 GR, PERSIL, CAROTTE 50 GR, OIGNON, TOMATE CONCASSEE 50 GR, BOEUF HACHE 100 GR, CONCENTRE DE TOMATE 10 GR, MOZZARELLA RAPEE 50 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 112,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "TARTE FINE AUX POIVRONS & CHORIZO",
+      "cleanedName": "Tarte fine aux poivrons & chorizo",
+      "ingredients": [
+        "PATE BRISEE",
+        "TOMATE CONCASSE 60 GR",
+        "POIVRON ROUGE 1/2 PCE",
+        "ORIGAN",
+        "AIL",
+        "OIGNON",
+        "CHORIZO 56,25 GR",
+        "TOMATE 0,5 PCE",
+        "CHEDDAR RAPEE 50 GR"
+      ],
+      "ingredientsRaw": "PATE BRISEE, TOMATE CONCASSE 60 GR, POIVRON ROUGE 1/2 PCE, ORIGAN, AIL, OIGNON, CHORIZO 56,25 GR, TOMATE 0,5 PCE, CHEDDAR RAPEE 50 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 113,
+      "section": "viande",
+      "category": "viandes",
+      "rawName": "MIJOTE DE POULET SUCRE/SALE A L'ABRICOT",
+      "cleanedName": "Mijoté de poulet sucré/salé à l'abricot",
+      "ingredients": [
+        "FILET DE POULET 100 GR",
+        "LAIT DE COCO 50 ML",
+        "CONFITURE D'ABRICOT 15 GR",
+        "AMANDE EFFILEE",
+        "POIVRON ROUGE 1/2 PCE",
+        "PERSIL",
+        "AIL",
+        "OIGNON",
+        "MIEL",
+        "SEMOULE A COUSCOUS GRAIN MOYEN 100 GR",
+        "CUMIN",
+        "CURRY",
+        "CURCUMA",
+        "ORIGAN"
+      ],
+      "ingredientsRaw": "FILET DE POULET 100 GR, LAIT DE COCO 50 ML, CONFITURE D'ABRICOT 15 GR, AMANDE EFFILEE, POIVRON ROUGE 1/2 PCE, PERSIL, AIL, OIGNON, MIEL, SEMOULE A COUSCOUS GRAIN MOYEN 100 GR, CUMIN, CURRY, CURCUMA, ORIGAN",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 121,
+      "section": "dessert",
+      "category": "desserts",
+      "rawName": "FLAN COCO",
+      "cleanedName": "Flan coco",
+      "ingredients": [
+        "LAIT CONCENTRE 10 CL",
+        "SUCRE SEMOULE ROUX 37,5 GR",
+        "CANELLE EN POUDRE",
+        "ORANGE 1/4 PCE",
+        "NOIX DE COCO RAPEE 25 GR",
+        "OEUF 0,75 PCE",
+        "JAUNE OEUF 1,5 PCE",
+        "VANILLE POUDRE"
+      ],
+      "ingredientsRaw": "LAIT CONCENTRE 10 CL, SUCRE SEMOULE ROUX 37,5 GR, CANELLE EN POUDRE, ORANGE 1/4 PCE, NOIX DE COCO RAPEE 25 GR, OEUF 0,75 PCE, JAUNE OEUF 1,5 PCE, VANILLE POUDRE",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    },
+    {
+      "excelRow": 122,
+      "section": "dessert",
+      "category": "desserts",
+      "rawName": "GATEAU AUX HARICOTS ROUGE",
+      "cleanedName": "Gâteau aux haricots rouge",
+      "ingredients": [
+        "HARICOT ROUGE EN BOITE 62,5 GR",
+        "OEUF 1,25 PCE",
+        "CHOCOLAT NOIR 37,5 GR",
+        "LEVURE CHIMIQUE 1,75",
+        "HUILE DE COCO 7,5 GR",
+        "SUCRE SEMOULE ROUX 17,5 GR",
+        "CACAO 5 GR"
+      ],
+      "ingredientsRaw": "HARICOT ROUGE EN BOITE 62,5 GR, OEUF 1,25 PCE, CHOCOLAT NOIR 37,5 GR, LEVURE CHIMIQUE 1,75, HUILE DE COCO 7,5 GR, SUCRE SEMOULE ROUX 17,5 GR, CACAO 5 GR",
+      "seasons": [
+        "ete"
+      ],
+      "kids_food": false,
+      "active": true
+    }
+  ]
+}
