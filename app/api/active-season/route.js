@@ -14,8 +14,14 @@ export async function GET() {
       )
     }
 
+    // ORDER BY updated_at DESC : la dernière saison modifiée par n'importe quel admin gagne.
+    // Sans cet ORDER BY, Postgres pouvait renvoyer une ligne arbitraire et donc un catalogue
+    // différent selon les requêtes — bug détecté lors du switch printemps → été 2026.
     const result = await sql`
-      SELECT active_season FROM admin_settings LIMIT 1
+      SELECT active_season FROM admin_settings
+      WHERE active_season IS NOT NULL
+      ORDER BY updated_at DESC NULLS LAST
+      LIMIT 1
     `
 
     const activeSeason = result.rows.length > 0 && result.rows[0].active_season

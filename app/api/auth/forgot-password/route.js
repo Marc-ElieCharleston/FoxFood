@@ -14,9 +14,9 @@ export async function POST(request) {
       )
     }
 
-    // Vérifier si l'utilisateur existe
+    // Vérifier si l'utilisateur existe (insensible à la casse — certains emails ont des majuscules)
     const userResult = await sql`
-      SELECT id, name, email FROM users WHERE email = ${email.trim().toLowerCase()}
+      SELECT id, name, email FROM users WHERE LOWER(email) = ${email.trim().toLowerCase()}
     `
 
     // Pour des raisons de sécurité, ne pas révéler si l'email existe ou non
