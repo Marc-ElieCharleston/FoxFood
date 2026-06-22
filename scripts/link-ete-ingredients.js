@@ -22,6 +22,9 @@ const { sql } = require('@vercel/postgres')
 
 const isDryRun = !process.argv.includes('--confirm')
 const createMissing = process.argv.includes('--create-missing')
+// Par défaut, ne re-traite que les plats sans aucune liaison.
+// --all repasse sur tous les plats été (utile après ajout de nouveaux ingrédients canoniques).
+const processAll = process.argv.includes('--all')
 
 // Normaliser une chaîne : minuscules, sans accents, sans ponctuation, espaces simples
 function normalize(s) {
@@ -248,7 +251,28 @@ const SYNONYMS = {
   'sarrasin': 'sarrasin en grains',
   'anchois a l huile': 'sardines en boite a lhuile olive', // pas d'anchois en DB
   'sucre semoule roux': 'sucre roux',
-  'gouda': 'gouda',  // si existe, sinon non matché
+  'gouda': 'gouda',
+  // Ingrédients restants après ajout des canoniques
+  'sucre poudre': 'sucre en poudre',
+  'sucre en poudre': 'sucre en poudre',
+  'sucre de canne poudre': 'sucre de canne en poudre',
+  'sucre de canne en poudre': 'sucre de canne en poudre',
+  'cacao poudre': 'cacao en poudre',
+  'pignon pin': 'pignon de pin',
+  'pignon de pin': 'pignon de pin',
+  'poudre a safran': 'safran en poudre',
+  'gingembre': 'gingembre poudre',
+  'sauce soja sucre': 'sauce soja sucree',
+  'huile olive bio': 'huile olive',
+  'chocolat': 'chocolat noir',
+  'coeur d artichaut': 'coeur d artichaut en boite',
+  'coeurs d artichaut': 'coeur d artichaut en boite',
+  'coeur d artichaut en boite': 'coeur d artichaut en boite',
+  'coeurs d artichaut en boite': 'coeur d artichaut en boite',
+  'canelle en poudre': 'cannelle en poudre',
+  'cannelle en poudre': 'cannelle en poudre',
+  'levure chimique 1 75': 'levure chimique',
+  'levure chimique 1': 'levure chimique',
 }
 
 async function main() {
@@ -275,16 +299,26 @@ async function main() {
   }
   console.log(`Ingrédients canoniques chargés : ${ingsR.rows.length} (${byNorm.size} clés normalisées avec variantes singulier)`)
 
-  // Charger les plats sans liaisons, visibles en été
-  const dishesR = await sql`
-    SELECT d.id, d.name, d.ingredients
-    FROM dishes d
-    WHERE d.active = true
-      AND (d.seasons @> '"ete"'::jsonb OR d.seasons @> '"toutes"'::jsonb)
-      AND NOT EXISTS (SELECT 1 FROM dish_ingredients WHERE dish_id = d.id)
-    ORDER BY d.id
-  `
-  console.log(`Plats été sans liaisons : ${dishesR.rows.length}`)
+  // Charger les plats actifs visibles en été.
+  // Par défaut on saute les plats déjà liés ; --all permet de repasser sur tous
+  // (pour combler les manques après ajout d'ingrédients canoniques).
+  const dishesR = processAll
+    ? await sql`
+        SELECT d.id, d.name, d.ingredients
+        FROM dishes d
+        WHERE d.active = true
+          AND (d.seasons @> '"ete"'::jsonb OR d.seasons @> '"toutes"'::jsonb)
+        ORDER BY d.id
+      `
+    : await sql`
+        SELECT d.id, d.name, d.ingredients
+        FROM dishes d
+        WHERE d.active = true
+          AND (d.seasons @> '"ete"'::jsonb OR d.seasons @> '"toutes"'::jsonb)
+          AND NOT EXISTS (SELECT 1 FROM dish_ingredients WHERE dish_id = d.id)
+        ORDER BY d.id
+      `
+  console.log(`Plats à traiter : ${dishesR.rows.length}${processAll ? ' (mode --all)' : ' (sans liaisons existantes)'}`)
   console.log()
 
   const unmatched = new Map() // normalized name → count
