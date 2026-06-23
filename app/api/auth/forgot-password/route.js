@@ -52,14 +52,16 @@ export async function POST(request) {
     `
 
     // Envoyer l'email avec le lien de réinitialisation
+    const subject = 'Réinitialisation de votre mot de passe FoxFood'
+    let emailResult = { success: false, error: 'not attempted' }
     try {
       const { sendEmail } = await import('@/lib/notifications')
 
       const resetLink = `${process.env.NEXTAUTH_URL || 'http://localhost:3000'}/reset-password?token=${token}`
 
-      await sendEmail({
+      emailResult = await sendEmail({
         to: user.email,
-        subject: 'Réinitialisation de votre mot de passe FoxFood',
+        subject,
         html: `
           <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
             <h2 style="color: #f97316;">Réinitialisation de mot de passe</h2>
@@ -87,28 +89,33 @@ export async function POST(request) {
           </div>
         `
       })
+    } catch (emailError) {
+      console.error('Erreur envoi email:', emailError)
+      emailResult = { success: false, error: emailError.message }
+    }
 
-      // Logger la notification
+    // Logger la notification (succès ou échec) — ne pas masquer les échecs Resend
+    try {
       await sql`
         INSERT INTO notifications_log (
           notification_type,
           recipient_email,
           method,
           subject,
-          status
+          status,
+          error_message
         )
         VALUES (
           'password_reset',
           ${user.email},
           'email',
-          'Réinitialisation de votre mot de passe FoxFood',
-          'sent'
+          ${subject},
+          ${emailResult.success ? 'sent' : 'failed'},
+          ${emailResult.success ? null : (emailResult.error || 'unknown error')}
         )
       `
-    } catch (emailError) {
-      console.error('Erreur envoi email:', emailError)
-      // Ne pas bloquer la requête si l'email échoue
-      // On peut logger l'erreur pour investigation
+    } catch (logError) {
+      console.error('Impossible de logger notification:', logError)
     }
 
     return NextResponse.json({
