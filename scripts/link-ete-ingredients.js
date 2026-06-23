@@ -353,8 +353,19 @@ async function main() {
 
       if (found) {
         if (!isDryRun) {
-          // quantity est NOT NULL, fallback à 1 si pas extrait du texte
-          const qty = parsed.quantity != null ? parsed.quantity : 1
+          // quantity est NOT NULL.
+          // - Si le texte contient une quantité explicite : on la prend.
+          // - Sinon (cas "AIL", "PERSIL"…) : pour les épices/condiments on met 0
+          //   (= qsp, "quantité suffisante pour", l'UI cache l'affichage).
+          //   Pour les autres ingrédients on garde 1 (placeholder).
+          let qty
+          if (parsed.quantity != null) {
+            qty = parsed.quantity
+          } else if (found.category === 'epice' || found.category === 'condiment') {
+            qty = 0
+          } else {
+            qty = 1
+          }
           await sql`
             INSERT INTO dish_ingredients (dish_id, ingredient_id, quantity, unit)
             VALUES (${dish.id}, ${found.id}, ${qty}, ${parsed.unit})
