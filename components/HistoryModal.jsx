@@ -273,7 +273,7 @@ export default function HistoryModal({ isOpen, onClose, userHouseholdSize = 1 })
                               {ingredients.map((ing, idx) => (
                                 <li key={idx} className="text-sm flex justify-between">
                                   <span>{ing.name}</span>
-                                  {ing.quantity && (
+                                  {ing.quantity && ing.category !== 'epice' && (
                                     <span className="text-gray-500">
                                       {ing.quantity % 1 === 0 ? ing.quantity : ing.quantity.toFixed(1)}
                                       {ing.unit && ` ${ing.unit}`}

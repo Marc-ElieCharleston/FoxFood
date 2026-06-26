@@ -77,7 +77,7 @@ export default function AdminRecapPage() {
     const items = []
     categories.forEach(cat => {
       if (weekData.ingredients[cat]) {
-        items.push(...weekData.ingredients[cat])
+        items.push(...weekData.ingredients[cat].map(i => ({ ...i, category: cat })))
       }
     })
     return items.sort((a, b) => a.name.localeCompare(b.name))
@@ -262,7 +262,7 @@ export default function AdminRecapPage() {
                             {items.map((ing, idx) => (
                               <li key={idx} className="text-sm flex justify-between">
                                 <span>{ing.name}</span>
-                                {ing.totalQuantity > 0 && (
+                                {ing.totalQuantity > 0 && ing.category !== 'epice' && (
                                   <span className="text-gray-500 font-medium">
                                     {ing.totalQuantity % 1 === 0 ? ing.totalQuantity : ing.totalQuantity.toFixed(1)}
                                     {ing.unit && ` ${ing.unit}`}
