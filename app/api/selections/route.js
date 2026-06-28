@@ -168,6 +168,27 @@ export async function POST(request) {
     const userNotificationEmail = userResult.rows[0]?.notification_email || userResult.rows[0]?.email
     const householdSize = userResult.rows[0]?.household_size || 1
 
+    // Capturer l'état AVANT upsert pour ne notifier l'admin que des semaines réellement
+    // nouvelles ou modifiées. Évite de renvoyer au chef une semaine déjà livrée/inchangée
+    // quand le client ajoute simplement la semaine suivante (le front renvoie tout le payload).
+    const existingByWeek = {}
+    {
+      const existingRows = householdId
+        ? (await sql`SELECT week_start_date, selected_dishes FROM weekly_selections WHERE household_id = ${householdId} AND week_start_date = ANY(${weekDates})`).rows
+        : (await sql`SELECT week_start_date, selected_dishes FROM weekly_selections WHERE user_id = ${userId} AND week_start_date = ANY(${weekDates})`).rows
+      for (const r of existingRows) {
+        const key = r.week_start_date?.toISOString ? r.week_start_date.toISOString().split('T')[0] : String(r.week_start_date)
+        const arr = Array.isArray(r.selected_dishes) ? r.selected_dishes : (r.selected_dishes ? JSON.parse(r.selected_dishes) : [])
+        existingByWeek[key] = arr.map(Number)
+      }
+    }
+    const sameDishes = (a, b) => {
+      if (!Array.isArray(a) || !Array.isArray(b) || a.length !== b.length) return false
+      const sa = [...a].map(Number).sort((x, y) => x - y)
+      const sb = [...b].map(Number).sort((x, y) => x - y)
+      return sa.every((v, i) => v === sb[i])
+    }
+
     const results = []
 
     // Traiter chaque semaine
@@ -322,6 +343,11 @@ export async function POST(request) {
           const weekData = weeklySelections[weekKey]
 
           if (weekData && weekData.dishes && weekData.dishes.length > 0) {
+            // Ne notifier le chef que pour les semaines nouvelles ou modifiées
+            if (sameDishes(weekData.dishes, existingByWeek[weekDates[i]])) {
+              continue
+            }
+
             // Récupérer les noms des plats avec overrides utilisateur (admin doit voir les modifs pour cuisiner)
             const dishesResult = await sql`
               SELECT d.id, d.name, udo.custom_name
