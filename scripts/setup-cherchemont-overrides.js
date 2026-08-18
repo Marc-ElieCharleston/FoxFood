@@ -158,7 +158,7 @@ const SPECIFIC_OVERRIDES = [
   // 5. Courgettes rondes farcies : mozza → brebis (global)
   { dishId: 369 },
   // 6. CroQ Mr courgette : pain de mie → pain sans gluten, gouda → brebis (global)
-  { dishId: 379, substituteIngredients: [{ from: 396, to: 347 }] },
+  { dishId: 379, customName: 'CroQ Mr, courgette & brebis', substituteIngredients: [{ from: 396, to: 347 }] },
   // 7. Cuisse de poulet à la toscane : pommes grenailles → carottes rôties
   { dishId: 373, customName: 'Cuisse de poulet à la toscane, tian de courgette & carotte rôtie', substituteIngredients: [{ from: 89, to: 30 }] },
   // 8 & 9. Enchiladas bœuf et poulet : cheddar → brebis (global)
@@ -184,7 +184,7 @@ const SPECIFIC_OVERRIDES = [
   // 15. Merlu sauce curcuma : la purée de patate douce devient un houmous (pois chiches + cumin)
   {
     dishId: 350,
-    customName: 'Merlu, sauce curcuma, houmous & carottes confites persan',
+    customName: 'Merlu, sauce curcuma, houmous & carottes confites à la passion',
     removeIngredients: [92],
     addIngredients: [{ id: 119, qty: 130, unit: 'g' }, { id: 61, qty: 0, unit: 'qsp' }]
   },
@@ -201,7 +201,7 @@ const SPECIFIC_OVERRIDES = [
   // 19. Quiche saumon/courgette/boursin → salade
   {
     dishId: 358,
-    customName: 'Salade courgette, saumon & boursin',
+    customName: 'Salade courgette, saumon & feta',
     removeIngredients: [194],
     addIngredients: [{ id: 27, qty: 0.5, unit: 'pce' }, { id: 30, qty: 100, unit: 'g' }]
   },
@@ -217,23 +217,30 @@ const SPECIFIC_OVERRIDES = [
   // 22. Parmentier de haddock : retirer patate douce et PDT, carottes +200 g
   { dishId: 365, removeIngredients: [92, 103], addIngredients: [{ id: 30, qty: 200, unit: 'g' }] },
   // 23. Crumble courgette/aubergine/tomate/sardines → ratatouille & œuf mimosa
-  { dishId: 366, customName: 'Ratatouille & œuf mimosa aux sardines', addIngredients: [{ id: 41, qty: 1, unit: 'pce' }] },
+  // (le crumble disparaît : farine, beurre et parmesan sont retirés, comme pour le crumble de légumes)
+  {
+    dishId: 366,
+    customName: 'Ratatouille & œuf mimosa aux sardines',
+    removeIngredients: [26, 18, 212],
+    addIngredients: [{ id: 41, qty: 1, unit: 'pce' }]
+  },
   // 24. Pissaladière → salade de mâche, radis, betterave & hareng fumé
   {
     dishId: 367,
     customName: 'Salade de mâche, radis, betterave & hareng fumé',
-    removeIngredients: [194],
+    // les 2 oignons confits de la pissaladière n'ont plus lieu d'être dans une salade
+    removeIngredients: [194, 28],
     substituteIngredients: [{ from: 245, to: 412, qty: 100, unit: 'g' }]
   },
   // 25. Risotto à la milanaise : konjac 100 g + brebis 25 g (déjà couvert par les règles printemps)
   // 26. Risotto verde : riz à risotto → konjac 100 g, parmesan poudre → brebis 25 g
-  { dishId: 322, substituteIngredients: [{ from: 217, to: 415, qty: 100, unit: 'g' }, { from: 212, to: 195, qty: 25, unit: 'g' }] },
+  { dishId: 322, customName: 'Risotto de konjac verde', substituteIngredients: [{ from: 217, to: 415, qty: 100, unit: 'g' }, { from: 212, to: 195, qty: 25, unit: 'g' }] },
   // 27. Risotto red : idem
-  { dishId: 323, substituteIngredients: [{ from: 217, to: 415, qty: 100, unit: 'g' }, { from: 212, to: 195, qty: 25, unit: 'g' }] },
+  { dishId: 323, customName: 'Risotto de konjac red', substituteIngredients: [{ from: 217, to: 415, qty: 100, unit: 'g' }, { from: 212, to: 195, qty: 25, unit: 'g' }] },
   // 28. Crumble de légumes d'été → ratatouille (retirer farine, beurre, parmesan)
   { dishId: 325, customName: 'Ratatouille', removeIngredients: [26, 18, 212] },
   // 29. Mafé : retirer le riz, carottes +100 g
-  { dishId: 291, removeIngredients: [405], addIngredients: [{ id: 30, qty: 100, unit: 'g' }] },
+  { dishId: 291, customName: 'Mafé aux haricots rouges & carottes', removeIngredients: [405], addIngredients: [{ id: 30, qty: 100, unit: 'g' }] },
   // 30. Moussaka végétarienne : lait → 20 cl de lait de soja, farine → maïzena (global), retirer le beurre, mozza → feta
   { dishId: 327, removeIngredients: [18], substituteIngredients: [{ from: 16, to: 288, qty: 200, unit: 'ml' }, { from: 175, to: 115 }] },
   // 31 & 32. Kuku aubergines et courgettes : farine → maïzena (global)
@@ -263,6 +270,8 @@ const SPECIFIC_OVERRIDES = [
   {
     dishId: 336,
     customName: 'Aubergines grillées à la feta, sucrine aux pousses de soja & carottes',
+    // la galette disparaît : patate douce, flocons d'avoine et œuf n'ont plus d'objet
+    removeIngredients: [92, 353, 41],
     addIngredients: [{ id: 37, qty: 100, unit: 'g' }, { id: 115, qty: 25, unit: 'g' }]
   },
   // 40. Nasi Goreng → salade thaï (riz thaï → aubergines)
@@ -290,8 +299,8 @@ const SPECIFIC_OVERRIDES = [
   { dishId: 388, removeIngredients: [227], addIngredients: [{ id: 31, qty: 100, unit: 'g' }] },
   // 47. Mijoté de poulet : semoule → perles de konjac
   { dishId: 393, substituteIngredients: [{ from: 65, to: 415 }] },
-  // 48. Moussaka au bœuf : lait → soja, mozza → brebis (globaux)
-  { dishId: 378 },
+  // 48. Moussaka au bœuf : lait → soja, mozza → brebis (globaux), beurre retiré comme dans la végé
+  { dishId: 378, removeIngredients: [18] },
   // 49. Paëlla → paella de lentilles corail
   { dishId: 252, customName: 'Paella de lentilles corail', substituteIngredients: [{ from: 327, to: 352 }] },
   // 50. Poivrons farcis à la dinde : patate douce → courgette
@@ -304,12 +313,17 @@ const SPECIFIC_OVERRIDES = [
   { dishId: 377, customName: 'Poulet basquaise, carottes aux fèves & petits pois', substituteIngredients: [{ from: 190, to: 30 }] },
   // 54. Poulet tikka massala : crème et yaourt → soja (globaux)
   { dishId: 134 },
-  // 55. Salade César : lait → soja, parmesan → brebis (globaux)
-  { dishId: 390 },
+  // 55. Salade César : lait → soja, parmesan → brebis (globaux), croûtons en pain sans gluten
+  { dishId: 390, substituteIngredients: [{ from: 396, to: 347 }] },
   // 56. Tomates farcies façon bolognaise : boulgour → houmous (pois chiches)
-  { dishId: 389, customName: 'Tomates farcies façon bolognaise & houmous', substituteIngredients: [{ from: 190, to: 119, qty: 100, unit: 'g' }] },
+  {
+    dishId: 389,
+    customName: 'Tomates farcies façon bolognaise & houmous',
+    substituteIngredients: [{ from: 190, to: 119, qty: 100, unit: 'g' }],
+    addIngredients: [{ id: 61, qty: 0, unit: 'qsp' }]   // cumin, comme pour le houmous du merlu
+  },
   // 57. Émincé de dinde façon chili con carne : riz → courgette grillée
-  { dishId: 380, customName: 'Émincé de dinde, courgette grillée au four', substituteIngredients: [{ from: 23, to: 31 }] },
+  { dishId: 380, customName: 'Émincé de dinde façon chili con carne & courgette grillée au four', substituteIngredients: [{ from: 23, to: 31 }] },
   // 58. Émincé de veau à la zurichoise : rösti de PDT → rösti de courgette
   { dishId: 375, customName: 'Émincé de veau à la zurichoise & rösti de courgette', substituteIngredients: [{ from: 103, to: 31 }] },
 ]
