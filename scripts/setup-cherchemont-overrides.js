@@ -265,7 +265,13 @@ const SPECIFIC_OVERRIDES = [
   },
   // 37. Chow mein aux légumes : nouilles → tagliatelle de konjac (déjà couvert par les règles printemps)
   // 38. Dhal de lentilles : patate douce → poivron rouge 50 g, carottes +50 g (50 → 100 g)
-  { dishId: 173, substituteIngredients: [{ from: 92, to: 71, qty: 50, unit: 'g' }], addIngredients: [{ id: 30, qty: 50, unit: 'g' }] },
+  //     (le nom citait encore les patates douces)
+  {
+    dishId: 173,
+    customName: 'Dhal de lentilles, poivron & carottes',
+    substituteIngredients: [{ from: 92, to: 71, qty: 50, unit: 'g' }],
+    addIngredients: [{ id: 30, qty: 50, unit: 'g' }]
+  },
   // 39. Galettes patate douce/sucrine → aubergines grillées à la feta
   {
     dishId: 336,
@@ -287,7 +293,12 @@ const SPECIFIC_OVERRIDES = [
     substituteIngredients: [{ from: 414, to: 377, qty: 0.5, unit: 'pce' }]
   },
   // 44. Filet mignon de porc : pommes grenailles → aubergines grillées
-  { dishId: 386, substituteIngredients: [{ from: 89, to: 37 }] },
+  //     (le nom citait encore les pommes de terre grenailles)
+  {
+    dishId: 386,
+    customName: 'Filet mignon de porc miel/moutarde, aubergines grillées & carotte vichy',
+    substituteIngredients: [{ from: 89, to: 37 }]
+  },
   // 45. Kefta de poulet : retirer le blé, pois chiches +50 g, concombre et tomate en plus
   {
     dishId: 372,
@@ -344,6 +355,120 @@ const HIDDEN_DISHES = [
   392,  // Tarte fine aux poivrons & chorizo              (été 2026)
 ]
 
+// === NOMS ALIGNÉS SUR LES SUBSTITUTIONS ===
+// Des plats dont le nom du catalogue annonce un ingrédient qu'elle ne reçoit
+// pas — « & ricotta » quand c'est de la feta, « & boulgour » quand c'est du
+// quinoa. Aucun changement de recette ici : seulement le mot qui ment.
+const NOMS_ALIGNES = {
+  258: 'Bagel saumon fumé & feta',                                  // ricotta → feta
+  303: 'Boulettes de lentilles & curry de carottes aux épinards',   // patate douce retirée
+  280: 'Cabillaud rôti miso, pak choï & quinoa au curcuma',         // boulgour → quinoa
+  210: 'Curry de crevettes, carottes & lait de coco',               // patate douce → carottes
+  388: 'Lasagne au courgette, feta & jambon',                       // ricotta → feta
+  65: 'Linguine à la crème de courgette & brebis',                  // parmesan → brebis
+  259: 'Clafoutis au saumon fumé, feta & asperge verte',            // boursin → feta
+  286: 'Salade de quinoa, petit pois, pois gourmand, œuf & pesto',  // boulgour → quinoa
+  243: 'Tagliatelles de konjac bolognaise',                         // spaghetti → konjac
+  271: 'Papitas, yaourt au soja au cumin & peperonata',             // fromage blanc → yaourt soja
+}
+
+// === DESCRIPTIONS PERSONNALISÉES ===
+// La phrase sous le nom du plat décrit la recette du catalogue. Adapter le nom
+// sans adapter la phrase donne « CroQ Mr, courgette & brebis » suivi de
+// « ... jambon blanc et gouda » : le client lit un ingrédient qu'il ne recevra
+// pas. Une entrée ici pour chaque plat dont la phrase ne dit plus la vérité.
+const DESCRIPTIONS = {
+  // ── Été 2026 ──
+  387: "Aubergines farcies au bœuf haché et fromage de brebis, servies avec de la courgette sautée.",
+  339: "Aubergines gratinées à l'italienne avec aubergine et feta.",
+  258: "Bagel sans gluten garni de saumon fumé, feta et crudités.",
+  179: "Nouilles de konjac sautées aux légumes croquants.",
+  379: "Croque-monsieur revisité avec pain sans gluten, jambon blanc et fromage de brebis.",
+  366: "Ratatouille de courgettes, aubergines et tomates, servie avec un œuf mimosa aux sardines.",
+  325: "Ratatouille de courgettes, aubergines, poivron et tomates aux herbes de Provence.",
+  373: "Cuisse de poulet à la toscane au fromage de brebis et à la crème de soja, tian de courgette et carottes rôties.",
+  360: "Curry de crevettes décortiquées au lait de coco, poivron rouge et pois chiches.",
+  173: "Dhal indien de lentilles corail au lait de coco, poivron rouge et carottes.",
+  381: "Enchiladas mexicaines au bœuf haché, poivron rouge et fromage de brebis.",
+  382: "Enchiladas mexicaines au filet de poulet, poivron rouge et fromage de brebis.",
+  126: "Chimichanga de bœuf en tortilla de maïs, poivron rouge et fromage de brebis.",
+  135: "Chimichanga de poulet en tortilla de maïs, poivron rouge et fromage de brebis.",
+  177: "Poêlée de légumes du soleil à la mexicaine, haricots rouges et maïs.",
+  287: "Falafels maison avec écrasée de carotte, haricots verts et yaourt au soja à la ciboulette.",
+  386: "Filet mignon de porc miel/moutarde à la crème de soja, aubergines grillées et carottes vichy.",
+  394: "Flan coco antillais au lait de soja, orange et noix de coco râpée.",
+  330: "Frittata italienne à la crème de soja, courgette et tomate.",
+  344: "Galettes de lentilles corail au thon et flocons d'avoine, carottes râpées au sésame et yaourt au soja curcuma/miel.",
+  336: "Aubergines grillées à la feta, sucrines aux pousses de soja et carottes.",
+  329: "Clafoutis de courgettes à la feta, servi avec une salade de mâche aux tomates cerises.",
+  328: "Frittata persane à l'aubergine, concombre à la menthe et yaourt au soja.",
+  388: "Lasagnes de courgettes au jambon blanc et à la feta, sans pâte, au lait de soja.",
+  331: "Lasagnes de légumes d'été sans pâte, au lait de soja.",
+  347: "Lasagnes sans pâte au saumon, crevettes et courgettes, au lait de soja.",
+  350: "Merlu à la sauce curcuma avec houmous de pois chiches au cumin et carottes confites à la passion.",
+  378: "Moussaka gratinée à l'aubergine, bœuf haché et lait de soja.",
+  327: "Moussaka gratinée à l'aubergine, lentilles corail et lait de soja.",
+  365: "Parmentier de haddock à la carotte fondante.",
+  368: "Poivrons farcis à la dinde hachée, wedges de courgette au tandoori.",
+  370: "Salade de haricots verts au jambon blanc, champignons, œuf et crème de soja.",
+  376: "Porc mijoté au lait de coco et gingembre, carottes et courgettes.",
+  358: "Salade de courgettes au saumon et à la feta, tomate et carottes.",
+  323: "Risotto de konjac crémeux au poivron rouge, haricots rouges et fromage de brebis.",
+  322: "Risotto de konjac crémeux aux épinards, petits pois et fromage de brebis.",
+  299: "Risotto de konjac au safran à la milanaise, fromage de brebis.",
+  390: "Salade César revisitée aux jeunes pousses, filet de poulet, fromage de brebis et croûtons sans gluten.",
+  341: "Salade fraîche aux haricots verts, avocat, tomates cerises et tofu.",
+  357: "Tarte de carottes écrasées au thon et curry, roquette et yaourt au soja.",
+  354: "Clafoutis au saumon fumé, épinards et courgette, à la crème de soja.",
+  359: "Salade de concombre au thon et à la feta, yaourt au soja.",
+  375: "Émincé de veau à la zurichoise aux champignons de Paris et crème de soja, rösti de courgette.",
+  253: "Tajine de poulet et fruits de mer aux courgettes, carottes et pois chiches.",
+  372: "Boulettes orientales de poulet, salade de légumes aux pois chiches et yaourt au cumin.",
+  291: "Mafé végétarien aux haricots rouges, cacahuètes et carottes.",
+  300: "Salade thaï au tofu, aubergines et légumes croquants.",
+  343: "Pavé de saumon grillé, salsa de mangue et courgette grillée.",
+  252: "Paëlla au poulet, fruits de mer et chorizo, aux lentilles corail.",
+  367: "Salade de mâche, radis rose et betterave au hareng fumé.",
+  389: "Tomates farcies au bœuf haché et pesto, servies avec un houmous de pois chiches au cumin.",
+  380: "Émincé de dinde façon chili con carne aux haricots rouges et maïs, courgette grillée au four.",
+  353: "Samossas croustillants au thon et fromage frais, salade d'avocat à la tomate.",
+  262: "Salade tahitienne fraîche au saumon, lait de coco et konjac.",
+  369: "Courgettes rondes farcies au porc et fromage de brebis, salade de lentilles corail au pesto d'herbes.",
+  391: "Cannellonis de courgette au bœuf haché et fromage de brebis.",
+
+  // ── Printemps / automne ──
+  280: "Cabillaud glacé au miso avec pak choï et quinoa au curcuma.",
+  292: "Crumble salé de courgettes au chèvre et fromage de brebis.",
+  230: "Curry de courgettes au chorizo servi avec des haricots rouges.",
+  65: "Pâtes linguine à la crème de soja et aux courgettes, fromage de brebis.",
+  284: "Plat libanais de lentilles et konjac aux oignons caramélisés.",
+  298: "Paella végétarienne au tofu, légumes et quinoa.",
+  259: "Clafoutis crémeux au saumon fumé, feta et asperges vertes.",
+  295: "Risotto de konjac crémeux aux asperges vertes et fromage de brebis.",
+  286: "Salade printanière de quinoa aux petits pois, pois gourmands, œuf et pesto.",
+  248: "Salade fraîche de sarrasin thaï au poulet et crudités.",
+  243: "Tagliatelles de konjac à la sauce bolognaise.",
+  285: "Clafoutis aux courgettes et feta, sans pâte.",
+  296: "Clafoutis aux asperges vertes.",
+  297: "Clafoutis aux épinards.",
+  270: "Lasagnes sans pâte au saumon et courgette, à la crème de soja.",
+  256: "Salade de tagliatelles de konjac à l'italienne.",
+  263: "Salade asiatique au hareng et tagliatelles de konjac.",
+  290: "Pad thaï au tofu et tagliatelles de konjac.",
+  274: "Curry de poisson cambodgien au lait de coco et pois chiches.",
+  288: "Feuilleté de chèvre au miel sur pain sans gluten, salade de quinoa, tomate séchée et olive.",
+  261: "Saumon en croûte de pistache, mousseline de chou-fleur et asperge verte.",
+  254: "Navarin d'agneau printanier aux légumes de saison.",
+  303: "Boulettes de lentilles et curry de carottes aux épinards.",
+  128: "Bœuf sauté aux tagliatelles de konjac et légumes croquants.",
+  136: "Poulet sauté aux tagliatelles de konjac et légumes croquants.",
+  158: "Porc sauté aux tagliatelles de konjac et légumes croquants.",
+  175: "Risotto de konjac au potiron et fromage de brebis.",
+  211: "Risotto de konjac aux crevettes, butternut et champignons persillés.",
+  210: "Curry de crevettes aux carottes et lait de coco.",
+  393: "Mijoté de poulet sucré/salé à l'abricot, perles de konjac.",
+}
+
 async function run() {
   const cible = USER_ID === CHERCHEMONT_USER_ID ? 'Mme Cherchemont' : 'compte de test'
   console.log(`🔧 Overrides ${cible} (user_id=${USER_ID})${DRY_RUN ? '  — SIMULATION, aucune écriture' : ''}\n`)
@@ -368,7 +493,7 @@ async function run() {
   })
 
   // 2. Appliquer les substitutions globales, plat par plat
-  const empty = () => ({ action: 'modify', customName: null, removeIngredients: [], substituteIngredients: [], addIngredients: [] })
+  const empty = () => ({ action: 'modify', customName: null, customDescription: null, removeIngredients: [], substituteIngredients: [], addIngredients: [] })
   const overridesMap = new Map()
 
   for (const [dishId, dishInfo] of dishIngMap) {
@@ -419,7 +544,29 @@ async function run() {
     overridesMap.set(spec.dishId, existing)
   }
 
-  // 4. Plats masqués
+  // 4. Noms alignés sur les substitutions (n'écrasent pas un nom déjà défini plus haut)
+  for (const [id, nomAligne] of Object.entries(NOMS_ALIGNES)) {
+    const dishId = Number(id)
+    if (!dishIngMap.has(dishId)) continue
+    const existing = overridesMap.get(dishId) || empty()
+    if (!existing.customName) existing.customName = nomAligne
+    overridesMap.set(dishId, existing)
+  }
+
+  // 5. Descriptions personnalisées
+  const descInconnues = []
+  for (const [id, texte] of Object.entries(DESCRIPTIONS)) {
+    const dishId = Number(id)
+    if (!dishIngMap.has(dishId)) { descInconnues.push(dishId); continue }
+    const existing = overridesMap.get(dishId) || empty()
+    existing.customDescription = texte
+    overridesMap.set(dishId, existing)
+  }
+  if (descInconnues.length > 0) {
+    console.log(`⚠️  Descriptions pour des plats introuvables, ignorées : ${descInconnues.join(', ')}\n`)
+  }
+
+  // 6. Plats masqués
   for (const dishId of HIDDEN_DISHES) {
     overridesMap.set(dishId, { ...empty(), action: 'hide' })
   }
@@ -447,6 +594,7 @@ async function run() {
       }
       console.log(`✏️  [${dishId}] ${info?.name || '?'} ${JSON.stringify(info?.seasons || [])}`)
       if (ov.customName) console.log(`      → « ${ov.customName} »`)
+      if (ov.customDescription) console.log(`      ✎ ${ov.customDescription}`)
       ov.removeIngredients.forEach(r => console.log(`      − ${nom(r.ingredient_id)}`))
       ov.substituteIngredients.forEach(s => console.log(`      ↻ ${nom(s.from_ingredient_id)} → ${nom(s.to_ingredient_id)}${s.quantity != null ? ` (${s.quantity} ${s.unit || ''})` : ''}`))
       ov.addIngredients.forEach(a => console.log(`      ✚ ${nom(a.ingredient_id)} ${a.quantity} ${a.unit || ''}`))
@@ -463,12 +611,13 @@ async function run() {
   let hideCount = 0
   for (const [dishId, override] of overridesMap) {
     await sql`
-      INSERT INTO user_dish_overrides (user_id, dish_id, action, custom_name, remove_ingredients, substitute_ingredients, add_ingredients)
+      INSERT INTO user_dish_overrides (user_id, dish_id, action, custom_name, custom_description, remove_ingredients, substitute_ingredients, add_ingredients)
       VALUES (
         ${USER_ID},
         ${dishId},
         ${override.action},
         ${override.customName},
+        ${override.customDescription},
         ${JSON.stringify(override.removeIngredients)}::jsonb,
         ${JSON.stringify(override.substituteIngredients)}::jsonb,
         ${JSON.stringify(override.addIngredients)}::jsonb

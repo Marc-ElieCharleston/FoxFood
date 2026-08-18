@@ -132,6 +132,9 @@ export async function GET(request) {
             ...dish,
             name: (override && override.custom_name) ? override.custom_name : dish.name,
             original_name: (override && override.custom_name) ? dish.name : undefined,
+            // La phrase sous le nom doit décrire ce que ce client reçoit,
+            // sinon elle annonce des ingrédients qu'il ne peut pas manger.
+            description: (override && override.custom_description) ? override.custom_description : dish.description,
             linked_ingredients: linkedIngredients,
             has_override: !!override
           }
@@ -140,11 +143,17 @@ export async function GET(request) {
       return NextResponse.json(dishesWithIngredients)
     }
 
-    // Sans ingrédients, appliquer juste le renommage
+    // Sans ingrédients, appliquer le renommage et la description personnalisée
     const finalDishes = dishes.map(dish => {
       const override = overrideMap.get(dish.id)
-      if (override && override.custom_name) {
-        return { ...dish, name: override.custom_name, original_name: dish.name, has_override: true }
+      if (override && (override.custom_name || override.custom_description)) {
+        return {
+          ...dish,
+          name: override.custom_name || dish.name,
+          original_name: override.custom_name ? dish.name : undefined,
+          description: override.custom_description || dish.description,
+          has_override: true
+        }
       }
       return dish
     })

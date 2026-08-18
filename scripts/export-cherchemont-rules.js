@@ -139,6 +139,18 @@ async function run() {
   renommes.forEach(r => L.push(`| ${r.dish_name} | **${r.custom_name}** |`))
   L.push('')
 
+  const decrits = modifies.filter(r => r.custom_description)
+  if (decrits.length > 0) {
+    L.push('---', '')
+    L.push('## ✎ Descriptions personnalisées', '')
+    L.push('_La phrase affichée sous le nom du plat. Celle du catalogue annonçait des_')
+    L.push('_ingrédients qu\'elle ne reçoit pas ; celle-ci décrit ce qui part chez elle._', '')
+    L.push('| Plat | Description affichée |', '|---|---|')
+    decrits.sort((a, b) => (a.custom_name || a.dish_name).localeCompare(b.custom_name || b.dish_name, 'fr'))
+    decrits.forEach(r => L.push(`| ${r.custom_name || r.dish_name} | ${r.custom_description} |`))
+    L.push('')
+  }
+
   fs.writeFileSync(OUT, L.join('\n'), 'utf8')
   console.log(`✅ ${OUT} régénéré — ${rows.length} overrides, ${subs.size} substitutions, ${ajouts.size} ajouts`)
 }
