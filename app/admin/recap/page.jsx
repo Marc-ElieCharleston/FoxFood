@@ -218,6 +218,14 @@ export default function AdminRecapPage() {
                             <li key={idx} className="flex items-center gap-2">
                               <span className="text-gray-400">•</span>
                               <span>{dish.name}</span>
+                              {dish.adapted && (
+                                <span
+                                  className="text-xs bg-amber-100 text-amber-700 px-1.5 py-0.5 rounded"
+                                  title={dish.originalName ? `Au catalogue : ${dish.originalName}` : 'Recette adaptée pour ce client'}
+                                >
+                                  adapté
+                                </span>
+                              )}
                               {dish.variantName && dish.variantName !== 'Classique' && (
                                 <span className="text-xs bg-purple-100 text-purple-700 px-1.5 py-0.5 rounded">
                                   {dish.variantName}

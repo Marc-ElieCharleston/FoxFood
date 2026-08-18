@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { sql } from '@/lib/db'
+import { loadDishOverrides, loadOverrideIngredients, applyDishOverride } from '@/lib/dish-overrides'
 
 export async function POST(request) {
   try {
@@ -37,29 +38,10 @@ export async function POST(request) {
       })
     })
 
-    // Récupérer les overrides de plats de l'utilisateur
-    const overridesResult = await sql`
-      SELECT dish_id, remove_ingredients, substitute_ingredients
-      FROM user_dish_overrides
-      WHERE user_id = ${session.user.id} AND action = 'modify'
-    `
-    const dishOverrides = new Map()
-    overridesResult.rows.forEach(r => dishOverrides.set(r.dish_id, r))
-
-    // Pré-charger les ingrédients de substitution des overrides
-    const allSubToIds = []
-    for (const ov of dishOverrides.values()) {
-      if (ov.substitute_ingredients) {
-        ov.substitute_ingredients.forEach(s => allSubToIds.push(s.to_ingredient_id))
-      }
-    }
-    let dishSubReplacements = new Map()
-    if (allSubToIds.length > 0) {
-      const subIngResult = await sql`
-        SELECT id, name, category, default_unit FROM ingredients WHERE id = ANY(${allSubToIds})
-      `
-      subIngResult.rows.forEach(r => dishSubReplacements.set(r.id, r))
-    }
+    // Récupérer les overrides de plats de l'utilisateur (retraits, substitutions, ajouts)
+    const dishOverrides = await loadDishOverrides(session.user.id)
+    // Pré-charger les ingrédients cibles des overrides (substitutions + ajouts)
+    const overrideIngredients = await loadOverrideIngredients(dishOverrides)
 
     // Log pour debug
     if (userReplacements.size > 0) {
@@ -105,59 +87,59 @@ export async function POST(request) {
       return NextResponse.json(rawGrouped)
     }
 
+    // Les overrides se raisonnent plat par plat (un ajout appartient à UN plat)
+    const rowsByDish = new Map()
+    for (const row of ingredientsResult.rows) {
+      if (!rowsByDish.has(row.dish_id)) rowsByDish.set(row.dish_id, [])
+      rowsByDish.get(row.dish_id).push(row)
+    }
+
     // Grouper et additionner les quantités par ingrédient en appliquant les remplacements
     const ingredientMap = {}
 
-    for (const ing of ingredientsResult.rows) {
-      const dishOverride = dishOverrides.get(ing.dish_id)
+    for (const [dishId, rows] of rowsByDish) {
+      const applied = applyDishOverride(
+        rows.map(r => ({
+          ingredientId: r.ingredient_id,
+          quantity: parseFloat(r.quantity) || 0,
+          unit: r.unit,
+          ref: r
+        })),
+        dishOverrides.get(dishId)
+      )
 
-      // 1. Vérifier si l'ingrédient est supprimé pour ce plat (override par plat)
-      if (dishOverride) {
-        const removeIds = (dishOverride.remove_ingredients || []).map(r => r.ingredient_id)
-        if (removeIds.includes(ing.ingredient_id)) continue
-      }
+      for (const item of applied) {
+        const meta = item.source === 'original' ? null : overrideIngredients.get(item.ingredientId)
+        // Cible désactivée : on retire plutôt que de laisser l'ingrédient d'origine,
+        // que le client ne peut justement pas manger.
+        if (item.source !== 'original' && !meta) continue
 
-      let ingredientId = ing.ingredient_id
-      let ingredientName = ing.name
-      let ingredientCategory = ing.category || 'autre'
+        let ingredientId = item.ingredientId
+        let ingredientName = meta ? meta.name : item.ref.name
+        let ingredientCategory = (meta ? meta.category : item.ref.category) || 'autre'
+        const unit = item.unit || (meta ? meta.default_unit : item.ref.default_unit) || 'g'
 
-      // 2. Appliquer les substitutions par plat (priorité sur les remplacements globaux)
-      let substituted = false
-      if (dishOverride) {
-        const subs = dishOverride.substitute_ingredients || []
-        const sub = subs.find(s => s.from_ingredient_id === ing.ingredient_id)
-        if (sub) {
-          const repl = dishSubReplacements.get(sub.to_ingredient_id)
-          if (repl) {
-            ingredientId = repl.id
-            ingredientName = repl.name
-            ingredientCategory = repl.category || 'autre'
-            substituted = true
-          }
+        // Remplacements globaux : uniquement sur ce qu'aucun override plat n'a touché
+        if (item.source === 'original' && userReplacements.has(ingredientId)) {
+          const replacement = userReplacements.get(ingredientId)
+          ingredientId = replacement.replacementId
+          ingredientName = replacement.replacementName
+          ingredientCategory = replacement.replacementCategory || 'autre'
         }
-      }
 
-      // 3. Appliquer les remplacements globaux (si pas déjà substitué)
-      if (!substituted && userReplacements.has(ing.ingredient_id)) {
-        const replacement = userReplacements.get(ing.ingredient_id)
-        ingredientId = replacement.replacementId
-        ingredientName = replacement.replacementName
-        ingredientCategory = replacement.replacementCategory || 'autre'
-      }
+        const key = ingredientId
+        const scaledQuantity = (parseFloat(item.quantity) || 0) * householdSize
 
-      const key = ingredientId
-      const quantity = parseFloat(ing.quantity) || 0
-      const scaledQuantity = quantity * householdSize
-
-      if (ingredientMap[key]) {
-        ingredientMap[key].quantity += scaledQuantity
-      } else {
-        ingredientMap[key] = {
-          id: ingredientId,
-          name: ingredientName,
-          category: ingredientCategory,
-          quantity: scaledQuantity,
-          unit: ing.unit || ing.default_unit || 'g'
+        if (ingredientMap[key]) {
+          ingredientMap[key].quantity += scaledQuantity
+        } else {
+          ingredientMap[key] = {
+            id: ingredientId,
+            name: ingredientName,
+            category: ingredientCategory,
+            quantity: scaledQuantity,
+            unit
+          }
         }
       }
     }

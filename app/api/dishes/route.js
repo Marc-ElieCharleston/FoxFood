@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { getServerSession } from 'next-auth'
 import { authOptions } from '@/lib/auth'
 import { sql } from '@/lib/db'
+import { loadDishOverrides, loadOverrideIngredients, applyDishOverride } from '@/lib/dish-overrides'
 
 // GET - Récupérer tous les plats ou par catégorie
 export async function GET(request) {
@@ -77,12 +78,9 @@ export async function GET(request) {
       `
     }
 
-    // Charger les overrides de l'utilisateur (masquage, renommage, substitutions par plat)
-    const overrides = await sql`
-      SELECT * FROM user_dish_overrides WHERE user_id = ${session.user.id}
-    `
-    const overrideMap = new Map()
-    overrides.rows.forEach(o => overrideMap.set(o.dish_id, o))
+    // Charger les overrides de l'utilisateur (masquage, renommage, substitutions, ajouts par plat)
+    const overrideMap = await loadDishOverrides(session.user.id)
+    const overrideIngredients = await loadOverrideIngredients(overrideMap)
 
     // Filtrer les plats masqués (sauf pour admin)
     let dishes = result.rows
@@ -107,35 +105,27 @@ export async function GET(request) {
           let linkedIngredients = ingredients.rows
 
           if (override && override.action === 'modify') {
-            // Retirer les ingrédients supprimés
-            const removeIds = (override.remove_ingredients || []).map(r => r.ingredient_id)
-            if (removeIds.length > 0) {
-              linkedIngredients = linkedIngredients.filter(ing => !removeIds.includes(ing.ingredient_id))
-            }
-
-            // Appliquer les substitutions
-            const subs = override.substitute_ingredients || []
-            if (subs.length > 0) {
-              // Charger les noms des ingrédients de remplacement
-              const subMap = new Map(subs.map(s => [s.from_ingredient_id, s.to_ingredient_id]))
-              const toIds = subs.map(s => s.to_ingredient_id)
-              if (toIds.length > 0) {
-                const replacements = await sql`
-                  SELECT id, name, dietary_tags FROM ingredients WHERE id = ANY(${toIds})
-                `
-                const replMap = new Map(replacements.rows.map(r => [r.id, r]))
-                linkedIngredients = linkedIngredients.map(ing => {
-                  const toId = subMap.get(ing.ingredient_id)
-                  if (toId) {
-                    const repl = replMap.get(toId)
-                    if (repl) {
-                      return { ...ing, ingredient_id: repl.id, ingredient_name: repl.name, dietary_tags: repl.dietary_tags }
-                    }
-                  }
-                  return ing
-                })
+            const applied = applyDishOverride(
+              ingredients.rows.map(ing => ({
+                ingredientId: ing.ingredient_id,
+                quantity: ing.quantity,
+                unit: ing.unit,
+                ref: ing
+              })),
+              override
+            )
+            linkedIngredients = applied.map(item => {
+              if (item.source === 'original') return item.ref
+              const meta = overrideIngredients.get(item.ingredientId)
+              return {
+                ...(item.ref || { dish_id: dish.id }),
+                ingredient_id: item.ingredientId,
+                ingredient_name: meta ? meta.name : (item.ref?.ingredient_name || ''),
+                dietary_tags: meta ? meta.dietary_tags : null,
+                quantity: item.quantity,
+                unit: item.unit || (meta ? meta.default_unit : null)
               }
-            }
+            })
           }
 
           return {
