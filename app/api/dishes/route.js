@@ -95,8 +95,11 @@ export async function GET(request) {
     if (includeIngredients) {
       const dishesWithIngredients = await Promise.all(
         dishes.map(async (dish) => {
+          // La catégorie classe la liste de courses (Frais / Légumes / Épicerie).
+          // Sans elle, chaque ingrédient retombait sur « autre » côté client, et
+          // la liste entière s'affichait en Épicerie.
           const ingredients = await sql`
-            SELECT di.*, i.name as ingredient_name, i.dietary_tags
+            SELECT di.*, i.name as ingredient_name, i.category as ingredient_category, i.dietary_tags
             FROM dish_ingredients di
             JOIN ingredients i ON i.id = di.ingredient_id
             WHERE di.dish_id = ${dish.id}
@@ -121,6 +124,9 @@ export async function GET(request) {
                 ...(item.ref || { dish_id: dish.id }),
                 ingredient_id: item.ingredientId,
                 ingredient_name: meta ? meta.name : (item.ref?.ingredient_name || ''),
+                // La catégorie suit le remplaçant : du konjac se range en
+                // épicerie même s'il remplace un produit frais.
+                ingredient_category: meta ? meta.category : (item.ref?.ingredient_category || null),
                 dietary_tags: meta ? meta.dietary_tags : null,
                 quantity: item.quantity,
                 unit: item.unit || (meta ? meta.default_unit : null)
