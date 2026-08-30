@@ -333,7 +333,7 @@ export async function POST(request) {
       `
 
       if (adminSettingsResult.rows.length > 0) {
-        const { notifyAdminOnSelection, getShoppingListData, generateShoppingListHtml } = await import('@/lib/notifications')
+        const { notifyAdminOnSelection, getShoppingListData, generateIngredientsParPlatHtml } = await import('@/lib/notifications')
 
         // Préparer les données PAR SEMAINE pour l'admin
         const adminWeeksData = {}
@@ -370,7 +370,8 @@ export async function POST(request) {
                 userId
               })
               if (shoppingData) {
-                shoppingListHtml = generateShoppingListHtml(shoppingData)
+                // Format CHEF : ingrédients sous chaque plat (cf. lib/notifications).
+                shoppingListHtml = generateIngredientsParPlatHtml(shoppingData.parPlat)
               }
             } catch (shoppingError) {
               console.error(`Erreur génération liste de courses admin semaine ${i}:`, shoppingError)
