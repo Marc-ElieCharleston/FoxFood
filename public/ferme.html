@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Fox food a déménagé — rendez-vous sur Mijoto</title>
+    <!--
+      Page unique servie pour TOUTES les adresses de foxfood.fr.
+
+      Avant elle, le domaine redirigeait en silence vers la page de connexion de
+      Mijoto : la cliente atterrissait sur un écran inconnu, sans savoir
+      pourquoi, et tentait son mot de passe au hasard. L'une d'elles a écrit au
+      chef plutôt que de comprendre.
+
+      Elle est écrite en HTML autonome, sans dépendance ni requête : l'ancienne
+      application ne tourne plus, sa base n'est plus interrogée, et cette page
+      doit s'afficher même si tout le reste est éteint.
+
+      C'est aussi le seul endroit où l'on peut nommer Fox food et Emeric : ici,
+      on SAIT de quelle cuisine vient la personne. La page de connexion de
+      Mijoto, elle, est commune à toutes les cuisines et ne peut rien supposer.
+    -->
+    <style>
+      :root {
+        --dusk: #16302a;
+        --cream: #f7f3ec;
+        --amber: #f0a93c;
+        --ink: #1b1b19;
+        --ink-soft: #6b6259;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        min-height: 100dvh;
+        display: grid;
+        place-items: center;
+        padding: 24px;
+        background: var(--dusk);
+        color: var(--ink);
+        font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+        line-height: 1.55;
+      }
+      .carte {
+        width: 100%;
+        max-width: 440px;
+        background: var(--cream);
+        border-radius: 24px;
+        padding: 32px 28px;
+        box-shadow: 0 50px 100px -50px rgba(0, 0, 0, 0.6);
+      }
+      h1 { margin: 0 0 6px; font-size: 1.5rem; letter-spacing: -0.01em; }
+      p { margin: 0 0 14px; font-size: 0.98rem; color: var(--ink-soft); }
+      p.fort { color: var(--ink); }
+      .bouton {
+        display: block;
+        margin: 22px 0 14px;
+        padding: 15px 20px;
+        border-radius: 999px;
+        background: var(--amber);
+        color: var(--dusk);
+        font-weight: 700;
+        font-size: 1rem;
+        text-align: center;
+        text-decoration: none;
+      }
+      .aide {
+        margin: 0;
+        padding-top: 16px;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+        font-size: 0.88rem;
+        color: var(--ink-soft);
+      }
+      .aide a { color: var(--ink); font-weight: 600; }
+    </style>
+  </head>
+  <body>
+    <main class="carte">
+      <h1>Fox food a déménagé 🍲</h1>
+      <p class="fort">
+        Vos commandes se font désormais sur <strong>Mijoto</strong>. Cette page-ci ne sert plus.
+      </p>
+      <p>
+        <strong>Votre compte est le même</strong> : même adresse email, même mot de passe. Vos plats
+        favoris et votre historique vous y attendent.
+      </p>
+
+      <a class="bouton" href="https://www.mijoto.com/login">Me connecter sur Mijoto →</a>
+
+      <p class="aide">
+        Si votre mot de passe n'est pas accepté, utilisez <strong>« Continuer avec Google »</strong> ou
+        <strong>« Mot de passe oublié »</strong> sur la page de connexion. Et si ça coince quand même,
+        écrivez à Emeric : <a href="mailto:foxfood.chef@gmail.com">foxfood.chef@gmail.com</a> — il vous
+        dépanne.
+      </p>
+    </main>
+  </body>
+</html>
