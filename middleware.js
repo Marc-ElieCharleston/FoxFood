@@ -36,7 +36,14 @@ export default withAuth(
 export const config = {
   matcher: [
     '/admin/:path*',
-    // Protéger toutes les pages sauf login, register, api, _next, et fichiers statiques
-    '/((?!api|login|register|forgot-password|reset-password|_next/static|_next/image|favicon.ico).*)',
+    // Protéger toutes les pages sauf login, register, api, _next, et fichiers statiques.
+    //
+    // `ferme.html` est exclu depuis la fermeture du site (24/09/2026) : c'est la
+    // page qui annonce le déménagement vers Mijoto, et elle s'adresse justement
+    // à des gens NON connectés. Sans cette exclusion, le middleware la renvoyait
+    // vers la page de connexion, que la redirection de `vercel.json` renvoyait
+    // vers `ferme.html` — une boucle, sur la seule page qui devait encore
+    // s'afficher.
+    '/((?!api|login|register|forgot-password|reset-password|ferme.html|_next/static|_next/image|favicon.ico).*)',
   ]
 }
