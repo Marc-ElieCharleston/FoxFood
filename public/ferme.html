@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex" />
-    <title>Fox food a déménagé — rendez-vous sur Mijoto</title>
+    <title>Fox food : les commandes se font maintenant sur Mijoto</title>
     <!--
       Page unique servie pour TOUTES les adresses de foxfood.fr.
 
@@ -17,9 +17,15 @@
       application ne tourne plus, sa base n'est plus interrogée, et cette page
       doit s'afficher même si tout le reste est éteint.
 
-      C'est aussi le seul endroit où l'on peut nommer Fox food et Emeric : ici,
-      on SAIT de quelle cuisine vient la personne. La page de connexion de
-      Mijoto, elle, est commune à toutes les cuisines et ne peut rien supposer.
+      C'est aussi le seul endroit où Emeric peut parler EN SON NOM : ici on sait
+      de quelle cuisine vient la personne. La page de connexion de Mijoto, elle,
+      est commune à toutes les cuisines et ne peut rien supposer — d'où le
+      tutoiement et la signature ici, et un écran neutre là-bas.
+
+      Il cuisine chez ses clientes et les connaît toutes : un message
+      administratif à la troisième personne (« Fox food a déménagé, écrivez à
+      Emeric ») sonnait comme une lettre de banque. Il dit donc « c'est moi,
+      voilà ce qui change, contacte-moi si ça coince », et il signe.
     -->
     <style>
       :root {
@@ -72,27 +78,34 @@
         color: var(--ink-soft);
       }
       .aide a { color: var(--ink); font-weight: 600; }
+      .signature {
+        margin: 14px 0 0;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--ink);
+      }
     </style>
   </head>
   <body>
     <main class="carte">
-      <h1>Fox food a déménagé 🍲</h1>
+      <h1>Hello 🍲</h1>
       <p class="fort">
-        Vos commandes se font désormais sur <strong>Mijoto</strong>. Cette page-ci ne sert plus.
+        C'est Emeric. J'ai changé d'outil pour les commandes : tout se passe maintenant sur
+        <strong>Mijoto</strong>. Cette page-ci ne sert plus.
       </p>
       <p>
-        <strong>Votre compte est le même</strong> : même adresse email, même mot de passe. Vos plats
-        favoris et votre historique vous y attendent.
+        <strong>Ton compte est le même</strong> : même adresse email, même mot de passe. Tes plats
+        favoris et ton historique sont déjà là-bas, tu n'as rien à refaire.
       </p>
 
-      <a class="bouton" href="https://www.mijoto.com/login">Me connecter sur Mijoto →</a>
+      <a class="bouton" href="https://www.mijoto.com/login">Aller sur Mijoto →</a>
 
       <p class="aide">
-        Si votre mot de passe n'est pas accepté, utilisez <strong>« Continuer avec Google »</strong> ou
+        Si ton mot de passe ne passe pas, essaie <strong>« Continuer avec Google »</strong> ou
         <strong>« Mot de passe oublié »</strong> sur la page de connexion. Et si ça coince quand même,
-        écrivez à Emeric : <a href="mailto:foxfood.chef@gmail.com">foxfood.chef@gmail.com</a> — il vous
-        dépanne.
+        <a href="mailto:foxfood.chef@gmail.com">contacte-moi</a>, je te débloque.
       </p>
+      <p class="signature">Emeric</p>
     </main>
   </body>
 </html>
