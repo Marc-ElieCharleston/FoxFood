@@ -1,8 +1,9 @@
 {
-  "crons": [
+  "redirects": [
     {
-      "path": "/api/cron/send-reminders",
-      "schedule": "0 9 * * *"
+      "source": "/(.*)",
+      "destination": "https://www.mijoto.com/login",
+      "permanent": false
     }
   ]
 }
